@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Copy Cat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<link rel="stylesheet" href="../_shared/kit.css">
+<style>
+  :root { --s1:#c3b0f5; --s2:#9277dc; --ss:#5f47a8; --st:#ffffff; --bg: linear-gradient(#ffe8d6 0%, #ffd2c2 55%, #9fd88a 55%, #7cc46a 100%); --ink:#3b2a4a; --b1:#ff9fb8; --b2:#e8679a; --bs:#b13f6f; --a1:#a98be8; --a2:#7a5cc9; --as:#4e3592; }
+  #stage { background: linear-gradient(#ffe9da 0%, #ffd9c9 62%, #a6db8f 62%, #82c66d 100%); }
+  .sun { position:absolute; right:calc(var(--u)*8); top:calc(var(--u)*-6); width:calc(var(--u)*22); height:calc(var(--u)*22); border-radius:50%; background:radial-gradient(#fff6b8,#ffd86b 60%, transparent 62%); }
+  .mat { position:absolute; left:calc(var(--u)*-4); bottom:calc(var(--u)*-3); width:calc(var(--u)*40); height:calc(var(--u)*14); border-radius:50%;
+    background: repeating-linear-gradient(90deg,#ff8fb0 0 calc(var(--u)*4), #fff calc(var(--u)*4) calc(var(--u)*8)); opacity:.85; }
+  /* frames */
+  .frame { position:absolute; top:calc(var(--u)*12); width:calc(var(--u)*69); height:calc(var(--u)*52); border-radius:calc(var(--u)*1.5); overflow:hidden; }
+  #model { left:calc(var(--u)*31); box-shadow:0 0 0 calc(var(--u)*1.6) #d9a441, 0 0 0 calc(var(--u)*2.4) #9b6b1f, 0 calc(var(--u)*1.5) calc(var(--u)*3) rgba(0,0,0,.3); }
+  #canvas { left:calc(var(--u)*104); box-shadow:0 0 0 calc(var(--u)*1) #fff, 0 calc(var(--u)*1.5) calc(var(--u)*3) rgba(0,0,0,.3); }
+  .tag { position:absolute; top:calc(var(--u)*13); z-index:9; font-size:calc(var(--u)*2.4); color:#5a3d6b; background:rgba(255,255,255,.85); border-radius:calc(var(--u)*2); padding:0 calc(var(--u)*1.5); z-index:5; }
+  .room { position:absolute; inset:0; background:linear-gradient(#fdf3e1 0 70%, #e8c9a0 70% 100%); }
+  .room .win { position:absolute; left:6%; top:8%; width:20%; height:24%; background:#bfe6ff; border:calc(var(--u)*.6) solid #fff; border-radius:calc(var(--u)*.6); }
+  .room .shelf { position:absolute; left:58%; right:4%; top:30%; height:3%; background:#b07a45; border-radius:calc(var(--u)*.4); }
+  .room .table { position:absolute; left:8%; width:38%; top:52%; height:4%; background:#c28b52; border-radius:calc(var(--u)*.5); }
+  .room .leg { position:absolute; top:56%; width:3%; height:30%; background:#a8743f; } .room .leg.a { left:11%; } .room .leg.b { left:40%; }
+  .room .chair { position:absolute; left:46%; width:13%; top:64%; height:3%; background:#7aa6d9; border-radius:calc(var(--u)*.4); }
+  .room .chair::before { content:""; position:absolute; left:0; bottom:100%; width:18%; height:280%; background:#7aa6d9; border-radius:calc(var(--u)*.4); }
+  .room .chair::after { content:""; position:absolute; left:6%; right:6%; top:100%; height:420%; border-left:calc(var(--u)*.5) solid #6390c2; border-right:calc(var(--u)*.5) solid #6390c2; }
+  .room .box { position:absolute; left:63%; width:24%; top:70%; height:18%; background:#d9a868; border-radius:calc(var(--u)*.4); box-shadow: inset 0 calc(var(--u)*1) 0 rgba(0,0,0,.12); z-index:3; pointer-events:none; }
+  .room .rug { position:absolute; left:30%; width:40%; top:88%; height:9%; background:#f29bb5; border-radius:50%; }
+  .slot { position:absolute; transform:translate(-50%,-50%); min-width:calc(var(--u)*12); min-height:calc(var(--u)*10); display:flex; align-items:flex-end; justify-content:center; gap:calc(var(--u)*.3); border-radius:calc(var(--u)*1.5); z-index:4; }
+  .slot.box { z-index:4; }
+  .slot .itm { width:calc(var(--u)*8.5); height:calc(var(--u)*8.5); }
+  .slot.c2 .itm { width:calc(var(--u)*6.5); height:calc(var(--u)*6.5); } .slot.c3 .itm, .slot.c4 .itm { width:calc(var(--u)*5); height:calc(var(--u)*5); }
+  #canvas .slot.filled { cursor:pointer; }
+  #canvas .slot.drop { outline:calc(var(--u)*.45) dashed rgba(122,92,201,.55); }
+  #canvas .slot.over { outline:calc(var(--u)*.6) solid #7a5cc9; background:rgba(169,139,232,.2); }
+  .slot.ok { box-shadow:0 0 0 calc(var(--u)*.6) #2fb457, 0 0 calc(var(--u)*2) #7be08a; }
+  .slot.glow { animation: kglow 1s infinite; }
+  .slot.pop { animation: spop .3s; } @keyframes spop { 50% { transform:translate(-50%,-50%) scale(1.15);} }
+  .cover { position:absolute; inset:0; z-index:8; display:none; align-items:center; justify-content:center; flex-direction:column; gap:calc(var(--u)*1.5);
+    background: repeating-linear-gradient(90deg,#b27ad9 0 calc(var(--u)*3),#9a62c4 calc(var(--u)*3) calc(var(--u)*6)); color:#fff; font-size:calc(var(--u)*3.4); text-shadow:0 1px 2px #000; }
+  .cover.on { display:flex; }
+  .cover.voice { background:#fffaf0; color:var(--ink); text-shadow:none; align-items:stretch; padding:calc(var(--u)*3); justify-content:flex-start; }
+  .vline { display:flex; align-items:center; gap:calc(var(--u)*1.2); font-size:calc(var(--u)*3); background:#fff; border-radius:calc(var(--u)*2); padding:calc(var(--u)*1) calc(var(--u)*1.6); box-shadow:0 calc(var(--u)*.4) calc(var(--u)*1) rgba(0,0,0,.12); }
+  .vline button { border:none; background:#efe7ff; border-radius:50%; width:calc(var(--u)*5); height:calc(var(--u)*5); font-size:calc(var(--u)*2.6); cursor:pointer; flex:none; }
+  .drawer { position:absolute; left:calc(var(--u)*104); width:calc(var(--u)*69); top:calc(var(--u)*69); height:calc(var(--u)*14); background:linear-gradient(#c79560,#a5733f); border-radius:calc(var(--u)*2); display:flex; align-items:center; justify-content:center; gap:calc(var(--u)*3); box-shadow:inset 0 calc(var(--u)*.8) 0 rgba(255,255,255,.25), 0 calc(var(--u)*1) 0 #7c5228; }
+  .drawer .lbl { position:absolute; left:calc(var(--u)*1.5); top:calc(var(--u)*.6); color:#fff5e0; font-size:calc(var(--u)*2); }
+  .drawer .src { width:calc(var(--u)*10); height:calc(var(--u)*10); background:rgba(255,255,255,.85); border-radius:calc(var(--u)*2); display:flex; align-items:center; justify-content:center; cursor:grab; }
+  .drawer .src .itm { width:70%; height:70%; }
+  .drawer.over { outline:calc(var(--u)*.6) solid #7a5cc9; }
+  .ghost { position:absolute; z-index:80; pointer-events:none; transform:translate(-50%,-110%); filter:drop-shadow(0 calc(var(--u)*1) calc(var(--u)*1) rgba(0,0,0,.35)); display:flex; gap:2px; }
+  .ghost .itm { width:calc(var(--u)*8); height:calc(var(--u)*8); }
+  #doneBtn { position:absolute; left:calc(var(--u)*76); top:calc(var(--u)*70); }
+  #peekBtn { position:absolute; left:calc(var(--u)*33); top:calc(var(--u)*70); display:none; }
+  #nextBtn { position:absolute; right:calc(var(--u)*4); bottom:calc(var(--u)*4); display:none; z-index:30; }
+  .tutor { left:calc(var(--u)*-1); bottom:calc(var(--u)*3); height:calc(var(--u)*30); }
+  .bubble { top:calc(var(--u)*30); width:calc(var(--u)*27); }
+  .mic { left:calc(var(--u)*31); right:calc(var(--u)*5); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="sun"></div><div class="mat"></div>
+
+  <section class="screen on" id="title">
+    <div class="topbar"><div class="row"><button class="btn alt" id="keyBtn">🔑</button></div><div class="row"><button class="btn alt" id="langBtn">한국어</button><button class="btn alt sndBtn">🔊</button></div></div>
+    <div class="logo">Copy Cat<small>카피캣 · 그림자가 바꿔 놓은 곳을 똑같이 고쳐요</small></div>
+    <img src="assets/duri_main.png" style="position:absolute;left:calc(var(--u)*6);bottom:calc(var(--u)*4);height:calc(var(--u)*40)" alt="Duri">
+    <div class="coll"><div class="k">🖼️</div>My Gallery<br><b id="collCount">0</b></div>
+    <div class="agebox">연령(보호자 설정) <button class="chip" data-age="5">5세</button><button class="chip" data-age="6">6세</button><button class="chip" data-age="7">7세</button></div>
+    <button class="btn start" id="startBtn">START</button>
+  </section>
+
+  <section class="screen" id="game">
+    <div class="topbar">
+      <div class="row"><div class="pill">⭐ <span id="starSum">0</span></div><div class="progress" id="progress"></div></div>
+      <div class="row"><div class="pill" id="lvPill">LEVEL 1</div><button class="btn alt" id="reQ">💬</button></div>
+      <div class="row"><button class="btn alt sndBtn">🔊</button><button class="btn" id="exitBtn">✕</button></div>
+    </div>
+    <div class="tag" style="left:calc(var(--u)*33)">🖌️ Duri's picture</div><div class="tag" style="left:calc(var(--u)*106)">🎨 My canvas</div>
+    <div class="frame" id="model"><div class="room"><div class="win"></div><div class="shelf"></div><div class="table"></div><div class="leg a"></div><div class="leg b"></div><div class="chair"></div><div class="rug"></div><div class="box"></div></div><div class="slots"></div>
+      <div class="cover" id="cover">🙈 <span>Remember my picture!</span></div></div>
+    <div class="frame" id="canvas"><div class="room"><div class="win"></div><div class="shelf"></div><div class="table"></div><div class="leg a"></div><div class="leg b"></div><div class="chair"></div><div class="rug"></div><div class="box"></div></div><div class="slots"></div></div>
+    <div class="drawer" id="drawer" data-hide-on-speak><span class="lbl">drawer</span></div>
+    <button class="btn alt" id="peekBtn" data-hide-on-speak>👀 <span id="peekN"></span></button>
+    <button class="btn green big" id="doneBtn" data-hide-on-speak>Done!</button>
+    <img class="tutor" id="tutor" src="assets/duri_neutral.png" alt="Duri">
+    <div class="bubble" id="bubble"></div>
+    <button class="btn gold big" id="nextBtn">Next ▶</button>
+  </section>
+
+  <section class="screen" id="result">
+    <div class="card-res"><h2 id="resTitle">Masterpiece!</h2><div class="res-hero" id="resHero"></div><div class="bigstars" id="resStars"></div><div class="resmeta" id="resMeta"></div><div id="resLv"></div>
+      <div class="reswords" id="resWords"></div><div class="resmeta" id="resReward"></div>
+      <div class="resbtns"><button class="btn alt" id="homeBtn">🏠 Home</button><button class="btn" id="againBtn">↻ Again</button><button class="btn green" id="nextRoundBtn">Next ▶</button></div></div>
+  </section>
+</div>
+<script src="../_shared/kit.js"></script>
+<script>
+'use strict';
+const {$, sleep, rnd, shuffle} = KIT;
+/* ---------- TRD 8-2 lines ---------- */
+KIT.L = {
+  hello:{en:"Hi! I'm Duri. This is my shadow friend!", ko:'안녕! 나는 두리야. 얘는 내 그림자 친구야!'},
+  demo1:{en:'Look at my picture. My shadow changed the other one!', ko:'내 그림을 봐. 그림자가 옆 그림을 바꿔 놨어!'},
+  demo2:{en:'Tap to change it. Make it the same!', ko:'눌러서 바꿔 봐. 똑같이 만들어!'},
+  demo3:{en:'Then tap Done!', ko:'다 하면 Done을 눌러!'},
+  start:{en:'Make it the same!', ko:'똑같이 만들어 봐!'},
+  cover:{en:"I'll cover my picture. Remember it!", ko:'내 그림을 가릴게. 잘 기억해!'},
+  listen7:{en:'Listen and make the picture.', ko:'잘 듣고 그림을 만들어 봐.'},
+  almost:{en:'Almost! Look again.', ko:'거의 다 됐어! 다시 봐.'},
+  hint:{en:'Look here!', ko:'여기를 봐!'},
+  fix:{en:'Shadow, fix it, please!', ko:'그림자야, 고쳐 줘!'},
+  idle:{en:"Find what's different!", ko:'다른 곳을 찾아 봐!'},
+  great:{en:['Perfect!','Beautiful!','Same, same!','What an artist!'], ko:['완벽해!','멋져!','똑같아!','진짜 화가다!']},
+  clear:{en:'Look at our gallery!', ko:'우리 갤러리를 봐!'},
+  levelUp:{en:'Level up! More things to fix!', ko:'레벨 업! 고칠 게 더 많아질 거야!'},
+};
+const FACE={listen:'neutral', joy:'happy', oops:'wow', neutral:'neutral'};
+KIT.face = f => { $('tutor').src=`assets/duri_${FACE[f]||'neutral'}.png`; if(f==='joy') KIT.anim($('tutor'),'bounce'); if(f==='oops') KIT.anim($('tutor'),'oops'); };
+
+/* ---------- scene & level data (TRD 4-1, 6-2) ---------- */
+const PLACES=[ {id:'shelf',name:'on the shelf',prep:'on',x:78,y:19}, {id:'table',name:'on the table',prep:'on',x:27,y:43}, {id:'under',name:'under the table',prep:'under',x:27,y:79},
+  {id:'chair',name:'on the chair',prep:'on',x:52,y:55}, {id:'box',name:'in the box',prep:'in',x:75,y:63}, {id:'rug',name:'on the rug',prep:'on',x:50,y:86} ];
+const TYPES=['mug','mitt','mask','mushroom'];
+const LV={ 1:{groups:3,diffs:2,similar:false,hide:0,peek:0}, 2:{groups:4,diffs:3,similar:false,hide:0,peek:0}, 3:{groups:4,diffs:3,similar:true,hide:0,peek:0},
+           4:{groups:5,diffs:4,similar:true,hide:12,peek:2}, 5:{groups:5,diffs:5,similar:true,hide:9,peek:1}, 6:{groups:6,diffs:6,similar:true,hide:6,peek:1} };
+const PALETTE={5:['red','blue','yellow','green'], 6:['red','blue','yellow','green','orange','purple'], 7:['red','blue','yellow','green','orange','purple','pink','brown']};
+const SIMILAR={red:['orange','pink'],orange:['red','yellow'],blue:['purple','green'],purple:['blue','pink'],yellow:['orange'],green:['blue'],pink:['red','purple'],brown:['orange']};
+const KINDS={5:['color','type'],6:['color','type','count'],7:['color','type','count','position']};
+const QCOUNT={5:5,6:6,7:6};
+
+/* ---------- puzzle generation ---------- */
+function makePuzzle(age, lv){
+  const P=LV[lv]; const pal=PALETTE[age]; let n=P.groups; if(age===7) n=Math.min(n,5);
+  const places=shuffle(PLACES).slice(0,n);
+  const model=places.map(pl=>({place:pl.id, type:rnd(TYPES), color:rnd(pal), count: age===5?1:1+Math.floor(Math.random()*(lv>=3?3:2))}));
+  const canvas=model.map(g=>({...g}));
+  const D=Math.min(P.diffs, n); const diffs=[]; const idx=shuffle([...Array(n).keys()]).slice(0,D);
+  const voice = age===7 && lv>=5;
+  idx.forEach((i,j)=>{ let kinds=KINDS[age]; if(age===7 && j===0) kinds=['position']; const kind=rnd(kinds); const g=canvas[i];
+    if(kind==='color'){ const sim=(P.similar? (SIMILAR[g.color]||[]).filter(c=>pal.includes(c)) : []); g.color = sim.length&&Math.random()<.7 ? rnd(sim) : rnd(pal.filter(c=>c!==g.color)); }
+    if(kind==='type'){ g.type=rnd(TYPES.filter(t=>t!==g.type)); }
+    if(kind==='count'){ g.count = g.count===1? 1+1+Math.floor(Math.random()*2) : (Math.random()<.5? g.count-1 : Math.min(3,g.count+1)); if(g.count===model[i].count) g.count = model[i].count===1?2:1; }
+    if(kind==='position'){ const used=canvas.map(c=>c.place); const free=PLACES.filter(p=>!used.includes(p.id)); g.place=rnd(free).id; }
+    diffs.push({i, kind}); });
+  canvas.forEach((g,i)=>{ const d=diffs.find(x=>x.i===i); g.cycle = d&&d.kind==='type' ? 'type' : 'color'; g.id=i; });
+  model.forEach((g,i)=>g.id=i);
+  return {age, lv, model, canvas, diffs, voice, pal};
+}
+const sig = g => g? `${g.type}|${g.color}|${g.count}` : '-';
+const placeOf = id => PLACES.find(p=>p.id===id);
+const itemSvg = g => KIT.SVG[g.type](KIT.COLORS[g.color]);
+function countWord(n){ return KIT.NUM[n]; }
+function sentenceFor(g){ const pl=placeOf(g.place); return `Put ${g.count===1?(/^[aeiou]/.test(g.color)?'an':'a'):countWord(g.count)} ${g.color} ${KIT.plural(g.type,g.count)} ${pl.name}.`; }
+
+/* ---------- render ---------- */
+function renderFrame(frameId, groups, interactive){
+  const box=$(frameId).querySelector('.slots'); box.innerHTML='';
+  PLACES.forEach(pl=>{ const g=groups.find(x=>x.place===pl.id); const s=document.createElement('div'); s.className='slot'+(pl.id==='box'?' box':''); s.dataset.place=pl.id;
+    s.style.left=pl.x+'%'; s.style.top=pl.y+'%';
+    if(g){ s.classList.add('filled','c'+g.count); s.dataset.gid=g.id; s.innerHTML=Array(g.count).fill(`<div class="itm">${itemSvg(g)}</div>`).join(''); }
+    else if(interactive && G && G.age===7) s.classList.add('drop');
+    if(interactive) bindSlot(s);
+    box.appendChild(s); });
+}
+function renderDrawer(){ const d=$('drawer'); d.querySelectorAll('.src').forEach(e=>e.remove()); if(G.age<6){ d.style.display='none'; return; } d.style.display='flex';
+  const types=[...new Set(G.p.canvas.map(g=>g.type))];
+  types.forEach(t=>{ const e=document.createElement('div'); e.className='src'; e.dataset.type=t; e.innerHTML=`<div class="itm">${KIT.SVG[t]('#b9b2c8')}</div>`; bindDrawerSrc(e); d.appendChild(e); }); }
+
+/* ---------- pointer interactions (tap = change, drag = move / count) ---------- */
+let drag=null;
+function ghostAt(x,y,html){ let gEl=$('ghost'); if(!gEl){ gEl=document.createElement('div'); gEl.id='ghost'; gEl.className='ghost'; $('stage').appendChild(gEl); } gEl.innerHTML=html; const s=$('stage').getBoundingClientRect(); gEl.style.left=(x-s.left)+'px'; gEl.style.top=(y-s.top)+'px'; gEl.style.display='flex'; }
+function hideGhost(){ const g=$('ghost'); if(g) g.style.display='none'; }
+function targetAt(x,y){ const els=document.elementsFromPoint(x,y); return { slot: els.find(e=>e.classList&&e.classList.contains('slot')&&e.closest('#canvas')), drawer: els.find(e=>e.id==='drawer') }; }
+function bindSlot(s){
+  s.onpointerdown=e=>{ if(!G||!G.accepting||!s.classList.contains('filled')) return; e.preventDefault(); drag={from:'slot', el:s, gid:+s.dataset.gid, x:e.clientX, y:e.clientY, moved:false}; s.setPointerCapture?.(e.pointerId); };
+  s.onpointermove=e=>moveDrag(e); s.onpointerup=e=>endDrag(e); s.onpointercancel=()=>{ drag=null; hideGhost(); };
+}
+function bindDrawerSrc(el){
+  el.onpointerdown=e=>{ if(!G||!G.accepting) return; e.preventDefault(); drag={from:'drawer', type:el.dataset.type, x:e.clientX, y:e.clientY, moved:true}; el.setPointerCapture?.(e.pointerId); ghostAt(e.clientX,e.clientY,`<div class="itm">${KIT.SVG[el.dataset.type]('#b9b2c8')}</div>`); };
+  el.onpointermove=e=>moveDrag(e); el.onpointerup=e=>endDrag(e); el.onpointercancel=()=>{ drag=null; hideGhost(); };
+}
+function moveDrag(e){ if(!drag) return; if(!drag.moved && Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>12){ drag.moved=true; } if(!drag.moved) return;
+  const g=G.p.canvas.find(x=>x.id===drag.gid); ghostAt(e.clientX,e.clientY, drag.from==='slot' ? (G.age===7? Array(g.count).fill(`<div class="itm">${itemSvg(g)}</div>`).join('') : `<div class="itm">${itemSvg(g)}</div>`) : $('ghost').innerHTML);
+  document.querySelectorAll('.over').forEach(o=>o.classList.remove('over')); const t=targetAt(e.clientX,e.clientY); (t.slot||t.drawer)?.classList.add('over'); }
+function endDrag(e){ if(!drag) return; const d=drag; drag=null; hideGhost(); document.querySelectorAll('.over').forEach(o=>o.classList.remove('over'));
+  touched();
+  if(d.from==='slot' && !d.moved){ return cycle(d.gid); }
+  const t=targetAt(e.clientX,e.clientY);
+  if(d.from==='drawer'){ if(t.slot && t.slot.classList.contains('filled')){ const g=G.p.canvas.find(x=>x.id===+t.slot.dataset.gid); if(g.type===d.type && g.count<4){ g.count++; KIT.sfx.pop(); redraw(g.place); } else KIT.sfx.bad(); } return; }
+  // dragging a group from the canvas
+  const g=G.p.canvas.find(x=>x.id===d.gid);
+  if(t.drawer && G.age>=6){ if(g.count>1){ g.count--; KIT.sfx.pop(); redraw(g.place); } else KIT.toast('🙂 1개는 남겨 둬요'); return; }
+  if(t.slot && !t.slot.classList.contains('filled') && G.age===7){ g.place=t.slot.dataset.place; KIT.sfx.click(); redraw(g.place); return; }
+}
+function cycle(gid){ const g=G.p.canvas.find(x=>x.id===gid);
+  if(g.cycle==='type'){ g.type=TYPES[(TYPES.indexOf(g.type)+1)%TYPES.length]; } else { const pal=G.p.pal; g.color=pal[(pal.indexOf(g.color)+1)%pal.length]; }
+  KIT.sfx.click(); redraw(g.place); KIT.say(`${g.color} ${g.type}`); }
+function redraw(place){ renderFrame('canvas', G.p.canvas, true); const s=document.querySelector(`#canvas .slot[data-place="${place}"]`); s&&s.classList.add('pop'); }
+function touched(){ G.interacted=true; KIT.clearIdle(); KIT.armIdle(idle); }
+
+/* ---------- flow ---------- */
+let G=null;
+async function startRound(){
+  const age=KIT.SAVE.age, lv=KIT.levelFor(age);
+  G={age, lv, total:QCOUNT[age], idx:0, stars:[], words:[], accepting:false}; const me=G;
+  $('lvPill').textContent=`LEVEL ${lv} · ${age}세`; KIT.show('game'); KIT.renderProgress(G);
+  if(KIT.demoNeeded()){ await runDemo(); } if(G!==me) return; nextPicture();
+}
+async function nextPicture(){
+  if(G.idx>=G.total) return finish();
+  const me=G; $('nextBtn').style.display='none'; ['doneBtn','drawer'].forEach(id=>$(id).style.visibility='visible');
+  const p=G.p=makePuzzle(G.age,G.lv); G.wrong=0; G.peeked=false; G.peeks=LV[G.lv].peek; G.interacted=false;
+  if(KIT.params.get('voice')==='1' && G.age===7) p.voice=true;
+  KIT.renderProgress(G); renderFrame('model',p.model,false); renderFrame('canvas',p.canvas,true); renderDrawer();
+  const cov=$('cover'); cov.className='cover'; $('peekBtn').style.display='none';
+  if(p.voice){ cov.className='cover on voice'; cov.innerHTML=p.diffs.slice(0,3).map((d,i)=>`<div class="vline"><button data-v="${i}">🔊</button><span>${sentenceFor(p.model[d.i])}</span></div>`).join('');
+    cov.querySelectorAll('button').forEach(b=>b.onclick=()=>KIT.say(sentenceFor(p.model[p.diffs[+b.dataset.v].i])));
+    await KIT.tutor('listen7',{keep:true}); for(const d of p.diffs.slice(0,3)){ if(G!==me) return; await KIT.say(sentenceFor(p.model[d.i])); } }
+  else { cov.innerHTML='🙈 <span>Remember my picture!</span>'; await KIT.tutor('start',{keep:true}); }
+  if(G!==me) return; G.accepting=true; KIT.armIdle(idle);
+  const hide=LV[G.lv].hide; if(hide && !p.voice){ setTimeout(async()=>{ if(G!==me||!G.accepting) return; cov.classList.add('on'); await KIT.tutor('cover'); updatePeek(); }, hide*1000); }
+}
+function updatePeek(){ const b=$('peekBtn'); if(G.peeks>0 && $('cover').classList.contains('on')){ b.style.display='block'; $('peekN').textContent='×'+G.peeks; } else b.style.display='none'; }
+$('peekBtn').onclick=async()=>{ if(!G||G.peeks<=0) return; G.peeks--; G.peeked=true; const c=$('cover'); c.classList.remove('on'); updatePeek(); await sleep(3000); if(G&&G.accepting){ c.classList.add('on'); updatePeek(); } };
+$('reQ').onclick=()=>{ if(!G||!G.p) return; if(G.p.voice) G.p.diffs.slice(0,3).reduce((pr,d)=>pr.then(()=>KIT.say(sentenceFor(G.p.model[d.i]))),Promise.resolve()); else KIT.tutor('start'); };
+async function idle(){ if(!G||!G.accepting) return; await KIT.tutor('idle'); KIT.showHand($('canvas')); }
+
+function check(){ const p=G.p; const bad=[]; PLACES.forEach(pl=>{ const m=p.model.find(g=>g.place===pl.id), c=p.canvas.find(g=>g.place===pl.id); if(sig(m)!==sig(c)) bad.push(pl.id); }); return bad; }
+$('doneBtn').onclick=async()=>{ if(!G||!G.accepting) return; touched(); const me=G; const bad=check();
+  document.querySelectorAll('#canvas .slot').forEach(s=>s.classList.remove('ok','glow'));
+  if(!bad.length) return success();
+  G.wrong++; KIT.sfx.bad(); KIT.face('oops');
+  // mark places that were different at the start and are now fixed
+  const startBad = G.p.diffs.map(d=>[G.p.model[d.i].place, ...(d.kind==='position'?[G.p.model[d.i].place]:[])]).flat();
+  document.querySelectorAll('#canvas .slot').forEach(s=>{ if(startBad.includes(s.dataset.place) && !bad.includes(s.dataset.place) && s.classList.contains('filled')) s.classList.add('ok'); });
+  if(G.wrong===1) await KIT.tutor('almost');
+  else if(G.wrong===2){ await KIT.tutor('hint'); if(G!==me) return; const pl=bad[0]; document.querySelector(`#canvas .slot[data-place="${pl}"]`)?.classList.add('glow'); document.querySelector(`#model .slot[data-place="${pl}"]`)?.classList.add('glow'); $('cover').classList.remove('on'); }
+  else { G.accepting=false; KIT.clearIdle(); await KIT.tutor('fix'); if(G!==me) return; G.p.canvas=G.p.model.map(g=>({...g})); renderFrame('canvas',G.p.canvas,false); $('cover').classList.remove('on'); record(0,false); $('nextBtn').style.display='block'; }
+};
+function speakTarget(){ const p=G.p; const order={7:['position','count','color','type'],6:['count','color','type'],5:['color','type']}[G.age];
+  const d=[...p.diffs].sort((a,b)=>order.indexOf(a.kind)-order.indexOf(b.kind))[0]; const g=p.model[d.i];
+  if(d.kind==='position'){ const pl=placeOf(g.place); const be=g.count>1?'are':'is'; return {phrase:`The ${KIT.plural(g.type,g.count)} ${be} ${pl.name}.`, keys:[g.type, pl.prep], place:g.place}; }
+  if(d.kind==='count'){ return {phrase:`${countWord(g.count)} ${KIT.plural(g.type,g.count)}`, keys:[countWord(g.count), g.type], place:g.place}; }
+  return {phrase:`${g.color} ${g.type}`, keys:[g.color, g.type], place:g.place}; }
+async function success(){
+  const me=G; G.accepting=false; KIT.clearIdle(); KIT.sfx.ok(); KIT.face('joy'); $('cover').classList.remove('on'); $('peekBtn').style.display='none';
+  document.querySelectorAll('#canvas .slot.filled').forEach(s=>s.classList.add('ok'));
+  const star=1+(G.wrong===0&&!G.peeked?1:0); const g=KIT.line('great'); KIT.bubble(g.t+(g.lang==='ko'?`<span class="en">${g.en}</span>`:'')); await KIT.say(g.t,g.lang); if(G!==me) return;
+  const t=speakTarget(); document.querySelector(`#canvas .slot[data-place="${t.place}"]`)?.classList.add('glow'); await KIT.say(t.phrase); if(G!==me) return;
+  const spoke=await KIT.speak({phrase:t.phrase, keys:t.keys, isAlive:()=>G===me}); if(G!==me) return;
+  record(star+(spoke?1:0), spoke, t); KIT.sfx.star(); $('nextBtn').style.display='block';
+}
+function record(s, spoke, t){ t=t||speakTarget(); G.stars[G.idx]=s; G.words.push({text:t.phrase, phrase:t.phrase, stars:s, spoke}); G.gallery=(G.gallery||[]).concat([G.p.model]); KIT.renderProgress(G); }
+$('nextBtn').onclick=()=>{ G.idx++; nextPicture(); };
+
+/* ---------- demo (TRD 2-3) ---------- */
+async function runDemo(){
+  KIT.demoStart(); const me=G;
+  G.p={age:5, model:[{id:0,place:'table',type:'mug',color:'blue',count:1},{id:1,place:'shelf',type:'mitt',color:'red',count:1}], canvas:[{id:0,place:'table',type:'mug',color:'red',count:1,cycle:'color'},{id:1,place:'shelf',type:'mitt',color:'red',count:1,cycle:'color'}], diffs:[{i:0,kind:'color'}], pal:['red','blue','yellow','green']};
+  renderFrame('model',G.p.model,false); renderFrame('canvas',G.p.canvas,false); $('drawer').style.display='none';
+  const steps=[ async()=>KIT.tutor('demo1',{keep:true}), async()=>KIT.tutor('demo2',{keep:true}),
+    async()=>{ const s=()=>document.querySelector('#canvas .slot[data-place="table"]'); KIT.showHand(s(),true); await sleep(900); G.p.canvas[0].color='blue'; renderFrame('canvas',G.p.canvas,false); KIT.sfx.click(); await KIT.say('blue mug'); },
+    async()=>{ await KIT.tutor('demo3',{keep:true}); KIT.showHand($('doneBtn'),true); await sleep(900); KIT.sfx.ok(); document.querySelectorAll('#canvas .slot.filled').forEach(s=>s.classList.add('ok')); KIT.face('joy'); await sleep(800); },
+    async()=>{ KIT.hideHand(); await KIT.tutor('demoEnd',{keep:true}); } ];
+  for(const s of steps){ if(KIT.skipDemo||G!==me) break; await s(); }
+  KIT.demoEnd(); KIT.face('neutral');
+}
+async function finish(){
+  KIT.clearIdle(); const hero=(G.gallery||[]).slice(-3).map(m=>`<div style="position:relative;width:calc(var(--u)*18);height:calc(var(--u)*13);background:#fdf3e1;border:calc(var(--u)*.8) solid #d9a441;border-radius:calc(var(--u)*1);display:flex;align-items:center;justify-content:center;gap:2px">${m.slice(0,3).map(g=>`<div class="itm" style="width:calc(var(--u)*4.5);height:calc(var(--u)*4.5)">${itemSvg(g)}</div>`).join('')}</div>`).join('');
+  await KIT.result(G,{title:'Masterpiece!', heroHtml:hero, icon:'🎨', unit:'물감 방울', collName:'My Gallery', per:1});
+}
+KIT.init({prefix:'copy', onStart:startRound, onExit:()=>{ G=null; },
+  qaExtra:'7세 음성 지시 모드 강제: 주소에 <code>&voice=1</code><br>'});
+window.__copy=()=>G;
+</script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Shop & Count</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<link rel="stylesheet" href="../_shared/kit.css">
+<style>
+  :root { --s1:#ffb08a; --s2:#f27f57; --ss:#b9502f; --st:#ffffff; --ink:#2d2440; --b1:#ff8a5c; --b2:#e8572c; --bs:#a8391a; --a1:#3fb6a8; --a2:#1f8a7d; --as:#126157; }
+  #stage { background: linear-gradient(#e9f7ff 0%, #d6efff 60%, #f2d7a8 60%, #e4c08a 100%); }
+  .sign { position:absolute; left:calc(var(--u)*30); top:calc(var(--u)*3.4); padding:0 calc(var(--u)*2); height:calc(var(--u)*6); display:none; }
+  #shelf { position:absolute; left:calc(var(--u)*30); top:calc(var(--u)*12); width:calc(var(--u)*88); height:calc(var(--u)*52); background:#fff7ea; border-radius:calc(var(--u)*1.5);
+    box-shadow:0 0 0 calc(var(--u)*1.2) #b9874f, 0 calc(var(--u)*1.5) calc(var(--u)*3) rgba(0,0,0,.25); }
+  .board { position:absolute; left:0; right:0; height:calc(var(--u)*1.6); background:#b9874f; border-radius:calc(var(--u)*.5); }
+  .item { position:absolute; transform:translate(-50%,-100%); display:flex; align-items:flex-end; justify-content:center; cursor:pointer; transition: transform .15s, opacity .25s; }
+  .item:active { transform:translate(-50%,-100%) scale(.92); }
+  .item .itm { width:100%; height:100%; } .item .emo { font-size:inherit; }
+  .item.taken { opacity:0; pointer-events:none; transform:translate(-50%,-140%) scale(.4); }
+  .item.glow { animation: iglow .9s infinite; border-radius:calc(var(--u)*2); }
+  @keyframes iglow { 50% { box-shadow:0 0 0 calc(var(--u)*.6) #ffd24d, 0 0 calc(var(--u)*3) #ffd24d; background:rgba(255,236,150,.5);} }
+  .item.blink { animation: iblink .5s 1; } @keyframes iblink { 50% { transform:translate(-50%,-100%) scale(1.3);} }
+  #bagRow { position:absolute; left:calc(var(--u)*30); top:calc(var(--u)*67); width:calc(var(--u)*88); height:calc(var(--u)*13); background:rgba(255,255,255,.75); border-radius:calc(var(--u)*3);
+    display:flex; align-items:center; gap:calc(var(--u)*.8); padding:0 calc(var(--u)*1.5); overflow:hidden; border:calc(var(--u)*.4) dashed #c7a26b; }
+  #bagRow .bag { font-size:calc(var(--u)*7); flex:none; }
+  #bagRow .in { width:calc(var(--u)*6.5); height:calc(var(--u)*6.5); flex:none; cursor:pointer; display:flex; align-items:center; justify-content:center; animation: drop .25s; }
+  #bagRow .in .emo { font-size:calc(var(--u)*5.5); } @keyframes drop { from { transform:translateY(calc(var(--u)*-5)) scale(1.4);} }
+  #bagRow.sorted { justify-content:flex-start; }
+  #counter { position:absolute; left:calc(var(--u)*122); top:calc(var(--u)*12); width:calc(var(--u)*52); height:calc(var(--u)*56); }
+  #customer { position:absolute; left:50%; bottom:calc(var(--u)*20); transform:translateX(-50%); height:calc(var(--u)*24); transition: transform .4s, opacity .4s; }
+  #customer.away { transform:translateX(80%); opacity:0; }
+  .desk { position:absolute; left:0; right:0; bottom:calc(var(--u)*12); height:calc(var(--u)*9); background:linear-gradient(#e07a4f,#b8552e); border-radius:calc(var(--u)*1.5); }
+  #order { position:absolute; left:0; right:0; top:0; min-height:calc(var(--u)*11); background:#fff; border-radius:calc(var(--u)*2.5); padding:calc(var(--u)*1) calc(var(--u)*1.6); font-size:calc(var(--u)*2.7); line-height:1.3; text-align:center;
+    box-shadow:0 calc(var(--u)*.6) calc(var(--u)*1.4) rgba(0,0,0,.2); display:flex; flex-direction:column; align-items:center; gap:calc(var(--u)*.6); }
+  #order .pics { display:flex; flex-wrap:wrap; gap:calc(var(--u)*.4); justify-content:center; }
+  #order .pics .itm { width:calc(var(--u)*4.6); height:calc(var(--u)*4.6); } #order .pics .emo { font-size:calc(var(--u)*4.2); }
+  #order button { border:none; background:#e8f7f5; border-radius:calc(var(--u)*2); padding:calc(var(--u)*.4) calc(var(--u)*1.4); font-size:calc(var(--u)*2.3); cursor:pointer; font-family:inherit; }
+  #bellBtn { position:absolute; left:calc(var(--u)*122); top:calc(var(--u)*70); width:calc(var(--u)*24); }
+  #nextBtn { position:absolute; right:calc(var(--u)*3); top:calc(var(--u)*70); display:none; z-index:30; }
+  .options { left:calc(var(--u)*30); width:calc(var(--u)*88); bottom:calc(var(--u)*2); height:calc(var(--u)*16); }
+  .options .card { height:calc(var(--u)*14); flex-basis:calc(var(--u)*14); }
+  #keypad { position:absolute; left:calc(var(--u)*24); right:calc(var(--u)*24); bottom:calc(var(--u)*2.5); height:calc(var(--u)*12); display:none; gap:calc(var(--u)*1); align-items:center; justify-content:center; z-index:22; }
+  #keypad.on { display:flex; }
+  #keypad button { width:calc(var(--u)*8.5); height:calc(var(--u)*10); border:none; border-radius:calc(var(--u)*2); background:#fff; font-size:calc(var(--u)*4.4); font-family:inherit; color:var(--ink); box-shadow:0 calc(var(--u)*.6) 0 #c9b28d; cursor:pointer; }
+  #keypad .disp { width:calc(var(--u)*12); height:calc(var(--u)*10); border-radius:calc(var(--u)*2); background:#fffbe6; border:calc(var(--u)*.5) solid #f0a500; display:flex; align-items:center; justify-content:center; font-size:calc(var(--u)*5); }
+  #keypad .ok { background:linear-gradient(#7be08a,#2fb457); color:#fff; width:calc(var(--u)*11); }
+  #dots { position:absolute; left:calc(var(--u)*34); top:calc(var(--u)*16); right:calc(var(--u)*63); background:rgba(255,255,255,.95); border-radius:calc(var(--u)*2); padding:calc(var(--u)*1.5); font-size:calc(var(--u)*4); text-align:center; z-index:15; display:none; letter-spacing:calc(var(--u)*.3); }
+  .tutor { left:calc(var(--u)*0); bottom:calc(var(--u)*20); height:calc(var(--u)*26); }
+  .bubble { top:calc(var(--u)*12); }
+  .mic { left:calc(var(--u)*28); right:calc(var(--u)*56); bottom:calc(var(--u)*1); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <section class="screen on" id="title">
+    <div class="topbar"><div class="row"><button class="btn alt" id="keyBtn">🔑</button></div><div class="row"><button class="btn alt" id="langBtn">한국어</button><button class="btn alt sndBtn">🔊</button></div></div>
+    <div class="logo" style="color:#fff">Shop &amp; Count<small>숍 앤 카운트 · 주문을 듣고 세어서 담아요</small></div>
+    <img src="assets/tobi_front.png" style="position:absolute;left:calc(var(--u)*8);bottom:calc(var(--u)*6);height:calc(var(--u)*38)" alt="Tobi">
+    <img src="assets/big.png" style="position:absolute;right:calc(var(--u)*30);bottom:calc(var(--u)*4);height:calc(var(--u)*24)" alt="">
+    <img src="assets/feet.png" style="position:absolute;right:calc(var(--u)*20);bottom:calc(var(--u)*4);height:calc(var(--u)*15)" alt="">
+    <img src="assets/dudu.png" style="position:absolute;right:calc(var(--u)*4);bottom:calc(var(--u)*4);height:calc(var(--u)*20)" alt="">
+    <div class="coll"><div class="k">🎟️</div>My Mart<br><b id="collCount">0</b></div>
+    <div class="agebox">연령(보호자 설정) <button class="chip" data-age="5">5세</button><button class="chip" data-age="6">6세</button><button class="chip" data-age="7">7세</button></div>
+    <button class="btn start" id="startBtn">START</button>
+  </section>
+
+  <section class="screen" id="game">
+    <div class="topbar">
+      <div class="row"><div class="pill">⭐ <span id="starSum">0</span></div><div class="progress" id="progress"></div></div>
+      <div class="row"><div class="pill" id="lvPill">LEVEL 1</div><button class="btn alt" id="reQ">💬</button></div>
+      <div class="row"><button class="btn alt sndBtn">🔊</button><button class="btn" id="exitBtn">✕</button></div>
+    </div>
+    <div id="shelf"></div>
+    <div id="dots"></div>
+    <div id="bagRow" data-hide-on-speak><span class="bag">👜</span></div>
+    <div id="counter"><div id="order"></div><img id="customer" src="assets/popo.png" alt=""><div class="desk"></div></div>
+    <button class="btn gold big" id="bellBtn" data-hide-on-speak>🔔 Ring</button>
+    <div class="options" id="options" data-hide-on-speak></div>
+    <div id="keypad" data-hide-on-speak></div>
+    <img class="tutor" id="tutor" src="assets/tobi_curious.png" alt="Tobi">
+    <div class="bubble" id="bubble"></div>
+    <button class="btn gold big" id="nextBtn">Next ▶</button>
+  </section>
+
+  <section class="screen" id="result">
+    <div class="card-res"><h2 id="resTitle">What a busy day!</h2><div class="res-hero" id="resHero"></div><div class="bigstars" id="resStars"></div><div class="resmeta" id="resMeta"></div><div id="resLv"></div>
+      <div class="reswords" id="resWords"></div><div class="resmeta" id="resReward"></div>
+      <div class="resbtns"><button class="btn alt" id="homeBtn">🏠 Home</button><button class="btn" id="againBtn">↻ Again</button><button class="btn green" id="nextRoundBtn">Next ▶</button></div></div>
+  </section>
+</div>
+<script src="../_shared/kit.js"></script>
+<script>
+'use strict';
+const {$, sleep, rnd, shuffle, NUM} = KIT;
+KIT.L = {
+  hello:{en:"Hi! I'm Tobi. Let's fill my magic bag!", ko:'안녕! 나는 토비야. 내 마법 가방을 채워 보자!'},
+  demo1:{en:'Listen to the order.', ko:'주문을 잘 들어 봐.'},
+  demo2:{en:'Tap to put things in my bag. Count them!', ko:'눌러서 내 가방에 담아. 세면서 담아!'},
+  demo3:{en:'Then ring the bell!', ko:'다 담으면 벨을 눌러!'},
+  countAgain:{en:"Let's count again!", ko:'다시 세어 보자!'},
+  hint:{en:'Count with me.', ko:'나랑 같이 세어 보자.'},
+  idle:{en:'Tap the shelf to put things in my bag!', ko:'선반을 눌러서 내 가방에 담아 봐!'},
+  bell:{en:'All done? Ring the bell!', ko:'다 담았어? 벨을 눌러!'},
+  great:{en:['Thank you!','Perfect count!','Great helper!',"That's right!"], ko:['고마워!','정확하게 셌어!','최고의 도우미!','맞았어!']},
+  clear:{en:'What a busy day! Look at my treasures.', ko:'정말 바쁜 하루였어! 내 보물들 좀 봐.'},
+  levelUp:{en:'Level up! More things on the shelf!', ko:'레벨 업! 선반에 물건이 더 많아질 거야!'},
+};
+const FACE={listen:'curious', joy:'proud', oops:'surprised', neutral:'curious'};
+KIT.face=f=>{ $('tutor').src=`assets/tobi_${FACE[f]||'curious'}.png`; if(f==='joy') KIT.anim($('tutor'),'bounce'); if(f==='oops') KIT.anim($('tutor'),'oops'); };
+
+/* ---------- data (TRD 5-2, 6-2) ---------- */
+const SVGK=['mug','mitt','mask','mushroom']; const EMOK=['map','mop','mirror'];
+const LV={ 1:{items:6,kinds:2,cond:'type',arr:'rows',nopts:3}, 2:{items:8,kinds:2,cond:'type',arr:'rows',nopts:3}, 3:{items:10,kinds:3,cond:'color',arr:'mixed',nopts:4},
+           4:{items:12,kinds:3,cond:'color',arr:'mixed',nopts:4}, 5:{items:15,kinds:4,cond:'two',arr:'scatter',nopts:5}, 6:{items:20,kinds:4,cond:'two+color',arr:'scatter',nopts:5} };
+const QCOUNT={5:6,6:8,7:8};
+const CUSTOMERS=['popo','dudu','big','feet','long','flat'];
+function maxN(age,lv){ return age===5? (lv<=3?5:10) : age===6? (lv<=3?10:20) : (lv<=3?10:20); }
+const pl = (it,n)=>KIT.plural(KIT.noun(it), n);
+const desc = (it,n)=> `${it.svg && it.useColor ? it.color+' ' : ''}${pl(it,n)}`;
+
+function makeKind(useColor){ if(useColor){ const t=rnd(SVGK); return {svg:t, color:rnd(['red','blue','yellow','green']), useColor:true}; } const t=rnd([...SVGK,...EMOK]); return SVGK.includes(t)? {svg:t, color:rnd(['red','blue','yellow','green'])} : {...KIT.word(t)}; }
+const keyOf = it => it.svg && it.useColor ? it.color+'-'+it.svg : (it.svg||it.w);   // colour only matters when the order asks for it
+function itemKey(it){ return it.svg? it.color+'-'+it.svg : it.w; }
+
+function makeOrder(age, lv){
+  const P=LV[lv]; const useColor = P.cond.includes('color') || (P.cond==='color'); const two = P.cond.startsWith('two') && age>=6;
+  let type;
+  if(age===5) type = Math.random()<.5? 'put':'count';
+  else if(age===6) type = two ? rnd(['put2','count']) : rnd(['put','count']);
+  else type = Math.random()<.5? 'story' : (two? 'put2':'put');
+  const forced=KIT.params.get('type'); if(forced) type=forced;
+  const cap=Math.min(maxN(age,lv), P.items-2);
+  const targets=[]; const t1=makeKind(useColor); targets.push(t1);
+  if(type==='put2'){ let t2; do { t2=makeKind(useColor); } while(KIT.noun(t2)===KIT.noun(t1)); targets.push(t2); }
+  const o={age, lv, type, targets, arr:P.arr};
+  if(type==='story'){ const max=maxN(7,lv); const add=Math.random()<.5; let a,b; if(add){ a=1+Math.floor(Math.random()*(max-2)); b=1+Math.floor(Math.random()*Math.min(5,max-a)); o.ans=a+b; }
+    else { a=2+Math.floor(Math.random()*(max-2)); b=1+Math.floor(Math.random()*Math.min(5,a-1)); o.ans=a-b; } o.a=a; o.b=b; o.add=add;
+    const p=pl(t1,2); o.text = add? `I have ${NUM[a]} ${p}. I get ${NUM[b]} more. How many ${p} now?` : `I have ${NUM[a]} ${p}. I give ${NUM[b]} to Mom. How many are left?`;
+    o.shelf=fillShelf([], P.items, P.kinds, useColor); o.phrase=`There are ${NUM[o.ans]} ${pl(t1,o.ans)}.`; o.keys=[NUM[o.ans], KIT.noun(t1)]; return o; }
+  const half = type==='put2' ? Math.max(1,Math.floor(cap/2)) : cap;
+  o.need = targets.map(()=>1+Math.floor(Math.random()*Math.min(half, cap)));
+  if(type==='count'){ o.ans=o.need[0]; o.text=`How many ${desc(t1,2)} do you see?`; }
+  else if(type==='put') o.text=`Put ${NUM[o.need[0]]} ${desc(t1,o.need[0])} in my bag.`;
+  else o.text=`${cap1(NUM[o.need[0]])} ${desc(t1,o.need[0])} and ${NUM[o.need[1]]} ${desc(targets[1],o.need[1])}, please!`;
+  // shelf: exactly n for 'count'; n + extra for put
+  const base=[]; targets.forEach((t,i)=>{ const extra = type==='count'? 0 : 1+Math.floor(Math.random()*2); for(let k=0;k<o.need[i]+extra;k++) base.push({...t}); });
+  o.shelf=fillShelf(base, Math.max(P.items, base.length+2), P.kinds, useColor, targets);
+  const n0=o.need[0];
+  if(age===5){ o.phrase = type==='count'? NUM[o.ans] : NUM[n0]; o.keys=[o.phrase]; }
+  else if(age===6){ o.phrase = type==='put2'? `${NUM[o.need[0]]} ${pl(t1,o.need[0])} and ${NUM[o.need[1]]} ${pl(targets[1],o.need[1])}` : `${NUM[n0]} ${pl(t1,n0)}`;
+    o.keys = type==='put2'? [NUM[o.need[0]], KIT.noun(t1), NUM[o.need[1]], KIT.noun(targets[1])] : [NUM[n0], KIT.noun(t1)]; }
+  else { o.phrase = type==='put2'? `There are ${NUM[o.need[0]]} ${pl(t1,o.need[0])} and ${NUM[o.need[1]]} ${pl(targets[1],o.need[1])}.` : `There are ${NUM[n0]} ${pl(t1,n0)}.`;
+    o.keys = type==='put2'? [NUM[o.need[0]], KIT.noun(t1), NUM[o.need[1]], KIT.noun(targets[1])] : [NUM[n0], KIT.noun(t1)]; }
+  return o;
+}
+function cap1(s){ return s[0].toUpperCase()+s.slice(1); }
+function fillShelf(base, total, kinds, useColor, targets=[]){
+  const out=[...base]; const tKeys=targets.map(keyOf); const tNouns=targets.map(KIT.noun);
+  const others=[]; let guard=0;
+  while(others.length<kinds-targets.length && guard++<50){ const k=makeKind(useColor);
+    if(tNouns.includes(KIT.noun(k)) && !(useColor && k.svg && !tKeys.includes(keyOf(k)))) continue;  // same noun allowed only as a different colour
+    if(others.some(o=>itemKey(o)===itemKey(k))) continue; others.push(k); }
+  if(useColor && targets[0]?.svg){ others.push({svg:targets[0].svg, color:rnd(['red','blue','yellow','green'].filter(c=>c!==targets[0].color)), useColor:true}); } // same object, other colour
+  while(out.length<total){ const k=others.length? rnd(others) : makeKind(false); out.push({...k}); }
+  return out.map((it,i)=>({...it, uid:i}));
+}
+
+/* ---------- shelf render (arrangement: rows / mixed / scatter) ---------- */
+function renderShelf(o){
+  const sh=$('shelf'); sh.innerHTML=''; const rows=3; [33.3,66.6,99].forEach(y=>{ const b=document.createElement('div'); b.className='board'; b.style.top=`calc(${y}% - var(--u)*1.6)`; sh.appendChild(b); });
+  let list=[...o.shelf]; if(o.arr==='rows') list.sort((a,b)=>itemKey(a)<itemKey(b)?-1:1); else list=shuffle(list);
+  const cols=Math.ceil(list.length/rows); const slotW=88/cols; const sz=Math.min(10, slotW*0.78);
+  list.forEach((it,i)=>{ const r=Math.floor(i/cols), c=i%cols; const e=document.createElement('div'); e.className='item'; e.dataset.uid=it.uid; e.dataset.k=itemKey(it);
+    let x=(c+0.5)*slotW, y=(r+1)*33.3-3.2; if(o.arr==='scatter'){ x+= (Math.random()-.5)*slotW*0.35; }
+    e.style.left=`calc(var(--u)*${x})`; e.style.top=`${y}%`; e.style.width=e.style.height=`calc(var(--u)*${sz})`; e.style.fontSize=`calc(var(--u)*${sz*0.85})`;
+    e.innerHTML = it.svg? `<div class="itm">${KIT.SVG[it.svg](KIT.COLORS[it.color])}</div>` : `<span class="emo">${it.e}</span>`;
+    e.onclick=()=>take(e,it); sh.appendChild(e); });
+}
+function bagHTML(it){ return it.svg? `<div class="itm" style="width:100%;height:100%">${KIT.SVG[it.svg](KIT.COLORS[it.color])}</div>` : `<span class="emo">${it.e}</span>`; }
+function take(el,it){
+  if(!G||!G.accepting||!G.o.type.startsWith('put')) return; touched(); el.classList.add('taken'); G.bag.push(it);
+  const b=document.createElement('div'); b.className='in'; b.dataset.uid=it.uid; b.innerHTML=bagHTML(it); b.onclick=()=>{ if(!G.accepting) return; touched(); G.bag=G.bag.filter(x=>x.uid!==it.uid); b.remove(); el.classList.remove('taken'); KIT.sfx.click(); };
+  $('bagRow').appendChild(b);
+  // TRD 4-2: count aloud (5세 L1~3), click only (5세 L4~6, 6세 L1~2), silent otherwise
+  const sameKind=G.bag.filter(x=>keyOf(x)===keyOf(it)).length;
+  if(G.age===5 && G.lv<=3) KIT.say(NUM[Math.min(sameKind,20)]); else if((G.age===5)||(G.age===6&&G.lv<=2)) KIT.sfx.click(); else KIT.sfx.pop();
+}
+
+/* ---------- order card ---------- */
+function renderOrder(o){
+  const od=$('order'); const t=o.targets[0]; const showPics = o.age===5 || (o.age===6 && o.lv<=2);
+  let pics='';
+  if(o.type==='put' && o.age===5) pics=Array(o.need[0]).fill(KIT.pic(t)).join('');
+  else if(showPics && o.type!=='story') pics=o.targets.map(x=>KIT.pic(x)).join(' ') + (o.type==='count'?' <b style="font-size:calc(var(--u)*4)">?</b>':'');
+  od.innerHTML = `${pics?`<div class="pics">${pics}</div>`:''}${o.age===7||o.type==='story'?`<div>${o.text}</div>`:''}<button id="orderSay">🔊 order</button>`;
+  $('orderSay').onclick=()=>KIT.say(o.text);
+}
+
+/* ---------- flow ---------- */
+let G=null;
+function touched(){ if(!G) return; G.interacted=true; KIT.clearIdle(); KIT.armIdle(idle); }
+async function idle(){ if(!G||!G.accepting) return; if(G.o.type.startsWith('put')){ await KIT.tutor('idle'); KIT.showHand($('shelf')); } else { await KIT.say(G.o.text); } }
+async function startRound(){
+  const age=KIT.SAVE.age, lv=KIT.levelFor(age); G={age, lv, total:QCOUNT[age], idx:0, stars:[], words:[]}; const me=G;
+  $('lvPill').textContent=`LEVEL ${lv} · ${age}세`; KIT.show('game'); KIT.renderProgress(G);
+  if(KIT.demoNeeded()) await runDemo(); if(G!==me) return; nextOrder();
+}
+async function nextOrder(){
+  if(G.idx>=G.total) return finish();
+  const me=G; $('nextBtn').style.display='none'; $('dots').style.display='none';
+  const o=G.o=makeOrder(G.age,G.lv); G.bag=[]; G.wrong=0; G.accepting=false; G.interacted=false; KIT.renderProgress(G);
+  $('bagRow').querySelectorAll('.in').forEach(e=>e.remove()); $('options').innerHTML=''; $('keypad').classList.remove('on');
+  renderShelf(o); const cust=$('customer'); cust.classList.add('away'); await sleep(250); cust.src=`assets/${CUSTOMERS[G.idx%CUSTOMERS.length]}.png`; cust.classList.remove('away');
+  renderOrder(o);
+  const isPut=o.type.startsWith('put'); $('bellBtn').style.display=isPut?'block':'none'; $('bagRow').style.display=isPut?'flex':'none';
+  KIT.bubble(o.text); await KIT.say(o.text); if(G!==me) return;
+  if(G.lang==='ko'){} if(KIT.SAVE.lang==='ko'){ const ko=koHint(o); if(ko) { KIT.bubble(`${o.text}<span class="en">${ko}</span>`); } }
+  G.accepting=true;
+  if(o.type==='count'){ const n=o.ans; let nums=new Set([n]); while(nums.size<LV[G.lv].nopts){ const d=n+Math.round((Math.random()-.5)*6); if(d>=1&&d<=Math.max(n+3,5)) nums.add(d); }
+    KIT.cards($('options'), shuffle([...nums]).map(x=>({num:x})), {onPick:pickNum, read:false}); }
+  if(o.type==='story') buildKeypad();
+  KIT.armIdle(idle);
+}
+function koHint(o){ const t=o.targets[0]; const KO={mug:'컵',mitt:'장갑',mask:'가면',mushroom:'버섯',map:'지도',mop:'걸레',mirror:'거울'}; const C={red:'빨간',blue:'파란',yellow:'노란',green:'초록'};
+  const name=x=>`${x.svg&&x.useColor?C[x.color]+' ':''}${KO[KIT.noun(x)]}`;
+  if(o.type==='put') return `${name(t)} ${o.need[0]}개 담아 줘!`; if(o.type==='put2') return `${name(t)} ${o.need[0]}개랑 ${name(o.targets[1])} ${o.need[1]}개!`;
+  if(o.type==='count') return `${name(t)}가 몇 개 보여?`; return ''; }
+function buildKeypad(){ const k=$('keypad'); k.innerHTML='<div class="disp" id="disp"></div>'+[1,2,3,4,5,6,7,8,9,0].map(d=>`<button data-d="${d}">${d}</button>`).join('')+'<button data-d="del">⌫</button><button class="ok" data-d="ok">OK</button>'; k.classList.add('on'); G.typed='';
+  k.querySelectorAll('button').forEach(b=>b.onclick=()=>{ if(!G.accepting) return; touched(); const d=b.dataset.d; if(d==='del') G.typed=G.typed.slice(0,-1); else if(d==='ok'){ if(G.typed) checkNumber(+G.typed); return; } else if(G.typed.length<2) G.typed+=d; $('disp').textContent=G.typed; KIT.sfx.click(); }); }
+function pickNum(card, it){ if(!G||!G.accepting) return; touched(); if(it.num===G.o.ans) { card.classList.add('ok'); success(); } else { KIT.anim(card,'shake'); wrong(); } }
+function checkNumber(n){ if(n===G.o.ans){ $('disp').style.borderColor='#2fb457'; success(); } else { G.typed=''; $('disp').textContent=''; wrong(); } }
+$('bellBtn').onclick=()=>{ if(!G||!G.accepting) return; touched(); KIT.sfx.bell(); const o=G.o;
+  const want={}; o.targets.forEach((t,i)=>want[keyOf(t)]=o.need[i]); const have={}; G.bag.forEach(x=>{ const k=o.targets.some(t=>keyOf(t)===keyOf(x))? keyOf(x) : itemKey(x)+'#x'; have[k]=(have[k]||0)+1; });
+  const ok = Object.keys(want).every(k=>have[k]===want[k]) && Object.keys(have).every(k=>want[k]!=null);
+  ok? success() : wrong(); };
+async function wrong(){
+  const me=G; G.wrong++; KIT.sfx.bad(); KIT.face('oops'); KIT.anim($('customer'),'oops');
+  if(G.wrong===1){ await KIT.tutor('countAgain'); if(G!==me) return; const row=$('bagRow'); [...row.querySelectorAll('.in')].sort((a,b)=>a.innerHTML<b.innerHTML?-1:1).forEach(e=>row.appendChild(e)); }
+  else if(G.wrong===2){ await KIT.tutor('hint'); if(G!==me) return; await hint(); }
+  else { G.accepting=false; KIT.clearIdle(); await reveal(); if(G!==me) return; record(0,false); $('nextBtn').style.display='block'; }
+}
+async function hint(){ const o=G.o;
+  if(o.type.startsWith('put')){ const keys=o.targets.map(keyOf); document.querySelectorAll('#shelf .item:not(.taken)').forEach(e=>{ const it=o.shelf.find(s=>s.uid===+e.dataset.uid); if(keys.includes(keyOf(it))) e.classList.add('glow'); }); }
+  else if(o.type==='count'){ const k=keyOf(o.targets[0]); const els=[...document.querySelectorAll('#shelf .item')].filter(e=>keyOf(o.shelf.find(s=>s.uid===+e.dataset.uid))===k);
+    for(const e of els){ if(!G||!G.accepting) return; KIT.showHand(e,true); e.classList.remove('blink'); void e.offsetWidth; e.classList.add('blink'); KIT.sfx.click(); await sleep(650); } KIT.hideHand(); }
+  else { const d=$('dots'); d.style.display='block'; d.innerHTML = o.add? `${'●'.repeat(o.a)}<br>+ ${'●'.repeat(o.b)}` : `${'●'.repeat(o.a-o.b)}<span style="opacity:.25">${'●'.repeat(o.b)}</span><br>− ${o.b}`; } }
+async function reveal(){ const o=G.o; KIT.face('listen');
+  if(o.type.startsWith('put')){ // put the right items in the bag
+    $('bagRow').querySelectorAll('.in').forEach(e=>e.remove()); document.querySelectorAll('#shelf .item').forEach(e=>e.classList.remove('taken','glow')); G.bag=[];
+    for(const [i,t] of o.targets.entries()){ const els=[...document.querySelectorAll('#shelf .item')].filter(e=>keyOf(o.shelf.find(s=>s.uid===+e.dataset.uid))===keyOf(t)).slice(0,o.need[i]);
+      for(const [j,e] of els.entries()){ G.accepting=true; take(e, o.shelf.find(s=>s.uid===+e.dataset.uid)); G.accepting=false; await KIT.say(NUM[j+1]); } } }
+  else if(o.type==='count'){ KIT.cardBy($('options'),'n'+o.ans)?.classList.add('ok'); }
+  else { $('disp').textContent=o.ans; }
+  await KIT.say(o.type==='story'? o.phrase : (o.type==='count'? `${NUM[o.ans]} ${pl(o.targets[0],o.ans)}!` : o.phrase)); }
+async function success(){
+  const me=G; G.accepting=false; KIT.clearIdle(); KIT.sfx.ok(); KIT.sfx.bell(); KIT.face('joy'); KIT.anim($('customer'),'bounce');
+  const star=1+(G.wrong===0?1:0); const g=KIT.line('great'); KIT.bubble(g.t+(g.lang==='ko'?`<span class="en">${g.en}</span>`:'')); await KIT.say(g.t,g.lang); if(G!==me) return;
+  await KIT.say(G.o.phrase); if(G!==me) return;
+  const spoke=await KIT.speak({phrase:G.o.phrase, keys:G.o.keys, isAlive:()=>G===me}); if(G!==me) return;
+  record(star+(spoke?1:0), spoke); KIT.sfx.coin(); $('nextBtn').style.display='block';
+}
+function record(s,spoke){ G.stars[G.idx]=s; G.words.push({text:G.o.phrase, phrase:G.o.phrase, stars:s, spoke}); KIT.renderProgress(G); }
+$('nextBtn').onclick=()=>{ G.idx++; nextOrder(); };
+$('reQ').onclick=()=>{ if(G&&G.o) KIT.say(G.o.text); };
+addEventListener('keydown',e=>{ if(!G||!G.accepting) return; if(G.o.type==='story'){ const b=[...$('keypad').querySelectorAll('button')].find(x=>x.dataset.d===e.key || (e.key==='Enter'&&x.dataset.d==='ok') || (e.key==='Backspace'&&x.dataset.d==='del')); b&&b.click(); }
+  else if(G.o.type==='count'){ const n=parseInt(e.key); const c=$('options').querySelectorAll('.card')[n-1]; c&&c.click(); } else if(e.key==='Enter') $('bellBtn').click(); });
+
+async function runDemo(){
+  KIT.demoStart(); const me=G; const t={svg:'mug',color:'blue'}; const o={age:5,lv:1,type:'put',targets:[t],need:[3],arr:'rows',text:'Put three mugs in my bag.',
+    shelf:[t,t,t,t,{...KIT.word('map')},{...KIT.word('map')}].map((it,i)=>({...it,uid:i}))}; G.o=o; G.bag=[]; renderShelf(o); renderOrder(o); $('bagRow').style.display='flex'; $('bellBtn').style.display='block';
+  const steps=[ async()=>{ await KIT.tutor('demo1',{keep:true}); await KIT.say(o.text); }, async()=>KIT.tutor('demo2',{keep:true}),
+    async()=>{ const els=[...document.querySelectorAll('#shelf .item')].filter(e=>e.dataset.k==='blue-mug').slice(0,3); for(const [i,e] of els.entries()){ if(KIT.skipDemo) return; KIT.showHand(e,true); await sleep(500); G.accepting=true; take(e,o.shelf.find(s=>s.uid===+e.dataset.uid)); G.accepting=false; await KIT.say(NUM[i+1]); } },
+    async()=>{ await KIT.tutor('demo3',{keep:true}); KIT.showHand($('bellBtn'),true); await sleep(800); KIT.sfx.bell(); KIT.sfx.ok(); KIT.face('joy'); await sleep(600); },
+    async()=>{ KIT.hideHand(); await KIT.tutor('demoEnd',{keep:true}); } ];
+  for(const s of steps){ if(KIT.skipDemo||G!==me) break; await s(); }
+  KIT.demoEnd(); $('bagRow').querySelectorAll('.in').forEach(e=>e.remove()); KIT.face('neutral');
+}
+async function finish(){ KIT.clearIdle(); await KIT.result(G,{title:'What a busy day!', heroHtml:'<img src="assets/tobi_proud.png"><span class="emo" style="font-size:calc(var(--u)*10)">👜</span>', icon:'🎟️', unit:'쿠폰', collName:'My Mart', per:1}); }
+KIT.init({prefix:'sc', onStart:startRound, onExit:()=>{ G=null; }, qaExtra:'문제 형식 강제: 주소에 <code>&type=put|put2|count|story</code><br>'});
+window.__sc=()=>G;
+</script>
+</body>
+</html>

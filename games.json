@@ -1,0 +1,450 @@
+{
+  "games": [
+    {
+      "id": "spin-peek",
+      "title": "Spin & Peek",
+      "titleKo": "스핀 앤 픽",
+      "type": [
+        "1인",
+        "말하기",
+        "레슨팩"
+      ],
+      "skill": "집중력·순간 기억",
+      "tutor": "Nubi",
+      "description": "도는 마법 문 너머에 순간순간 보이는 물건을 맞혀요.",
+      "thumbnail": "Spin-Peek/assets/nubi_delighted.png",
+      "color": "#c9d4ff",
+      "playUrl": "Spin-Peek/",
+      "trdUrl": "trd/spin-peek.md",
+      "checklist": [
+        {
+          "item": "설명 SKIP · 첫 판 시범",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "방문당 1회, SKIP 버튼"
+        },
+        {
+          "item": "말하기 JUMP",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "자동 레벨 6단계",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "회전 시간·노출 횟수·보기 수·미끼 번쩍임"
+        },
+        {
+          "item": "레슨팩 그림·공식 녹음",
+          "status": "일부",
+          "priority": "높음",
+          "note": "임시 그림(이모지·도형), 브라우저 음성"
+        },
+        {
+          "item": "발음 판정(phonics-api)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "브라우저 음성 인식으로 대체"
+        },
+        {
+          "item": "공통 기록(phonics.progress)",
+          "status": "없음",
+          "priority": "중간",
+          "note": ""
+        },
+        {
+          "item": "실기기 확인(iPad·휴대폰·Safari)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "GitHub Pages 배포 후 확인"
+        },
+        {
+          "item": "Nubi 오답용 표정",
+          "status": "일부",
+          "priority": "낮음",
+          "note": "시트 표정 4종, 아쉬움 표정 없음"
+        }
+      ]
+    },
+    {
+      "id": "curtain-call",
+      "title": "Curtain Call",
+      "titleKo": "커튼콜",
+      "type": [
+        "1인",
+        "말하기",
+        "레슨팩"
+      ],
+      "skill": "단기·위치 기억",
+      "tutor": "Party One",
+      "description": "커튼이 닫힌 사이 무엇이 사라지고, 바뀌고, 자리를 바꿨는지 찾아요.",
+      "thumbnail": "thumbs/curtain-call.png",
+      "color": "#ffd3e2",
+      "playUrl": "Curtain-Call/",
+      "trdUrl": "trd/curtain-call.md",
+      "checklist": [
+        {
+          "item": "설명 SKIP · 첫 판 시범",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "말하기 JUMP",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "자동 레벨 6단계",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "배우 수·기억 시간·헷갈리는 흔들림"
+        },
+        {
+          "item": "레슨팩 그림·공식 녹음",
+          "status": "일부",
+          "priority": "높음",
+          "note": "임시 그림, 배우 버전은 발만 붙임"
+        },
+        {
+          "item": "발음 판정(phonics-api)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "브라우저 음성 인식으로 대체"
+        },
+        {
+          "item": "공통 기록(phonics.progress)",
+          "status": "없음",
+          "priority": "중간",
+          "note": ""
+        },
+        {
+          "item": "실기기 확인(iPad·휴대폰·Safari)",
+          "status": "없음",
+          "priority": "높음",
+          "note": ""
+        },
+        {
+          "item": "Party One 털 없는 버전 표정",
+          "status": "없음",
+          "priority": "낮음",
+          "note": "한 표정 + 몸짓으로 대신함"
+        }
+      ]
+    },
+    {
+      "id": "copy-cat",
+      "title": "Copy Cat",
+      "titleKo": "카피캣",
+      "type": [
+        "1인",
+        "말하기",
+        "레슨팩"
+      ],
+      "skill": "비교·공간 개념",
+      "tutor": "Duri",
+      "description": "그림자가 몰래 바꿔 놓은 캔버스를 견본과 똑같이 고쳐요.",
+      "thumbnail": "Copy-Cat/assets/duri_main.png",
+      "color": "#ffe1d1",
+      "playUrl": "Copy-Cat/",
+      "trdUrl": "trd/copy-cat.md",
+      "checklist": [
+        {
+          "item": "설명 SKIP · 첫 판 시범",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "말하기 JUMP",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "자동 레벨 6단계",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "다른 곳 수·견본 가림·7세 음성 지시"
+        },
+        {
+          "item": "레슨팩 그림·공식 녹음",
+          "status": "일부",
+          "priority": "높음",
+          "note": "색 바꾸기 도형 4종만 사용"
+        },
+        {
+          "item": "발음 판정(phonics-api)",
+          "status": "없음",
+          "priority": "높음",
+          "note": ""
+        },
+        {
+          "item": "공통 기록(phonics.progress)",
+          "status": "없음",
+          "priority": "중간",
+          "note": ""
+        },
+        {
+          "item": "스마트폰 화면 폭(견본·캔버스 나란히)",
+          "status": "일부",
+          "priority": "중간",
+          "note": "844×390에서 작음, 아이 테스트 필요"
+        },
+        {
+          "item": "My Gallery 꾸미기 화면",
+          "status": "없음",
+          "priority": "낮음",
+          "note": "결과 화면에 물감 방울 수만 표시"
+        }
+      ]
+    },
+    {
+      "id": "little-detective",
+      "title": "Little Detective",
+      "titleKo": "꼬마 탐정",
+      "type": [
+        "1인",
+        "말하기",
+        "레슨팩"
+      ],
+      "skill": "추리력",
+      "tutor": "Piko",
+      "description": "어두운 방에서 돋보기로 단서를 모아 숨은 물건을 추리해요.",
+      "thumbnail": "Little-Detective/assets/piko_observant.png",
+      "color": "#cfd8ff",
+      "playUrl": "Little-Detective/",
+      "trdUrl": "trd/little-detective.md",
+      "checklist": [
+        {
+          "item": "설명 SKIP · 첫 판 시범",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "말하기 JUMP",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "자동 레벨 6단계",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "단서 수·돋보기 크기·가짜 반짝임"
+        },
+        {
+          "item": "레슨팩 그림·공식 녹음",
+          "status": "일부",
+          "priority": "높음",
+          "note": "확대해도 깨지지 않는 고해상도 그림 필요"
+        },
+        {
+          "item": "단서 자리·힌트 문장 데이터",
+          "status": "일부",
+          "priority": "중간",
+          "note": "13단어×3문장 직접 작성, 단서 자리는 공통 4곳"
+        },
+        {
+          "item": "발음 판정(phonics-api)",
+          "status": "없음",
+          "priority": "높음",
+          "note": ""
+        },
+        {
+          "item": "실기기 확인(iPad·휴대폰·Safari)",
+          "status": "없음",
+          "priority": "높음",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "id": "shop-count",
+      "title": "Shop & Count",
+      "titleKo": "숍 앤 카운트",
+      "type": [
+        "1인",
+        "말하기",
+        "레슨팩",
+        "문법"
+      ],
+      "skill": "수·셈",
+      "tutor": "Tobi",
+      "description": "손님 주문을 듣고 세어서 마법 가방에 담아요. 7세는 더하기·빼기 이야기 문제.",
+      "thumbnail": "Shop-Count/assets/tobi_front.png",
+      "color": "#ffe6c7",
+      "playUrl": "Shop-Count/",
+      "trdUrl": "trd/shop-count.md",
+      "checklist": [
+        {
+          "item": "설명 SKIP · 첫 판 시범",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "말하기 JUMP",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "정답 숫자 단서 숨김",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "가방·선반·보기에 숫자 강조 없음"
+        },
+        {
+          "item": "복수 -s 말하기 판정",
+          "status": "없음",
+          "priority": "중간",
+          "note": "숫자·명사만 판정(Ring Ding Dong과 연계 논의)"
+        },
+        {
+          "item": "레슨팩 그림·공식 녹음",
+          "status": "일부",
+          "priority": "높음",
+          "note": ""
+        },
+        {
+          "item": "발음 판정(phonics-api)",
+          "status": "없음",
+          "priority": "높음",
+          "note": ""
+        },
+        {
+          "item": "스마트폰 선반 물건 크기(L6 20개)",
+          "status": "일부",
+          "priority": "중간",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "id": "maze-quest",
+      "title": "Maze Quest",
+      "titleKo": "메이즈 퀘스트",
+      "type": [
+        "1인",
+        "말하기",
+        "레슨팩"
+      ],
+      "skill": "계획·코딩 사고",
+      "tutor": "Bobo",
+      "description": "미로에 길을 그리고, 7세는 방향 명령 카드로 보물을 모아요.",
+      "thumbnail": "thumbs/maze-quest.png",
+      "color": "#cdeccf",
+      "playUrl": "Maze-Quest/",
+      "trdUrl": "trd/maze-quest.md",
+      "checklist": [
+        {
+          "item": "설명 SKIP · 첫 판 시범",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "말하기 JUMP",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "미로 풀 수 있음 검사",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "순서 미션 5,400개 생성 검사 통과"
+        },
+        {
+          "item": "Shape Builders 장치 규칙",
+          "status": "일부",
+          "priority": "중간",
+          "note": "블록 벽(Stretch)만 구현, 터널·계단 등은 없음"
+        },
+        {
+          "item": "스마트폰 7×7 미로 칸 크기",
+          "status": "일부",
+          "priority": "중간",
+          "note": "손가락 그리기 아이 테스트 필요"
+        },
+        {
+          "item": "발음 판정(phonics-api)",
+          "status": "없음",
+          "priority": "높음",
+          "note": ""
+        },
+        {
+          "item": "실기기 확인(iPad·휴대폰·Safari)",
+          "status": "없음",
+          "priority": "높음",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "id": "photo-safari",
+      "title": "Photo Safari",
+      "titleKo": "포토 사파리",
+      "type": [
+        "1인",
+        "말하기",
+        "레슨팩"
+      ],
+      "skill": "탐색·위치 개념",
+      "tutor": "Nunu",
+      "description": "캠프 장면에 숨은 대상을 찾아 카메라로 찰칵, 앨범을 채워요.",
+      "thumbnail": "thumbs/photo-safari.png",
+      "color": "#d4f0c8",
+      "playUrl": "Photo-Safari/",
+      "trdUrl": "trd/photo-safari.md",
+      "checklist": [
+        {
+          "item": "설명 SKIP · 첫 판 시범",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "말하기 JUMP",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "장면 밀기 vs 뷰파인더 끌기 구분",
+          "status": "일부",
+          "priority": "중간",
+          "note": "5세가 헷갈리는지 아이 테스트 필요"
+        },
+        {
+          "item": "캠프 장면 4종",
+          "status": "일부",
+          "priority": "중간",
+          "note": "숲 캠프 1종만 구현"
+        },
+        {
+          "item": "레슨팩 그림·공식 녹음",
+          "status": "일부",
+          "priority": "높음",
+          "note": ""
+        },
+        {
+          "item": "발음 판정(phonics-api)",
+          "status": "없음",
+          "priority": "높음",
+          "note": ""
+        },
+        {
+          "item": "실기기 확인(iPad·휴대폰·Safari)",
+          "status": "없음",
+          "priority": "높음",
+          "note": ""
+        }
+      ]
+    }
+  ]
+}

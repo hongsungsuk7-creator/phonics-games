@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Little Detective</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<link rel="stylesheet" href="../_shared/kit.css">
+<style>
+  :root { --s1:#ffe48a; --s2:#f3c23a; --ss:#b48614; --st:#3a2a00; --ink:#1d2550; --b1:#ffd36a; --b2:#f0a500; --bs:#a86f00; --a1:#4f7bd9; --a2:#2c4fa8; --as:#1b3373; }
+  #stage { background: radial-gradient(ellipse at 30% 0%, #3a4a8a 0%, #1c2457 50%, #10153a 100%); }
+  .btn { color:#fff; } .btn:not(.alt):not(.green):not(.gold) { color:#4a3000; }
+  .rain i { position:absolute; width:1px; height:calc(var(--u)*3); background:rgba(180,200,255,.35); animation: rain 1.2s linear infinite; }
+  @keyframes rain { to { transform: translateY(calc(var(--u)*110)); } }
+  .desk { position:absolute; left:0; right:0; bottom:0; height:calc(var(--u)*26); background:linear-gradient(#7b4a2a,#5a331b); }
+  #scene { position:absolute; left:calc(var(--u)*30); top:calc(var(--u)*12); width:calc(var(--u)*90); height:calc(var(--u)*58); border-radius:calc(var(--u)*2); overflow:hidden;
+    background: radial-gradient(ellipse at 50% 40%, #1a2150, #0a0e2a); box-shadow:0 0 0 calc(var(--u)*.8) #3b4a8f, 0 calc(var(--u)*1.5) calc(var(--u)*3) rgba(0,0,0,.5); touch-action:none; cursor:none; }
+  #scene .stars { position:absolute; inset:0; background-image: radial-gradient(1px 1px at 20% 30%, #fff8, transparent), radial-gradient(1px 1px at 70% 20%, #fff8, transparent), radial-gradient(1px 1px at 40% 80%, #fff6, transparent), radial-gradient(1px 1px at 85% 65%, #fff6, transparent); }
+  .layer { position:absolute; left:0; top:0; width:calc(var(--u)*90); height:calc(var(--u)*58); background: radial-gradient(ellipse at 50% 45%, #fff6dc, #f3d9a6 70%, #d9b47a); }
+  .layer .obj { position:absolute; left:50%; top:46%; transform:translate(-50%,-50%); display:flex; align-items:center; justify-content:center; }
+  .layer .obj .emo { font-size:calc(var(--u)*34); } .layer .obj .itm { width:calc(var(--u)*36); height:calc(var(--u)*36); }
+  #lit { opacity:0; transition: opacity .8s; }
+  #lit.on { opacity:1; }
+  #lens { position:absolute; border-radius:50%; overflow:hidden; pointer-events:none; box-shadow:0 0 0 calc(var(--u)*1.2) #ffd36a, 0 0 0 calc(var(--u)*1.8) #8a5b00, 0 0 calc(var(--u)*4) rgba(255,220,120,.5); z-index:5; }
+  #lens .layer { transform-origin:0 0; }
+  #lens .handle { display:none; }
+  #lensHandle { position:absolute; width:calc(var(--u)*3); height:calc(var(--u)*12); background:linear-gradient(#8a5b00,#5a3a00); border-radius:calc(var(--u)*1.5); transform-origin:50% 0; transform:rotate(-40deg); pointer-events:none; z-index:4; }
+  .mark { position:absolute; transform:translate(-50%,-50%); font-size:calc(var(--u)*3.4); pointer-events:none; z-index:3; animation: twinkle 1.2s infinite; }
+  .mark.faint { opacity:.3; } .mark.glow { animation: bigglow .7s infinite; font-size:calc(var(--u)*5); opacity:1; }
+  @keyframes twinkle { 50% { opacity:.35; transform:translate(-50%,-50%) scale(.85);} }
+  @keyframes bigglow { 50% { transform:translate(-50%,-50%) scale(1.4); filter: drop-shadow(0 0 calc(var(--u)*2) #ffe27a);} }
+  .foot { position:absolute; transform:translate(-50%,-50%); font-size:calc(var(--u)*2.4); opacity:.55; pointer-events:none; z-index:2; }
+  .gain { position:absolute; width:calc(var(--u)*9); height:calc(var(--u)*9); border-radius:50%; border:calc(var(--u)*.6) solid #ffe27a; transform:translate(-50%,-50%) scale(.2); pointer-events:none; z-index:6; transition: transform .3s; }
+  #battery { position:absolute; left:calc(var(--u)*32); top:calc(var(--u)*13.5); width:calc(var(--u)*16); height:calc(var(--u)*3); border:2px solid #ffe27a; border-radius:4px; z-index:8; display:none; }
+  #battery i { display:block; height:100%; width:100%; background:#7be08a; transition: width linear; }
+  /* notebook */
+  #notebook { position:absolute; left:calc(var(--u)*124); top:calc(var(--u)*12); width:calc(var(--u)*50); height:calc(var(--u)*58); background:#fffbea; border-radius:calc(var(--u)*1.5);
+    box-shadow:inset calc(var(--u)*3) 0 0 #e9dfbd, 0 calc(var(--u)*1) calc(var(--u)*2) rgba(0,0,0,.4); padding:calc(var(--u)*2) calc(var(--u)*2) calc(var(--u)*2) calc(var(--u)*5);
+    background-image: repeating-linear-gradient(#fffbea 0 calc(var(--u)*4.6), #d9e3f5 calc(var(--u)*4.6) calc(var(--u)*4.8)); }
+  #notebook h4 { margin:0 0 calc(var(--u)*1) 0; font-size:calc(var(--u)*2.8); color:#2c4fa8; }
+  .cells { display:grid; grid-template-columns:1fr 1fr; gap:calc(var(--u)*1.6); }
+  .cell { position:relative; height:calc(var(--u)*20); border-radius:50%; border:calc(var(--u)*.4) dashed #b9c4e4; overflow:hidden; background:#f4f6ff; cursor:pointer; }
+  .cell .layer { transform-origin:0 0; }
+  .cell.got { border-style:solid; border-color:#ffd36a; }
+  .cell.txt { border-radius:calc(var(--u)*2); display:flex; align-items:center; justify-content:center; text-align:center; font-size:calc(var(--u)*2.4); padding:calc(var(--u)*1); background:#fff; }
+  .options { left:calc(var(--u)*30); right:calc(var(--u)*26); bottom:calc(var(--u)*3); height:calc(var(--u)*19); }
+  .options.locked .card { opacity:.55; }
+  #client { position:absolute; right:calc(var(--u)*2); bottom:calc(var(--u)*2); height:calc(var(--u)*22); z-index:20; transition: transform .4s; }
+  #clientNote { position:absolute; right:calc(var(--u)*14); bottom:calc(var(--u)*21); background:#fff; border-radius:calc(var(--u)*2); padding:calc(var(--u)*.6) calc(var(--u)*1.4); font-size:calc(var(--u)*2.4); z-index:21; }
+  #nextBtn { position:absolute; right:calc(var(--u)*3); top:calc(var(--u)*74); display:none; z-index:30; }
+  .tutor { left:calc(var(--u)*1); bottom:calc(var(--u)*24); height:calc(var(--u)*26); }
+  .bubble { top:calc(var(--u)*12); }
+  #found { position:absolute; left:calc(var(--u)*75); top:calc(var(--u)*61); transform:translateX(-50%); color:#fff; font-size:calc(var(--u)*4.6); text-shadow:0 2px 3px #000; z-index:9; opacity:0; transition:opacity .4s; }
+  #found.on { opacity:1; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="rain" id="rain"></div><div class="desk"></div>
+
+  <section class="screen on" id="title">
+    <div class="topbar"><div class="row"><button class="btn alt" id="keyBtn">🔑</button></div><div class="row"><button class="btn alt" id="langBtn">한국어</button><button class="btn alt sndBtn">🔊</button></div></div>
+    <div class="logo">Little Detective<small>꼬마 탐정 · 돋보기로 단서를 찾아 추리해요</small></div>
+    <img src="assets/piko_observant.png" style="position:absolute;left:calc(var(--u)*8);bottom:calc(var(--u)*4);height:calc(var(--u)*40)" alt="Piko">
+    <img src="assets/popo.png" style="position:absolute;right:calc(var(--u)*24);bottom:calc(var(--u)*3);height:calc(var(--u)*22)" alt="Popo">
+    <img src="assets/dudu.png" style="position:absolute;right:calc(var(--u)*6);bottom:calc(var(--u)*3);height:calc(var(--u)*20)" alt="Dudu">
+    <div class="coll" style="top:calc(var(--u)*14);right:calc(var(--u)*5)"><div class="k">🏅</div>Case Files<br><b id="collCount">0</b></div>
+    <div class="agebox">연령(보호자 설정) <button class="chip" data-age="5">5세</button><button class="chip" data-age="6">6세</button><button class="chip" data-age="7">7세</button></div>
+    <button class="btn start" id="startBtn">START</button>
+  </section>
+
+  <section class="screen" id="game">
+    <div class="topbar">
+      <div class="row"><div class="pill">⭐ <span id="starSum">0</span></div><div class="progress" id="progress"></div></div>
+      <div class="row"><div class="pill" id="lvPill">LEVEL 1</div><button class="btn alt" id="reQ">💬</button></div>
+      <div class="row"><button class="btn alt sndBtn">🔊</button><button class="btn" id="exitBtn">✕</button></div>
+    </div>
+    <div id="scene"><div class="stars"></div><div class="layer" id="lit"><div class="obj" id="litObj"></div></div><div id="marks"></div><div id="lens"></div><div id="lensHandle"></div></div>
+    <div id="battery"><i id="batt"></i></div>
+    <div id="found"></div>
+    <div id="notebook"><h4>🔍 Clue notebook</h4><div class="cells" id="cells"></div></div>
+    <div class="options locked" id="options" data-hide-on-speak></div>
+    <img id="client" src="assets/popo.png" alt=""><div id="clientNote" style="display:none"></div>
+    <img class="tutor" id="tutor" src="assets/piko_curious.png" alt="Piko">
+    <div class="bubble" id="bubble"></div>
+    <button class="btn gold big" id="nextBtn">Next ▶</button>
+  </section>
+
+  <section class="screen" id="result">
+    <div class="card-res"><h2 id="resTitle">Case Closed!</h2><div class="res-hero" id="resHero"></div><div class="bigstars" id="resStars"></div><div class="resmeta" id="resMeta"></div><div id="resLv"></div>
+      <div class="reswords" id="resWords"></div><div class="resmeta" id="resReward"></div>
+      <div class="resbtns"><button class="btn alt" id="homeBtn">🏠 Home</button><button class="btn" id="againBtn">↻ Again</button><button class="btn green" id="nextRoundBtn">Next ▶</button></div></div>
+  </section>
+</div>
+<script src="../_shared/kit.js"></script>
+<script>
+'use strict';
+const {$, sleep, rnd, shuffle} = KIT;
+(function(){ const r=$('rain'); for(let i=0;i<40;i++){ const e=document.createElement('i'); e.style.left=Math.random()*100+'%'; e.style.top=(-10-Math.random()*90)+'%'; e.style.animationDelay=Math.random()*1.2+'s'; r.appendChild(e);} })();
+KIT.L = {
+  hello:{en:"Hi, I'm Piko! Let's look a little closer.", ko:'안녕, 나는 피코야! 조금 더 가까이 들여다보자.'},
+  demo1:{en:'Move the magnifier to find clues.', ko:'돋보기를 움직여 단서를 찾아 봐.'},
+  demo2:{en:'Then guess what it is!', ko:'그다음 뭔지 맞혀 봐!'},
+  case:{en:'Something is hiding in the dark. What is it?', ko:'어둠 속에 뭔가 숨어 있어. 뭘까?'},
+  clue:{en:'A clue!', ko:'단서다!'},
+  first:{en:'Find a clue first!', ko:'먼저 단서를 찾아 봐!'},
+  battery:{en:'My flashlight is tired. Here are all the clues!', ko:'손전등이 지쳤어. 단서를 다 보여 줄게!'},
+  again:{en:'Hmm, not that one. Find more clues!', ko:'음, 그건 아니야. 단서를 더 찾아 봐!'},
+  hintGlow:{en:'Look over here!', ko:'여기를 봐!'},
+  ask:{en:'What is it?', ko:'이게 뭐지?'},
+  idle:{en:'Move the magnifier around!', ko:'돋보기를 움직여 봐!'},
+  great:{en:['Case closed!','Super detective!','You solved it!','You looked closer!'], ko:['사건 해결!','최고의 탐정!','풀었다!','자세히 봤구나!']},
+  clear:{en:'All cases closed. Great work, detective!', ko:'사건을 다 해결했어. 수고했어, 탐정!'},
+  levelUp:{en:'Level up! Fewer clues this time!', ko:'레벨 업! 이번엔 단서가 더 적어!'},
+};
+const FACE={listen:'curious', joy:'delighted', oops:'puzzled', look:'observant', neutral:'curious'};
+KIT.face=f=>{ $('tutor').src=`assets/piko_${FACE[f]||'curious'}.png`; if(f==='joy') KIT.anim($('tutor'),'bounce'); if(f==='oops') KIT.anim($('tutor'),'oops'); };
+
+/* ---------- data (TRD 5-2: clue spots + hint sentences; no m-words in hints) ---------- */
+const HINTS={
+  moon:['It is in the sky at night.','It is round.','It is yellow.'], map:['It shows the way.','It is made of paper.','It has roads and rivers.'],
+  milk:['It is white.','You can drink it.','It comes from a cow.'], mop:['It cleans the floor.','It has a long stick.','It gets wet.'],
+  mug:['You drink from it.','It has a handle.','It holds hot cocoa.'], mouse:['It is small and gray.','It has a long tail.','It likes cheese.'],
+  monkey:['It likes bananas.','It can climb trees.','It has a long tail.'], mushroom:['It grows in the forest.','It looks like a little umbrella.','It has white dots.'],
+  mask:['You wear it on your face.','It has two eye holes.','It is for a party.'], mail:['It comes in an envelope.','The postman brings it.','You open it and read it.'],
+  mitt:['You wear it on your hand.','It keeps your hand warm.','It has a thumb.'], mirror:['You can see yourself in it.','It is shiny.','It hangs on the wall.'],
+  man:['He is a grown-up.','He can be a dad.','He has a face and hair.'],
+};
+const ANSWERS=Object.keys(HINTS);
+const SHAPE={ round:['moon','mirror','mushroom','milk','mug'], long:['mop','map','mail'], living:['mouse','monkey','man','mice'], wear:['mask','mitt'] };
+const shapeOf=w=>Object.keys(SHAPE).find(k=>SHAPE[k].includes(w));
+// clue spots relative to the object centre (percent of scene), easiest first
+const CLUES=[[ -9,-14],[ 9,12],[ 10,-13],[ -10,12]];
+const LV={ 1:{clues:4,lens:32,opts:3,dist:'other',decoy:0,mark:'foot'}, 2:{clues:4,lens:30,opts:4,dist:'cat',decoy:0,mark:'spark'}, 3:{clues:3,lens:28,opts:4,dist:'cat',decoy:0,mark:'spark'},
+           4:{clues:3,lens:26,opts:5,dist:'shape',decoy:1,mark:'faint'}, 5:{clues:2,lens:24,opts:5,dist:'shape',decoy:1,mark:'faint'}, 6:{clues:2,lens:22,opts:6,dist:'shape+',decoy:2,mark:'none'} };
+const QCOUNT={5:5,6:6,7:8};
+const OBJ_Y=46;
+
+function makeCase(age, lv, used){
+  const P=LV[lv]; const w=rnd(ANSWERS.filter(a=>!used.has(a))) || rnd(ANSWERS); used.add(w); const ans=KIT.word(w);
+  const ban=new Set([w]); const out=[]; const add=it=>{ if(it && !ban.has(it.w) && !out.some(o=>o.w===it.w) && out.length<P.opts-1) out.push(it); };
+  if(P.dist==='other') shuffle(KIT.OTHER).forEach(add);
+  if(P.dist==='shape+') (KIT.CONFUSE[w]||[]).forEach(c=>add(KIT.word(c)));
+  if(P.dist.startsWith('shape')) shuffle(SHAPE[shapeOf(w)]||[]).forEach(c=>add(KIT.word(c)));
+  if(P.dist!=='other') shuffle(KIT.MWORDS.filter(m=>m.cat===ans.cat)).forEach(add);
+  shuffle(KIT.MWORDS.filter(m=>m.w!=='match')).forEach(add);
+  const textMode = age===7 && lv>=5;
+  return {age, lv, ans, options:shuffle([ans,...out]), clues:CLUES.slice(0,P.clues).map(([dx,dy],i)=>({i, x:50+dx, y:OBJ_Y+dy, hint:HINTS[w][i%3], got:false})), textMode,
+    phrase: age===5? w : age===6? `It's a ${w}.` : `It is a ${w}.`, keys:[w]};
+}
+
+/* ---------- lens (2x zoom) ---------- */
+const scene=$('scene'), lens=$('lens');
+const U=()=>KIT.u; const SW=()=>90*U(), SH=()=>58*U();
+let lx=0, ly=0;
+function layerHTML(obj){ return `<div class="layer"><div class="obj">${obj}</div></div>`; }
+function zoomInto(el, cx, cy, d){ const l=el.querySelector('.layer'); if(!l) return; l.style.transform=`translate(${d/2-2*cx}px, ${d/2-2*cy}px) scale(2)`; }
+function placeLens(x,y){ const d=LV[G.lv].lens*U(); lx=KIT.clamp(x,0,SW()); ly=KIT.clamp(y,0,SH()); lens.style.width=lens.style.height=d+'px'; lens.style.left=(lx-d/2)+'px'; lens.style.top=(ly-d/2)+'px';
+  const h=$('lensHandle'); h.style.left=(lx+d*0.33)+'px'; h.style.top=(ly+d*0.33)+'px'; if(!G.p.textMode) zoomInto(lens,lx,ly,d); }
+let dwell=null;
+function onLensMove(){ if(!G||!G.accepting) return; const p=G.p; const sx=lx/SW()*100, sy=ly/SH()*100;
+  const c=p.clues.find(c=>!c.got && Math.hypot((c.x-sx)*1.55, c.y-sy)<9);
+  if(c){ if(!dwell||dwell.c!==c){ clearTimeout(dwell?.t); dwell={c, t:setTimeout(()=>gainClue(c),1000)}; } }
+  else if(dwell){ clearTimeout(dwell.t); dwell=null; } }
+let dragging=false;
+scene.addEventListener('pointerdown',e=>{ if(!G||!G.accepting) return; dragging=true; scene.setPointerCapture(e.pointerId); moveFromEvent(e); touched(); });
+scene.addEventListener('pointermove',e=>{ if(!G||!G.accepting) return; if(e.pointerType==='mouse'||dragging) moveFromEvent(e); });
+scene.addEventListener('pointerup',()=>dragging=false); scene.addEventListener('pointercancel',()=>dragging=false);
+function moveFromEvent(e){ const r=scene.getBoundingClientRect(); const lift = e.pointerType==='touch' ? 10*U() : 0; placeLens(e.clientX-r.left, e.clientY-r.top-lift); onLensMove(); }
+addEventListener('keydown',e=>{ if(!G||!G.accepting) return; const st=(e.shiftKey?6:2.5)*U(); const m={ArrowLeft:[-st,0],ArrowRight:[st,0],ArrowUp:[0,-st],ArrowDown:[0,st]}[e.key];
+  if(m){ e.preventDefault(); placeLens(lx+m[0],ly+m[1]); onLensMove(); touched(); } const n=parseInt(e.key); if(n>=1&&n<=6){ const c=$('options').querySelectorAll('.card')[n-1]; c&&c.click(); } });
+
+async function gainClue(c){
+  if(!G||!G.accepting||c.got) return; c.got=true; G.cluesUsed++; KIT.sfx.star(); KIT.face('look'); const me=G;
+  const g=document.createElement('div'); g.className='gain'; g.style.left=c.x+'%'; g.style.top=c.y+'%'; scene.appendChild(g); requestAnimationFrame(()=>g.style.transform='translate(-50%,-50%) scale(1.3)'); setTimeout(()=>g.remove(),600);
+  document.querySelectorAll(`.mark[data-c="${c.i}"]`).forEach(m=>m.remove());
+  fillCell(c); $('options').classList.remove('locked');
+  if(G.age>=6){ await KIT.sayLine(c.hint); } else { await KIT.tutor('clue',{noEn:true}); }
+  if(G===me) KIT.face('listen');
+}
+function fillCell(c){ const cell=$('cells').children[c.i]; if(!cell) return; cell.classList.add('got');
+  if(G.p.textMode || (G.age>=6 && false)){ cell.classList.add('txt'); cell.textContent=c.hint; return; }
+  const d=cell.clientHeight; cell.innerHTML=layerHTML(KIT.pic(G.p.ans)); const sx=c.x/100*SW(), sy=c.y/100*SH(); zoomInto(cell, sx*(d/ (LV[G.lv].lens*U())) , sy*(d/(LV[G.lv].lens*U())), d);
+  // simpler & exact: scale relative to cell size so the clue point sits in the centre at 2x
+  const l=cell.querySelector('.layer'); l.style.transform=`translate(${d/2-2*sx}px, ${d/2-2*sy}px) scale(2)`;
+  cell.onclick=()=>{ if(G.age>=6) KIT.say(c.hint); }; }
+
+/* ---------- flow ---------- */
+let G=null;
+function touched(){ if(!G) return; G.interacted=true; KIT.clearIdle(); KIT.armIdle(idle); }
+async function idle(){ if(!G||!G.accepting) return; await KIT.tutor('idle'); KIT.showHand(scene); }
+async function startRound(){
+  const age=KIT.SAVE.age, lv=KIT.levelFor(age); G={age, lv, total:QCOUNT[age], idx:0, stars:[], words:[], used:new Set(), solved1:0}; const me=G;
+  $('lvPill').textContent=`LEVEL ${lv} · ${age}세`; KIT.show('game'); KIT.renderProgress(G);
+  if(KIT.demoNeeded()) await runDemo(); if(G!==me) return; nextCase();
+}
+function setupScene(p){
+  $('lit').classList.remove('on'); $('litObj').innerHTML = p.textMode? '' : KIT.pic(p.ans); $('found').classList.remove('on');
+  lens.innerHTML = p.textMode? '<div class="layer" style="background:radial-gradient(#3a4a8a,#1c2457)"></div>' : layerHTML(KIT.pic(p.ans));
+  const marks=$('marks'); marks.innerHTML=''; const P=LV[G.lv];
+  p.clues.forEach(c=>{ if(P.mark==='foot'){ const m=document.createElement('div'); m.className='mark'; m.dataset.c=c.i; m.textContent='✨'; m.style.left=c.x+'%'; m.style.top=c.y+'%'; marks.appendChild(m); }
+    else if(P.mark!=='none'){ const m=document.createElement('div'); m.className='mark'+(P.mark==='faint'?' faint':''); m.dataset.c=c.i; m.textContent='✨'; m.style.left=c.x+'%'; m.style.top=c.y+'%'; marks.appendChild(m); } });
+  if(P.mark==='foot'){ for(let i=0;i<7;i++){ const f=document.createElement('div'); f.className='foot'; f.textContent='👣'; f.style.left=(8+i*6)+'%'; f.style.top=(84-i*4)+'%'; marks.appendChild(f); } }
+  for(let i=0;i<P.decoy;i++){ const m=document.createElement('div'); m.className='mark'+(P.mark==='faint'?' faint':''); m.textContent='✨'; const left=Math.random()<.5; m.style.left=(left? 8+Math.random()*12 : 80+Math.random()*12)+'%'; m.style.top=(15+Math.random()*70)+'%'; marks.appendChild(m); }
+  const cells=$('cells'); cells.innerHTML=''; p.clues.forEach(()=>{ const c=document.createElement('div'); c.className='cell'+(p.textMode?' txt':''); if(p.textMode) c.textContent='?'; cells.appendChild(c); });
+  placeLens(SW()*0.12, SH()*0.8);
+}
+async function nextCase(){
+  if(G.idx>=G.total) return finish();
+  const me=G; $('nextBtn').style.display='none'; const p=G.p=makeCase(G.age,G.lv,G.used); G.wrong=0; G.cluesUsed=0; G.interacted=false; G.accepting=false;
+  KIT.renderProgress(G); setupScene(p); $('options').classList.add('locked'); $('options').innerHTML='';
+  const client=rnd(['popo','dudu']); $('client').src=`assets/${client}.png`; const note=$('clientNote'); note.textContent='Help! 🆘'; note.style.display='block';
+  await KIT.tutor('case',{keep:true, face:'listen'}); if(G!==me) return;
+  note.style.display='none'; G.accepting=true;
+  KIT.cards($('options'), p.options, {onPick, label:G.age===7, read:false});
+  KIT.armIdle(idle);
+  if(p.textMode){ const b=$('battery'), bi=$('batt'); b.style.display='block'; bi.style.transition='none'; bi.style.width='100%'; void bi.offsetWidth; bi.style.transition='width 25s linear'; bi.style.width='0%';
+    G.battT=setTimeout(async()=>{ if(G!==me||!G.accepting) return; await KIT.tutor('battery'); p.clues.forEach(c=>{ if(!c.got){ c.got=true; fillCell(c); } }); $('options').classList.remove('locked'); },25000); }
+  else $('battery').style.display='none';
+}
+async function onPick(card, it){
+  if(!G||!G.accepting) return; touched();
+  if(!G.p.clues.some(c=>c.got)){ KIT.anim(card,'shake'); await KIT.tutor('first'); return; }
+  if(it.w===G.p.ans.w) return success(card);
+  const me=G; G.wrong++; KIT.sfx.bad(); KIT.anim(card,'shake'); KIT.face('oops');
+  if(G.wrong===1) await KIT.tutor('again');
+  else if(G.wrong===2){ await KIT.tutor('hintGlow'); if(G!==me) return; const c=G.p.clues.find(c=>!c.got);
+    if(c){ const m=document.createElement('div'); m.className='mark glow'; m.dataset.c=c.i; m.textContent='✨'; m.style.left=c.x+'%'; m.style.top=c.y+'%'; $('marks').appendChild(m); }
+    else { const bad=[...$('options').querySelectorAll('.card')].find(x=>x.dataset.k!==G.p.ans.w && !x.classList.contains('dim')); bad&&bad.classList.add('dim'); } }
+  else { G.accepting=false; KIT.clearIdle(); clearTimeout(G.battT); await revealObj(); if(G!==me) return; KIT.cardBy($('options'),G.p.ans.w)?.classList.add('ok'); await KIT.say(G.p.ans.w); record(0,false); $('nextBtn').style.display='block'; }
+}
+async function revealObj(){ const p=G.p; $('litObj').innerHTML=KIT.pic(p.ans); $('lit').classList.add('on'); lens.style.opacity=0; $('lensHandle').style.opacity=0; $('marks').innerHTML='';
+  $('found').textContent=p.ans.w; $('found').classList.add('on'); await sleep(700); }
+async function success(card){
+  const me=G; G.accepting=false; KIT.clearIdle(); clearTimeout(G.battT); card.classList.add('ok'); KIT.sfx.ok(); KIT.face('joy'); if(G.cluesUsed===1) G.solved1++;
+  await revealObj(); if(G!==me) return; KIT.anim($('client'),'bounce');
+  const star=1+(G.wrong===0?1:0); const g=KIT.line('great'); KIT.bubble(g.t+(g.lang==='ko'?`<span class="en">${g.en}</span>`:'')); await KIT.say(g.t,g.lang); if(G!==me) return;
+  await KIT.tutor('ask',{keep:true}); if(G!==me) return;
+  const spoke=await KIT.speak({phrase:G.p.phrase, keys:G.p.keys, isAlive:()=>G===me}); if(G!==me) return;
+  record(star+(spoke?1:0), spoke); KIT.sfx.star(); $('nextBtn').style.display='block';
+}
+function record(s,spoke){ G.stars[G.idx]=s; G.words.push({text:`${G.p.ans.e} ${G.p.ans.w}`, phrase:G.p.phrase, stars:s, spoke}); KIT.renderProgress(G); }
+$('nextBtn').onclick=()=>{ lens.style.opacity=1; $('lensHandle').style.opacity=1; G.idx++; nextCase(); };
+$('reQ').onclick=()=>{ if(G) KIT.tutor('case'); };
+
+async function runDemo(){
+  KIT.demoStart(); const me=G; G.lv=1; G.p=makeCase(5,1,new Set(['map','mop','mail','mug','milk','mouse','monkey','mushroom','mask','mitt','mirror','man'])); setupScene(G.p);
+  $('options').innerHTML=''; G.accepting=false;
+  const steps=[ async()=>KIT.tutor('demo1',{keep:true}),
+    async()=>{ const c=G.p.clues[0]; for(let t=0;t<=20;t++){ placeLens(SW()*(0.12+(c.x/100-0.12)*t/20), SH()*(0.8+(c.y/100-0.8)*t/20)); await sleep(40); } KIT.showHand(lens,true); G.accepting=true; G.cluesUsed=0; await gainClue(c); G.accepting=false; },
+    async()=>{ await KIT.tutor('demo2',{keep:true}); await KIT.cards($('options'), G.p.options, {read:false}); const card=KIT.cardBy($('options'),G.p.ans.w); KIT.showHand(card,true); await sleep(900); card.classList.add('ok'); KIT.sfx.ok(); await revealObj(); await KIT.say(G.p.ans.w); },
+    async()=>{ KIT.hideHand(); await KIT.tutor('demoEnd',{keep:true}); } ];
+  for(const s of steps){ if(KIT.skipDemo||G!==me) break; await s(); }
+  KIT.demoEnd(); if(G){ G.lv=KIT.levelFor(G.age); lens.style.opacity=1; $('lensHandle').style.opacity=1; }
+}
+async function finish(){ KIT.clearIdle(); await KIT.result(G,{title:'Case Closed!', heroHtml:'<img src="assets/piko_delighted.png"><img src="assets/popo.png"><img src="assets/dudu.png">', icon:'🏅', unit:'탐정 배지', collName:'Case Files', per:10}); }
+KIT.init({prefix:'ld', onStart:startRound, onExit:()=>{ if(G) clearTimeout(G.battT); G=null; }});
+window.__ld=()=>G;
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phonics Games</title>
+<meta name="description" content="FPR K · 파닉스 게임 모음 — 교사·기획자·QA용 게임 런처">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%88%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-row">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">🎈</span>
+      <div><h1>Phonics Games</h1><p class="sub">FPR K · 파닉스 게임 모음</p></div>
+    </div>
+    <!-- 우측 상단: 화면 전환 탭 + 테마 -->
+    <nav class="top-right no-print" aria-label="화면 전환">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" id="tab-games" aria-controls="panel-games" aria-selected="true" data-tab="games">🎮 게임</button>
+        <button class="tab" role="tab" id="tab-check" aria-controls="panel-check" aria-selected="false" data-tab="check">✅ 점검표 <span class="count" id="checkBadge"></span></button>
+      </div>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="화면 테마 바꾸기">🌙</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="notice" id="loadError" hidden></p>
+
+  <!-- ===== 게임 탭 ===== -->
+  <section class="panel" id="panel-games" role="tabpanel" aria-labelledby="tab-games">
+    <section aria-labelledby="allTitle">
+      <div class="sec-head">
+        <h2 id="allTitle">모든 게임 <small id="allCount"></small></h2>
+        <label class="search" title="키보드 / 키를 누르면 바로 검색할 수 있어요">
+          <span class="sr-only">게임 이름으로 찾기</span>
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+          <input type="search" id="search" placeholder="게임 이름으로 찾기 (예: Maze, 탐정)" autocomplete="off">
+        </label>
+      </div>
+      <div class="chips" id="typeChips" role="group" aria-label="게임 유형 필터"></div>
+      <div class="grid" id="grid"></div>
+      <p class="empty" id="gridEmpty" hidden></p>
+    </section>
+  </section>
+
+  <!-- ===== 점검표 탭 ===== -->
+  <section class="panel check" id="panel-check" role="tabpanel" aria-labelledby="tab-check" hidden>
+    <div class="sec-head">
+      <h2>게임 점검표 · 보완 목록</h2>
+      <div class="actions no-print">
+        <button class="btn primary" id="copyBtn" type="button">📋 고른 항목 복사 <span id="selCount"></span></button>
+        <button class="btn line" id="printBtn" type="button">🖨️ 인쇄 · PDF</button>
+      </div>
+    </div>
+    <div class="filters no-print">
+      <div><span class="flabel">게임</span><div class="chips small" id="gameChips" role="group" aria-label="게임 필터"></div></div>
+      <div><span class="flabel">상태</span><div class="chips small" id="statusChips" role="group" aria-label="상태 필터"></div></div>
+      <div><span class="flabel">우선순위</span><div class="chips small" id="prioChips" role="group" aria-label="우선순위 필터"></div></div>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr>
+          <th class="no-print"><input type="checkbox" id="checkAll" aria-label="보이는 항목 모두 고르기"></th>
+          <th>게임</th><th>점검 항목</th><th>상태</th><th>우선순위</th><th>메모</th>
+        </tr></thead>
+        <tbody id="checkBody"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="checkEmpty" hidden>조건에 맞는 항목이 없어요.</p>
+    <p class="print-meta" id="printMeta"></p>
+  </section>
+</main>
+
+<footer class="wrap site-footer no-print">
+  게임 목록은 <code>games.json</code>, 기획 문서(TRD)는 <code>trd/</code> 폴더에서 불러옵니다. 게임 화면은 새 탭에서 열립니다.
+</footer>
+
+<!-- ===== TRD 보기 (개발자·기획자용) ===== -->
+<div class="reader" id="reader" hidden>
+  <div class="reader-card" role="dialog" aria-modal="true" aria-labelledby="rTitle">
+    <aside class="reader-side">
+      <img id="rImg" alt="">
+      <h2 id="rTitle"></h2>
+      <p class="rko" id="rKo"></p>
+      <div class="rlinks">
+        <a class="btn primary sm" id="rPlay" target="_blank" rel="noopener">▶ 플레이</a>
+        <button class="btn line sm" id="rPrint" type="button">🖨️ 인쇄 · PDF</button>
+      </div>
+      <nav class="toc" id="rToc" aria-label="TRD 목차"></nav>
+    </aside>
+    <article class="reader-body md" id="rBody" tabindex="0"></article>
+    <button class="close" id="rClose" type="button" aria-label="닫기">✕</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Maze Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<link rel="stylesheet" href="../_shared/kit.css">
+<style>
+  :root { --s1:#ffd089; --s2:#f4a043; --ss:#b46a1d; --st:#4a2605; --ink:#1f3324; --b1:#ffb347; --b2:#f08a1c; --bs:#a85a00; --a1:#4cb47a; --a2:#2c8a55; --as:#1b5e38; }
+  #stage { background: radial-gradient(ellipse at 50% 120%, #9fdc8a 0%, #57b06a 45%, #2f7a4c 100%); }
+  .leaf { position:absolute; font-size:calc(var(--u)*9); opacity:.55; }
+  #maze { position:absolute; left:calc(var(--u)*30); top:calc(var(--u)*12); width:calc(var(--u)*74); height:calc(var(--u)*74); background:#e9d3a2; border-radius:calc(var(--u)*1.5);
+    box-shadow:0 0 0 calc(var(--u)*1.2) #2c6b3f, 0 calc(var(--u)*1.5) calc(var(--u)*3) rgba(0,0,0,.35); touch-action:none; }
+  .cell { position:absolute; box-sizing:border-box; }
+  .cell.wT { border-top:calc(var(--u)*1.1) solid #3f8a4c; } .cell.wL { border-left:calc(var(--u)*1.1) solid #3f8a4c; }
+  .cell.wB { border-bottom:calc(var(--u)*1.1) solid #3f8a4c; } .cell.wR { border-right:calc(var(--u)*1.1) solid #3f8a4c; }
+  .tok { position:absolute; display:flex; align-items:center; justify-content:center; pointer-events:none; transform:translate(-50%,-50%); }
+  .tok.item .emo { font-size:inherit; } .tok.item .itm { width:100%; height:100%; }
+  .tok.item.got { opacity:0; transform:translate(-50%,-90%) scale(.3); transition: all .3s; }
+  .tok.foot { opacity:.8; animation: fp 1s infinite; } @keyframes fp { 50% { opacity:.3; } }
+  #bobo { position:absolute; transform:translate(-50%,-62%); transition: left .16s linear, top .16s linear; z-index:6; pointer-events:none; }
+  #bobo.bump { animation: bump .35s; } @keyframes bump { 30% { margin-left:calc(var(--u)*1.5); } 70% { margin-left:calc(var(--u)*-1.5); } }
+  #gate { position:absolute; transform:translate(-50%,-55%); z-index:5; transition: transform .6s, opacity .6s; pointer-events:none; }
+  #gate.open { transform:translate(10%,-55%) scale(.6); opacity:.35; }
+  #path { position:absolute; inset:0; pointer-events:none; z-index:4; }
+  .cell.err { background:rgba(255,140,60,.35); }
+  /* right panel */
+  #panel { position:absolute; left:calc(var(--u)*108); top:calc(var(--u)*12); width:calc(var(--u)*66); }
+  #mission { background:#fffdf3; border-radius:calc(var(--u)*2.5); padding:calc(var(--u)*1.4) calc(var(--u)*2); box-shadow:0 calc(var(--u)*.6) calc(var(--u)*1.4) rgba(0,0,0,.25); }
+  #mission .t { font-size:calc(var(--u)*2.4); color:#5a6b4a; }
+  #mission .list { display:flex; gap:calc(var(--u)*1.6); align-items:center; margin-top:calc(var(--u)*.6); min-height:calc(var(--u)*8); }
+  .mi { position:relative; width:calc(var(--u)*8); height:calc(var(--u)*8); border-radius:calc(var(--u)*1.6); background:#f3ead1; display:flex; align-items:center; justify-content:center; }
+  .mi .emo { font-size:calc(var(--u)*6); } .mi.got { background:#c9f0c2; } .mi.got::after { content:"✔"; position:absolute; right:calc(var(--u)*-.6); top:calc(var(--u)*-1); color:#2fb457; font-size:calc(var(--u)*3.2); }
+  .mi .n { position:absolute; left:calc(var(--u)*-.8); top:calc(var(--u)*-.8); width:calc(var(--u)*3.4); height:calc(var(--u)*3.4); border-radius:50%; background:#ffb347; color:#5a3300; font-size:calc(var(--u)*2.2); display:flex; align-items:center; justify-content:center; }
+  #mission button { border:none; background:#eaf6ea; border-radius:calc(var(--u)*2); padding:calc(var(--u)*.4) calc(var(--u)*1.4); font-size:calc(var(--u)*2.2); font-family:inherit; cursor:pointer; }
+  #coder { margin-top:calc(var(--u)*2); display:none; }
+  #coder.on { display:block; }
+  #prog { display:flex; flex-wrap:wrap; gap:calc(var(--u)*.8); background:rgba(255,255,255,.8); border-radius:calc(var(--u)*2); padding:calc(var(--u)*1); min-height:calc(var(--u)*20); align-content:flex-start; }
+  .slotc { width:calc(var(--u)*8.6); height:calc(var(--u)*8.6); border-radius:calc(var(--u)*1.6); border:calc(var(--u)*.4) dashed #9fbf9f; display:flex; align-items:center; justify-content:center; font-size:calc(var(--u)*3.6); }
+  .slotc.cmd { border:none; background:#2c8a55; color:#fff; cursor:pointer; box-shadow:0 calc(var(--u)*.5) 0 #1b5e38; }
+  .slotc.cmd small { font-size:calc(var(--u)*2.6); margin-left:2px; }
+  .slotc.run { outline:calc(var(--u)*.6) solid #ffd24d; } .slotc.bad { background:#ff9a3c; }
+  #palette { display:flex; gap:calc(var(--u)*1.2); margin-top:calc(var(--u)*1.4); align-items:center; }
+  #palette button { width:calc(var(--u)*10); height:calc(var(--u)*10); border:none; border-radius:calc(var(--u)*2); background:#fff; font-size:calc(var(--u)*5); cursor:pointer; box-shadow:0 calc(var(--u)*.6) 0 #9fbf9f; font-family:inherit; }
+  #palette .go { width:calc(var(--u)*14); background:linear-gradient(#7be08a,#2fb457); color:#fff; font-size:calc(var(--u)*4); }
+  #drawTools { margin-top:calc(var(--u)*2); display:none; gap:calc(var(--u)*1.5); }
+  #drawTools.on { display:flex; }
+  #nextBtn { position:absolute; right:calc(var(--u)*4); bottom:calc(var(--u)*6); display:none; z-index:30; }
+  .tutor { left:calc(var(--u)*0); bottom:calc(var(--u)*3); height:calc(var(--u)*30); }
+  .bubble { top:calc(var(--u)*13); }
+  .mic { left:calc(var(--u)*106); right:calc(var(--u)*2); bottom:calc(var(--u)*4); flex-wrap:wrap; height:calc(var(--u)*30); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <span class="leaf" style="left:2%;top:4%">🌿</span><span class="leaf" style="right:2%;top:60%">🌴</span><span class="leaf" style="left:20%;bottom:2%">🌱</span>
+  <section class="screen on" id="title">
+    <div class="topbar"><div class="row"><button class="btn alt" id="keyBtn">🔑</button></div><div class="row"><button class="btn alt" id="langBtn">한국어</button><button class="btn alt sndBtn">🔊</button></div></div>
+    <div class="logo">Maze Quest<small>메이즈 퀘스트 · 길을 찾아 보물을 모아요</small></div>
+    <img src="assets/bobo_body.png" style="position:absolute;left:calc(var(--u)*8);bottom:calc(var(--u)*4);height:calc(var(--u)*42)" alt="Bobo">
+    <div style="position:absolute;right:calc(var(--u)*4);bottom:calc(var(--u)*4);display:flex;align-items:flex-end;gap:calc(var(--u)*1)">
+      <img src="assets/sb_stretch.png" style="height:calc(var(--u)*18)"><img src="assets/sb_roll.png" style="height:calc(var(--u)*10)"><img src="assets/sb_fold.png" style="height:calc(var(--u)*16)"><img src="assets/sb_expand.png" style="height:calc(var(--u)*11)"></div>
+    <div class="coll"><div class="k">🗺️</div>Island Map<br><b id="collCount">0</b></div>
+    <div class="agebox">연령(보호자 설정) <button class="chip" data-age="5">5세</button><button class="chip" data-age="6">6세</button><button class="chip" data-age="7">7세</button></div>
+    <button class="btn start" id="startBtn">START</button>
+  </section>
+
+  <section class="screen" id="game">
+    <div class="topbar">
+      <div class="row"><div class="pill">⭐ <span id="starSum">0</span></div><div class="progress" id="progress"></div></div>
+      <div class="row"><div class="pill" id="lvPill">LEVEL 1</div><button class="btn alt" id="reQ">💬</button></div>
+      <div class="row"><button class="btn alt sndBtn">🔊</button><button class="btn" id="exitBtn">✕</button></div>
+    </div>
+    <div id="maze"></div>
+    <div id="panel">
+      <div id="mission" data-hide-on-speak><div class="t">🎯 Mission</div><div class="list" id="mlist"></div><button id="mSay">🔊 mission</button></div>
+      <div id="drawTools" data-hide-on-speak><button class="btn alt" id="eraseBtn">↶ 지우개</button></div>
+      <div id="coder" data-hide-on-speak><div id="prog"></div>
+        <div id="palette"><button data-c="U">↑</button><button data-c="D">↓</button><button data-c="L">←</button><button data-c="R">→</button><button data-c="del">⌫</button><button class="go" data-c="go">GO</button></div></div>
+    </div>
+    <img class="tutor" id="tutor" src="assets/bobo_neutral.png" alt="Bobo">
+    <div class="bubble" id="bubble"></div>
+    <button class="btn gold big" id="nextBtn">Next ▶</button>
+  </section>
+
+  <section class="screen" id="result">
+    <div class="card-res"><h2 id="resTitle">Treasure!</h2><div class="res-hero" id="resHero"></div><div class="bigstars" id="resStars"></div><div class="resmeta" id="resMeta"></div><div id="resLv"></div>
+      <div class="reswords" id="resWords"></div><div class="resmeta" id="resReward"></div>
+      <div class="resbtns"><button class="btn alt" id="homeBtn">🏠 Home</button><button class="btn" id="againBtn">↻ Again</button><button class="btn green" id="nextRoundBtn">Next ▶</button></div></div>
+  </section>
+</div>
+<script src="../_shared/kit.js"></script>
+<script>
+'use strict';
+const {$, sleep, rnd, shuffle} = KIT;
+KIT.L = {
+  hello:{en:"Hi! I'm Bobo. Let's go on a quest!", ko:'안녕! 나는 보보야. 탐험을 떠나자!'},
+  demoDraw:{en:'Draw a line to the treasure.', ko:'보물까지 선을 그어 봐.'},
+  demoCode:{en:'Put the arrow cards in order. Then tap GO!', ko:'화살표 카드를 순서대로 놓고 GO를 눌러!'},
+  bump:{en:"Oops! Let's try another way.", ko:'앗! 다른 길로 가 보자.'},
+  hint:{en:'Follow my footprints.', ko:'내 발자국을 따라와.'},
+  show:{en:'Let me show you the way.', ko:'내가 길을 보여 줄게.'},
+  key:{en:'Get the key! Then the blocks will move.', ko:'열쇠를 가져와! 그러면 블록 친구가 비켜 줄 거야.'},
+  keyGot:{en:'The blocks moved!', ko:'블록 친구가 비켜 줬어!'},
+  notAll:{en:'We need all the things first!', ko:'물건을 먼저 다 모아야 해!'},
+  idle:{en:'Draw a path for me!', ko:'나에게 길을 그려 줘!'},
+  idle7:{en:'Put arrow cards and tap GO!', ko:'화살표 카드를 놓고 GO를 눌러!'},
+  great:{en:['Treasure!','You found the way!','Great navigator!','Hooray!'], ko:['보물이다!','길을 찾았어!','최고의 길잡이!','만세!']},
+  clear:{en:'Look! A new part of the island!', ko:'봐! 섬의 새로운 곳이 나타났어!'},
+  levelUp:{en:'Level up! Bigger mazes ahead!', ko:'레벨 업! 더 큰 미로가 기다려!'},
+};
+const FACE={listen:'neutral', joy:'joy', oops:'surprise', neutral:'neutral'};
+KIT.face=f=>{ $('tutor').src=`assets/bobo_${FACE[f]||'neutral'}.png`; if(f==='joy') KIT.anim($('tutor'),'bounce'); if(f==='oops') KIT.anim($('tutor'),'oops'); };
+
+/* ---------- level table (TRD 6-2) ---------- */
+const LV={ 1:{n:4,dis:0,gate:false,slots:4,chip:1}, 2:{n:5,dis:0,gate:false,slots:5,chip:2}, 3:{n:5,dis:1,gate:false,slots:6,chip:3},
+           4:{n:6,dis:2,gate:false,slots:8,chip:3}, 5:{n:7,dis:2,gate:true,slots:10,chip:4}, 6:{n:7,dis:3,gate:true,slots:12,chip:4} };
+const QCOUNT={5:5,6:5,7:5};
+const POOL=['moon','map','milk','mop','mug','mitt','mask','mushroom','mirror','monkey','mail'];
+const DIR={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]}; const ARROW={U:'↑',D:'↓',L:'←',R:'→'}; const WORDDIR={U:'up',D:'down',L:'left',R:'right'};
+
+/* ---------- maze generation (perfect maze; always solvable) ---------- */
+function genMaze(n){
+  const w=Array.from({length:n},()=>Array.from({length:n},()=>({T:1,B:1,L:1,R:1})));
+  const seen=new Set(), st=[[0,n-1]]; seen.add('0,'+(n-1));
+  while(st.length){ const [x,y]=st[st.length-1]; const nb=shuffle(Object.entries({T:[0,-1,'B'],B:[0,1,'T'],L:[-1,0,'R'],R:[1,0,'L']})).filter(([d,[dx,dy]])=>{ const nx=x+dx, ny=y+dy; return nx>=0&&ny>=0&&nx<n&&ny<n&&!seen.has(nx+','+ny); });
+    if(!nb.length){ st.pop(); continue; } const [d,[dx,dy,od]]=nb[0]; w[y][x][d]=0; w[y+dy][x+dx][od]=0; seen.add((x+dx)+','+(y+dy)); st.push([x+dx,y+dy]); }
+  return w;
+}
+function canMove(m, x, y, d, gateOpen){ const n=m.n; const [dx,dy]=DIR[d]; const nx=x+dx, ny=y+dy; if(nx<0||ny<0||nx>=n||ny>=n) return false;
+  const side={U:'T',D:'B',L:'L',R:'R'}[d]; if(m.w[y][x][side]) return false; if(m.gate && !gateOpen && nx===m.gate.x && ny===m.gate.y) return false; return true; }
+function bfs(m, from, to, gateOpen){ const n=m.n, prev={}, q=[from], k=c=>c[0]+','+c[1]; prev[k(from)]=null;
+  while(q.length){ const c=q.shift(); if(c[0]===to[0]&&c[1]===to[1]) break; for(const d of 'UDLR'){ if(!canMove(m,c[0],c[1],d,gateOpen)) continue; const nc=[c[0]+DIR[d][0], c[1]+DIR[d][1]]; if(!(k(nc) in prev)){ prev[k(nc)]=c; q.push(nc); } } }
+  if(!(k(to) in prev)) return null; const path=[]; let c=to; while(c){ path.unshift(c); c=prev[k(c)]; } return path; }
+
+/* an ordered mission must be solvable: the way to each stop may not cross a later mission item (TRD 4-1) */
+function orderOK(m){ if(!m.ordered) return true; const cells=m.mission.map(i=>[i.x,i.y]); let cur=m.start;
+  const stops=[]; if(m.key) stops.push([m.key.x,m.key.y]); cells.forEach(c=>stops.push(c)); stops.push(m.goal);
+  let gateOpen=false;
+  for(const s of stops){ const seg=bfs(m,cur,s,gateOpen); if(!seg) return false;
+    const later=cells.filter(c=>!stops.slice(0,stops.indexOf(s)+1).some(t=>t[0]===c[0]&&t[1]===c[1]));
+    if(seg.slice(1).some(c=>later.some(l=>l[0]===c[0]&&l[1]===c[1]))) return false;
+    if(m.key && s[0]===m.key.x && s[1]===m.key.y) gateOpen=true; cur=s; }
+  return true; }
+function makeLevel(age, lv){
+  for(let t=0;t<80;t++){ const m=makeLevelOnce(age,lv); if(orderOK(m)) return m; }
+  const m=makeLevelOnce(age,lv); m.ordered=false; return m;   // fallback: never hand out an unsolvable order
+}
+function makeLevelOnce(age, lv){
+  const P=LV[lv]; const n=P.n; const m={n, w:genMaze(n), start:[0,n-1], goal:[n-1,0]};
+  const missionN = age===5? 1 : (lv<=3? 2 : 3); const ordered = (age===6 && lv>=4) || age===7;
+  const free=[]; for(let y=0;y<n;y++) for(let x=0;x<n;x++){ if((x===0&&y===n-1)||(x===n-1&&y===0)) continue; free.push([x,y]); }
+  let cells=shuffle(free);
+  if(P.gate){ const sol=bfs(m,m.start,m.goal,true); const mid=sol[Math.floor(sol.length/2)]; m.gate={x:mid[0],y:mid[1]};
+    const reach=[]; for(const c of free){ if(c[0]===m.gate.x&&c[1]===m.gate.y) continue; if(bfs(m,m.start,c,false)) reach.push(c); }
+    const kc=rnd(reach.filter(c=>!(c[0]===m.start[0]&&c[1]===m.start[1]))); m.key={x:kc[0],y:kc[1]}; cells=cells.filter(c=>!(c[0]===kc[0]&&c[1]===kc[1])&&!(c[0]===m.gate.x&&c[1]===m.gate.y)); }
+  const words=shuffle(POOL); m.mission=words.slice(0,missionN).map((w,i)=>({w, x:cells[i][0], y:cells[i][1], got:false}));
+  m.dis=words.slice(missionN, missionN+P.dis).map((w,i)=>({w, x:cells[missionN+i][0], y:cells[missionN+i][1], got:false}));
+  m.ordered=ordered; m.age=age; m.lv=lv;
+  const W=m.mission.map(i=>i.w);
+  m.missionText = age===5? `Get the ${W[0]}!` : ordered? `First get the ${W[0]}. Then get the ${W[1]}.${W[2]?` Then get the ${W[2]}.`:''}` : `Get the ${W.slice(0,-1).join(', the ')} and the ${W[W.length-1]}.`;
+  m.phrase = age===5? W[0] : age===6? `I got the ${W.slice(0,-1).join(', the ')} and the ${W[W.length-1]}.` : `First the ${W[0]}, then the ${W.slice(1).join(', then the ')}.`;
+  m.keys=W; m.voiceOnly = age===7 && lv>=4;
+  return m;
+}
+
+/* ---------- render ---------- */
+let CS=0; // cell size in px
+function cellXY(x,y){ return [ (x+0.5)*CS, (y+0.5)*CS ]; }
+function render(){
+  const m=G.m, mz=$('maze'); mz.innerHTML='<svg id="path"></svg>'; CS=mz.clientWidth/m.n;
+  for(let y=0;y<m.n;y++) for(let x=0;x<m.n;x++){ const c=document.createElement('div'); const w=m.w[y][x]; c.className='cell'+(w.T?' wT':'')+(w.B?' wB':'')+(w.L?' wL':'')+(w.R?' wR':''); c.dataset.x=x; c.dataset.y=y;
+    Object.assign(c.style,{left:x*CS+'px', top:y*CS+'px', width:CS+'px', height:CS+'px'}); mz.appendChild(c); }
+  const tok=(html,x,y,cls,scale=.62)=>{ const t=document.createElement('div'); t.className='tok '+cls; const [px,py]=cellXY(x,y); Object.assign(t.style,{left:px+'px',top:py+'px',width:CS*scale+'px',height:CS*scale+'px',fontSize:CS*scale*0.9+'px'}); t.innerHTML=html; mz.appendChild(t); return t; };
+  tok('<span class="emo">🎁</span>', m.goal[0], m.goal[1], 'goal');
+  [...m.mission, ...m.dis].forEach(it=>{ it.el=tok(`<span class="emo">${KIT.word(it.w).e}</span>`, it.x, it.y, 'item'+(it.got?' got':'')); });
+  if(m.key){ m.key.el=tok('<span class="emo">🗝️</span>', m.key.x, m.key.y, 'item'+(m.key.got?' got':'')); }
+  if(m.gate){ const g=document.createElement('img'); g.id='gate'; g.src='assets/sb_stretch.png'; const [px,py]=cellXY(m.gate.x,m.gate.y); Object.assign(g.style,{left:px+'px',top:py+'px',height:CS*0.95+'px'}); if(m.gateOpen) g.classList.add('open'); mz.appendChild(g); }
+  const b=document.createElement('img'); b.id='bobo'; b.src='assets/bobo_body.png'; b.style.height=CS*0.9+'px'; mz.appendChild(b); placeBobo(); drawPath();
+}
+function placeBobo(){ const [px,py]=cellXY(G.pos[0],G.pos[1]); const b=$('bobo'); b.style.left=px+'px'; b.style.top=py+'px'; }
+function drawPath(){ const svg=$('path'); if(!svg) return; const pts=G.path.map(c=>cellXY(c[0],c[1]).join(',')).join(' ');
+  svg.setAttribute('viewBox',`0 0 ${$('maze').clientWidth} ${$('maze').clientHeight}`); svg.innerHTML = G.path.length>1? `<polyline points="${pts}" fill="none" stroke="#ff7a1a" stroke-width="${CS*0.18}" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>` : ''; }
+function renderMission(){ const m=G.m; const l=$('mlist');
+  l.innerHTML = m.voiceOnly && !G.revealMission ? '<span style="font-size:calc(var(--u)*5)">🎧</span><span style="font-size:calc(var(--u)*2.4)">Listen!</span>' :
+    m.mission.map((it,i)=>`<div class="mi${it.got?' got':''}">${m.ordered?`<span class="n">${i+1}</span>`:''}<span class="emo">${KIT.word(it.w).e}</span></div>`).join('') + '<span style="font-size:calc(var(--u)*4)">→ 🎁</span>'; }
+
+/* ---------- drawing (5·6세) ---------- */
+let drawing=false;
+function cellAt(e){ const r=$('maze').getBoundingClientRect(); const x=Math.floor((e.clientX-r.left)/CS), y=Math.floor((e.clientY-r.top)/CS); return [x,y]; }
+function pathHasKey(){ const k=G.m.key; return k && (G.m.key.got || G.path.some(c=>c[0]===k.x&&c[1]===k.y)); }
+$('maze').addEventListener('pointerdown',e=>{ if(!G||!G.accepting||G.age===7) return; touched(); drawing=true; $('maze').setPointerCapture(e.pointerId); G.path=[G.pos.slice()]; extend(cellAt(e)); });
+$('maze').addEventListener('pointermove',e=>{ if(drawing) extend(cellAt(e)); });
+$('maze').addEventListener('pointerup',()=>{ if(!drawing) return; drawing=false; if(G.path.length>1) walk(G.path.slice(1)); });
+function extend([x,y]){ const p=G.path, last=p[p.length-1];
+  if(Math.abs(x-last[0])+Math.abs(y-last[1])!==1) return;   // only neighbouring cells; stays at the last cell when blocked
+  const d=Object.keys(DIR).find(k=>DIR[k][0]===x-last[0]&&DIR[k][1]===y-last[1]);
+  if(!canMove(G.m,last[0],last[1],d,G.m.gateOpen||pathHasKey())) return;
+  // going back along the same corridor is allowed (e.g. into a dead end to pick an item and back out);
+  // the line is only cleared with the eraser button
+  p.push([x,y]); KIT.sfx.click(); drawPath(); }
+$('eraseBtn').onclick=()=>{ G.path=[G.pos.slice()]; drawPath(); };
+
+/* ---------- walking & rules (TRD 4-1, 4-4) ---------- */
+async function walk(cells, auto){
+  G.accepting=false; KIT.clearIdle(); const m=G.m; const me=G;
+  for(const c of cells){ if(G!==me) return; G.pos=c.slice(); placeBobo(); await sleep(170);
+    if(m.key && !m.key.got && c[0]===m.key.x && c[1]===m.key.y){ m.key.got=true; m.key.el.classList.add('got'); m.gateOpen=true; $('gate')?.classList.add('open'); KIT.sfx.coin(); KIT.tutor('keyGot'); }
+    const it=[...m.mission,...m.dis].find(i=>!i.got && i.x===c[0] && i.y===c[1]);
+    if(it){ const isM=m.mission.includes(it);
+      if(isM && m.ordered){ const next=m.mission.find(i=>!i.got); if(next!==it){ G.path=[G.pos.slice()]; drawPath(); KIT.sfx.bad(); await failure(`Not yet! Get the ${next.w} first.`, `아직이야! ${next.w} 먼저 가져와.`); return; } }
+      it.got=true; it.el.classList.add('got'); KIT.sfx.pop(); await KIT.say(it.w);
+      if(!isM){ G.wrongItem=true; const need=m.mission.find(i=>!i.got)||m.mission[0]; await KIT.sayLine(`That's a ${it.w}. We need the ${need.w}!`, `그건 ${it.w}야. 우리는 ${need.w}가 필요해!`); }
+      renderMission(); }
+    if(c[0]===m.goal[0]&&c[1]===m.goal[1]){
+      if(m.mission.every(i=>i.got)){ G.path=[G.pos.slice()]; drawPath(); return success(auto); }
+      if(c===cells[cells.length-1]){ G.path=[G.pos.slice()]; drawPath(); KIT.sfx.bad(); await failure(null,null,'notAll'); return; } } } // passing over the goal is fine
+  G.path=[G.pos.slice()]; drawPath(); if(G===me){ G.accepting=true; KIT.armIdle(idle); }
+}
+async function failure(en, ko, key){
+  const me=G; G.fails++; KIT.face('oops'); $('bobo').classList.remove('bump'); void $('bobo').offsetWidth; $('bobo').classList.add('bump'); KIT.sfx.bump();
+  if(en) await KIT.sayLine(en,ko); else if(key) await KIT.tutor(key); else await KIT.tutor('bump'); if(G!==me) return;
+  if(G.fails===2){ await KIT.tutor('hint'); if(G!==me) return; showFootprints(3); }
+  if(G.fails>=3){ await KIT.tutor('show'); if(G!==me) return; const route=solution(); G.revealed=true; return walk(route.slice(1), true); }
+  G.accepting=true; KIT.armIdle(idle);
+}
+function solution(){ const m=G.m; let cur=G.pos.slice(), route=[cur]; const gateOpen=()=>m.gateOpen || route.some(c=>m.key&&c[0]===m.key.x&&c[1]===m.key.y);
+  const stops=[]; if(m.key&&!m.key.got) stops.push([m.key.x,m.key.y]); m.mission.filter(i=>!i.got).forEach(i=>stops.push([i.x,i.y])); stops.push(m.goal);
+  for(const s of stops){ let seg=bfs(m,cur,s,gateOpen()); if(!seg) seg=bfs(m,cur,s,true); route=route.concat(seg.slice(1)); cur=s; }
+  // skip distractor cells is not needed: a distractor on the way only costs star ②
+  return route; }
+function showFootprints(k){ document.querySelectorAll('.tok.foot').forEach(e=>e.remove()); const r=solution().slice(1,1+k); r.forEach(c=>{ const t=document.createElement('div'); t.className='tok foot'; const [px,py]=cellXY(c[0],c[1]); Object.assign(t.style,{left:px+'px',top:py+'px',fontSize:CS*0.45+'px'}); t.textContent='👣'; $('maze').appendChild(t); }); }
+
+/* ---------- command cards (7세) ---------- */
+function renderProg(active, bad){ const pr=$('prog'); const max=LV[G.lv].slots; pr.innerHTML='';
+  for(let i=0;i<max;i++){ const c=G.prog[i]; const s=document.createElement('div'); s.className='slotc'+(c?' cmd':'')+(i===active?' run':'')+(i===bad?' bad':'');
+    if(c){ s.innerHTML=`${ARROW[c.d]}<small>${c.n>1?c.n:''}</small>`; s.onclick=()=>{ if(!G.accepting) return; touched(); const chip=LV[G.lv].chip; c.n = c.n>=chip?1:c.n+1; renderProg(); KIT.say(`Go ${WORDDIR[c.d]} ${KIT.NUM[c.n]}.`); }; }
+    pr.appendChild(s); } }
+document.querySelectorAll('#palette button').forEach(b=>b.onclick=()=>{ if(!G||!G.accepting) return; touched(); const c=b.dataset.c;
+  if(c==='del'){ G.prog.pop(); renderProg(); return; } if(c==='go'){ runProg(); return; }
+  if(G.prog.length>=LV[G.lv].slots){ KIT.toast('칸이 가득 찼어요'); return; } G.prog.push({d:c,n:1}); KIT.sfx.click(); KIT.say(`Go ${WORDDIR[c]}.`); renderProg(); });
+async function runProg(){
+  if(!G.prog.length) return; G.accepting=false; KIT.clearIdle(); const me=G; const m=G.m; let bumped=-1;
+  outer: for(let i=0;i<G.prog.length;i++){ renderProg(i); const c=G.prog[i];
+    for(let s=0;s<c.n;s++){ if(G!==me) return; if(!canMove(m,G.pos[0],G.pos[1],c.d,m.gateOpen)){ bumped=i; break outer; }
+      const nc=[G.pos[0]+DIR[c.d][0], G.pos[1]+DIR[c.d][1]];
+      const before=G.fails; const done=await stepOne(nc); if(G!==me) return; if(done==='end') return; if(G.fails>before){ renderProg(-1); return; } } }
+  if(G!==me) return;
+  if(bumped>=0){ renderProg(-1,bumped); KIT.sfx.bump(); await failure(); if(G===me) renderProg(-1,bumped); return; }
+  if(G.pos[0]===m.goal[0]&&G.pos[1]===m.goal[1]){ G.prog=[]; renderProg(); KIT.sfx.bad(); await failure(null,null,'notAll'); return; }
+  G.prog=[]; renderProg(); G.accepting=true; KIT.armIdle(idle);
+}
+async function stepOne(c){ // walk one cell with the same rules as drawing mode
+  const m=G.m; const before=G.fails; G.pos=c.slice(); placeBobo(); await sleep(200);
+  if(m.key && !m.key.got && c[0]===m.key.x && c[1]===m.key.y){ m.key.got=true; m.key.el.classList.add('got'); m.gateOpen=true; $('gate')?.classList.add('open'); KIT.sfx.coin(); }
+  const it=[...m.mission,...m.dis].find(i=>!i.got && i.x===c[0] && i.y===c[1]);
+  if(it){ const isM=m.mission.includes(it);
+    if(isM && m.ordered){ const next=m.mission.find(i=>!i.got); if(next!==it){ KIT.sfx.bad(); await failure(`Not yet! Get the ${next.w} first.`, `아직이야! ${next.w} 먼저 가져와.`); return 'fail'; } }
+    it.got=true; it.el.classList.add('got'); KIT.sfx.pop(); await KIT.say(it.w); if(!isM) G.wrongItem=true; renderMission(); }
+  if(c[0]===m.goal[0]&&c[1]===m.goal[1] && m.mission.every(i=>i.got)){ success(); return 'end'; }
+  return 'ok';   // passing over the goal mid-program is fine; checked again when the program ends
+}
+
+/* ---------- flow ---------- */
+let G=null;
+function touched(){ if(!G) return; G.interacted=true; KIT.clearIdle(); KIT.armIdle(idle); }
+async function idle(){ if(!G||!G.accepting) return; if(G.age===7){ await KIT.tutor('idle7'); KIT.showHand($('palette')); } else { await KIT.tutor('idle'); KIT.showHand($('bobo')); } }
+async function startRound(){
+  const age=KIT.SAVE.age, lv=KIT.levelFor(age); G={age, lv, total:QCOUNT[age], idx:0, stars:[], words:[], path:[], prog:[]}; const me=G;
+  $('lvPill').textContent=`LEVEL ${lv} · ${age}세`; KIT.show('game'); KIT.renderProgress(G);
+  if(KIT.demoNeeded()) await runDemo(); if(G!==me) return; nextMaze();
+}
+async function nextMaze(){
+  if(G.idx>=G.total) return finish();
+  const me=G; $('nextBtn').style.display='none'; const m=G.m=makeLevel(G.age,G.lv); G.pos=m.start.slice(); G.path=[G.pos.slice()]; G.prog=[]; G.fails=0; G.wrongItem=false; G.revealed=false; G.revealMission=false; G.accepting=false;
+  KIT.renderProgress(G); render(); renderMission(); $('coder').classList.toggle('on',G.age===7); $('drawTools').classList.toggle('on',G.age!==7); if(G.age===7) renderProg();
+  await KIT.sayLine(m.missionText); if(G!==me) return; if(m.gate) { await KIT.tutor('key'); if(G!==me) return; }
+  G.accepting=true; KIT.armIdle(idle);
+}
+$('mSay').onclick=()=>{ if(G&&G.m) KIT.say(G.m.missionText); };
+$('reQ').onclick=()=>$('mSay').click();
+async function success(auto){
+  const me=G; G.accepting=false; KIT.clearIdle(); KIT.sfx.ok(); KIT.face('joy'); G.revealMission=true; renderMission();
+  if(G.revealed){ record(0,false); $('nextBtn').style.display='block'; return; }
+  const star=1+(G.fails===0&&!G.wrongItem?1:0); const g=KIT.line('great'); KIT.bubble(g.t+(g.lang==='ko'?`<span class="en">${g.en}</span>`:'')); await KIT.say(g.t,g.lang); if(G!==me) return;
+  await KIT.say(G.m.phrase); if(G!==me) return;
+  const spoke=await KIT.speak({phrase:G.m.phrase, keys:G.m.keys, ordered:G.age===7, isAlive:()=>G===me}); if(G!==me) return;
+  record(star+(spoke?1:0), spoke); KIT.sfx.coin(); $('nextBtn').style.display='block';
+}
+function record(s,spoke){ G.stars[G.idx]=s; G.words.push({text:G.m.mission.map(i=>KIT.word(i.w).e+' '+i.w).join(' → '), phrase:G.m.phrase, stars:s, spoke}); KIT.renderProgress(G); }
+$('nextBtn').onclick=()=>{ G.idx++; nextMaze(); };
+addEventListener('keydown',e=>{ if(!G||!G.accepting) return; const d={ArrowUp:'U',ArrowDown:'D',ArrowLeft:'L',ArrowRight:'R'}[e.key];
+  if(G.age===7){ if(d) document.querySelector(`#palette button[data-c="${d}"]`).click(); if(e.key==='Enter') runProg(); if(e.key==='Backspace'){ G.prog.pop(); renderProg(); } return; }
+  if(d && canMove(G.m,G.pos[0],G.pos[1],d,G.m.gateOpen)){ touched(); walk([[G.pos[0]+DIR[d][0], G.pos[1]+DIR[d][1]]]); } });
+addEventListener('resize',()=>{ if(G&&G.m&&$('game').classList.contains('on')) render(); });
+
+async function runDemo(){
+  KIT.demoStart(); const me=G; G.m=makeLevel(5,1); G.pos=G.m.start.slice(); G.path=[G.pos.slice()]; render(); renderMission(); $('coder').classList.remove('on'); $('drawTools').classList.remove('on');
+  const steps=[ async()=>KIT.tutor(G.age===7?'demoCode':'demoDraw',{keep:true}),
+    async()=>{ const route=bfs(G.m,G.m.start,[G.m.mission[0].x,G.m.mission[0].y],true).concat(bfs(G.m,[G.m.mission[0].x,G.m.mission[0].y],G.m.goal,true).slice(1));
+      KIT.showHand($('bobo'),true); for(const c of route.slice(1)){ if(KIT.skipDemo) return; G.path.push(c); drawPath(); const [px,py]=cellXY(c[0],c[1]); const r=$('maze').getBoundingClientRect(), s=$('stage').getBoundingClientRect(); const h=$('hand'); h.style.left=(r.left-s.left+px-h.offsetWidth/3)+'px'; h.style.top=(r.top-s.top+py)+'px'; await sleep(160); }
+      KIT.hideHand(); for(const c of route.slice(1)){ if(KIT.skipDemo) return; G.pos=c; placeBobo(); const it=G.m.mission.find(i=>i.x===c[0]&&i.y===c[1]); if(it){ it.el.classList.add('got'); KIT.sfx.pop(); } await sleep(150); } KIT.sfx.ok(); KIT.face('joy'); },
+    async()=>KIT.tutor('demoEnd',{keep:true}) ];
+  for(const s of steps){ if(KIT.skipDemo||G!==me) break; await s(); }
+  KIT.demoEnd(); KIT.face('neutral');
+}
+async function finish(){ KIT.clearIdle(); await KIT.result(G,{title:'Treasure!', heroHtml:'<img src="assets/bobo_joy.png"><img src="assets/sb_expand.png" style="height:60%"><img src="assets/sb_roll.png" style="height:45%">', icon:'🗺️', unit:'섬 지도 칸', collName:'Island Map', per:3}); }
+KIT.init({prefix:'mq', onStart:startRound, onExit:()=>{ G=null; }});
+window.__mq=()=>G;
+</script>
+</body>
+</html>

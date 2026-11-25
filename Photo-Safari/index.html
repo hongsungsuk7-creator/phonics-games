@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Photo Safari</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<link rel="stylesheet" href="../_shared/kit.css">
+<style>
+  :root { --s1:#a6dcfb; --s2:#5eaee6; --ss:#2f73a8; --st:#ffffff; --ink:#22331f; --b1:#ffcf4a; --b2:#f0a500; --bs:#a86f00; --a1:#5aa0d9; --a2:#2f6fb0; --as:#1c4b7d; }
+  #stage { background: linear-gradient(#bfe6ff 0%, #e7f6ff 55%, #8fd07a 55%, #6db55c 100%); }
+  .btn:not(.alt):not(.green) { color:#4a3000; }
+  #view { position:absolute; left:calc(var(--u)*30); top:calc(var(--u)*12); width:calc(var(--u)*112); height:calc(var(--u)*70); overflow:hidden; border-radius:calc(var(--u)*2);
+    box-shadow:0 0 0 calc(var(--u)*1) #fff, 0 calc(var(--u)*1.5) calc(var(--u)*3) rgba(0,0,0,.3); touch-action:none; }
+  #scene { position:absolute; left:0; top:0; width:calc(var(--u)*168); height:100%; transition: transform .45s ease; background: linear-gradient(#9fd9ff 0 45%, #a8dd8e 45% 100%); }
+  #scene .hill { position:absolute; bottom:52%; width:40%; height:30%; border-radius:50% 50% 0 0; background:#86c46f; }
+  #scene .sun { position:absolute; right:8%; top:6%; width:calc(var(--u)*10); height:calc(var(--u)*10); border-radius:50%; background:#ffe680; box-shadow:0 0 calc(var(--u)*4) #fff3a8; }
+  #scene.night { background: linear-gradient(#1d2a5c 0 45%, #2f5a3a 45% 100%); }
+  .spot { position:absolute; transform:translate(-50%,-100%); }
+  .spot .obj { position:absolute; left:50%; bottom:0; transform:translate(-50%, var(--hide)); display:flex; gap:2px; align-items:flex-end; transition: transform .35s; z-index:1; }
+  .spot .obj .emo { font-size:inherit; } .spot .obj .itm { width:1em; height:1em; }
+  .spot.focus .obj, .spot.shown .obj { transform:translate(-50%, var(--peek)); }
+  .spot .cover { position:relative; z-index:2; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; }
+  .cv-bush { width:100%; height:100%; background: radial-gradient(circle at 30% 60%, #4f9e45 0 38%, transparent 39%), radial-gradient(circle at 70% 60%, #4f9e45 0 38%, transparent 39%), radial-gradient(circle at 50% 35%, #5fb352 0 40%, transparent 41%); }
+  .cv-rock { width:100%; height:100%; background:#9aa3ab; border-radius:45% 55% 20% 20%; box-shadow:inset calc(var(--u)*-1) calc(var(--u)*-1) 0 #7d858c; }
+  .cv-log { width:100%; height:100%; background:linear-gradient(#a8744a,#7a4f2c); border-radius:calc(var(--u)*3); }
+  .cv-mat { width:100%; height:100%; background:repeating-linear-gradient(90deg,#ff8f8f 0 calc(var(--u)*2),#fff calc(var(--u)*2) calc(var(--u)*4)); border-radius:calc(var(--u)*.8); }
+  .cv-emo { font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif; line-height:.85; }
+  .spot.glow .cover { filter: drop-shadow(0 0 calc(var(--u)*1.5) #ffe27a) drop-shadow(0 0 calc(var(--u)*1.5) #ffe27a); }
+  .spot.peekaboo .obj { animation: peekaboo 4s infinite; } @keyframes peekaboo { 0%,55% { opacity:1; } 62%,92% { opacity:0; } 100% { opacity:1; } }
+  .spot.peekaboo.focus .obj, .spot.peekaboo.shown .obj { animation:none; }
+  .spot.friend .obj img { height:1em; }
+  #vf { position:absolute; border:calc(var(--u)*.6) solid #fff; border-radius:calc(var(--u)*2); box-shadow:0 0 0 calc(var(--u)*200) rgba(0,0,0,.12); z-index:10; touch-action:none; cursor:grab; }
+  #vf::before, #vf::after { content:""; position:absolute; left:50%; top:50%; background:#fff; transform:translate(-50%,-50%); }
+  #vf::before { width:calc(var(--u)*3); height:2px; } #vf::after { width:2px; height:calc(var(--u)*3); }
+  #focusBox { position:absolute; border:calc(var(--u)*.5) solid #ff3b3b; border-radius:calc(var(--u)*1); z-index:9; display:none; pointer-events:none; }
+  #flash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; z-index:12; transition: opacity .25s; }
+  .edge { position:absolute; top:0; bottom:0; width:calc(var(--u)*6); z-index:11; pointer-events:none; opacity:0; }
+  .edge.l { left:0; background:linear-gradient(90deg, rgba(255,226,122,.9), transparent); } .edge.r { right:0; background:linear-gradient(-90deg, rgba(255,226,122,.9), transparent); }
+  .edge.on { animation: edgeglow 1s infinite; } @keyframes edgeglow { 50% { opacity:1; } }
+  #side { position:absolute; left:calc(var(--u)*145); top:calc(var(--u)*12); width:calc(var(--u)*30); display:flex; flex-direction:column; align-items:center; gap:calc(var(--u)*2); }
+  #card { width:calc(var(--u)*28); height:calc(var(--u)*32); background:#fff; border-radius:calc(var(--u)*1.5); padding:calc(var(--u)*1.4); box-shadow:0 calc(var(--u)*1) calc(var(--u)*2) rgba(0,0,0,.3); transform:rotate(3deg); display:flex; flex-direction:column; align-items:center; }
+  #card .ph { width:100%; flex:1; background:#e9eef2; border-radius:calc(var(--u)*.8); display:flex; align-items:center; justify-content:center; gap:4px; overflow:hidden; }
+  #card .ph .emo { font-size:calc(var(--u)*9); } #card .ph .itm { width:calc(var(--u)*13); height:calc(var(--u)*13); }
+  #card .ph.blur > * { filter: blur(1.5px) saturate(.75); opacity:.6; }  /* toned down but keeps the colour cue (5세 colour mission) */
+  #card .cap { font-size:calc(var(--u)*2.3); margin-top:calc(var(--u)*.8); text-align:center; line-height:1.2; }
+  #card button { border:none; background:#eaf3fb; border-radius:calc(var(--u)*2); padding:calc(var(--u)*.3) calc(var(--u)*1.2); font-size:calc(var(--u)*2.1); font-family:inherit; cursor:pointer; margin-top:calc(var(--u)*.5); }
+  #shutter { width:calc(var(--u)*18); height:calc(var(--u)*18); border-radius:50%; font-size:calc(var(--u)*8); padding:0; }
+  #zoomBtn { display:none; }
+  #nextBtn { position:absolute; right:calc(var(--u)*3); bottom:calc(var(--u)*4); display:none; z-index:30; }
+  .tutor { left:calc(var(--u)*0); bottom:calc(var(--u)*3); height:calc(var(--u)*28); }
+  .bubble { top:calc(var(--u)*13); }
+  .mic { left:calc(var(--u)*30); right:calc(var(--u)*36); bottom:calc(var(--u)*3); z-index:31; }
+  #album { position:absolute; left:calc(var(--u)*37); bottom:calc(var(--u)*1.5); height:calc(var(--u)*13); display:flex; gap:calc(var(--u)*1); align-items:center; }
+  .photo { width:calc(var(--u)*11); height:calc(var(--u)*11); background:#fff; padding:calc(var(--u)*.6); border-radius:calc(var(--u)*.6); box-shadow:0 calc(var(--u)*.5) calc(var(--u)*1) rgba(0,0,0,.3); display:flex; align-items:center; justify-content:center; transform:rotate(-3deg); }
+  .photo .emo { font-size:calc(var(--u)*6); } .photo .itm { width:calc(var(--u)*7); height:calc(var(--u)*7); } .photo img { height:calc(var(--u)*8); }
+  .photo.bw { filter:grayscale(1); }
+  .nunu-cam { position:absolute; left:calc(var(--u)*8); bottom:calc(var(--u)*4); height:calc(var(--u)*40); aspect-ratio:428/560; }
+  .nunu-cam img, .nunu-cam svg { position:absolute; inset:0; width:100%; height:100%; }
+  .nunu-cam svg { overflow:visible; }
+  .nunu-cam .cam-body { filter:drop-shadow(0 3px 3px rgba(0,0,0,.25)); }
+  .nunu-cam .cam-flash { opacity:0; transform-origin:171px 295px; animation:camflash 3.2s infinite 1s; }
+  @keyframes camflash { 0%,86%,100% { opacity:0; transform:scale(.3); } 90% { opacity:1; transform:scale(1); } 95% { opacity:.4; transform:scale(1.15); } }
+  @media (prefers-reduced-motion: reduce) { .nunu-cam .cam-flash { animation:none; } }
+</style>
+</head>
+<body>
+<div id="stage">
+  <section class="screen on" id="title">
+    <div class="topbar"><div class="row"><button class="btn alt" id="keyBtn">🔑</button></div><div class="row"><button class="btn alt" id="langBtn">한국어</button><button class="btn alt sndBtn">🔊</button></div></div>
+    <div class="logo">Photo Safari<small>포토 사파리 · 숨은 친구를 찾아 찰칵!</small></div>
+    <div class="nunu-cam" aria-label="Nunu with a camera">
+      <img src="assets/nunu_body.png" alt="Nunu">
+      <svg viewBox="0 0 428 560" aria-hidden="true">
+        <defs>
+          <linearGradient id="camTop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f7fb"/><stop offset="1" stop-color="#cdd6e2"/></linearGradient>
+          <linearGradient id="camBand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef8a4a"/><stop offset="1" stop-color="#d1652a"/></linearGradient>
+          <radialGradient id="lensG" cx=".38" cy=".35" r=".7"><stop offset="0" stop-color="#8fd3ff"/><stop offset=".45" stop-color="#2f78c4"/><stop offset="1" stop-color="#173a6b"/></radialGradient>
+          <radialGradient id="flashG"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#fffbe0" stop-opacity=".9"/><stop offset="1" stop-color="#fff6c0" stop-opacity="0"/></radialGradient>
+        </defs>
+        <!-- neck strap -->
+        <path d="M118 236 Q132 282 166 318" fill="none" stroke="#c9562a" stroke-width="10" stroke-linecap="round"/>
+        <path d="M310 236 Q296 282 262 318" fill="none" stroke="#c9562a" stroke-width="10" stroke-linecap="round"/>
+        <!-- camera -->
+        <g class="cam-body">
+          <rect x="140" y="300" width="148" height="104" rx="22" fill="url(#camTop)" stroke="#6b7a8f" stroke-width="3"/>
+          <rect x="140" y="344" width="148" height="44" fill="url(#camBand)"/>
+          <rect x="140" y="300" width="148" height="104" rx="22" fill="none" stroke="#6b7a8f" stroke-width="3"/>
+          <rect x="156" y="286" width="30" height="18" rx="5" fill="#fff8d6" stroke="#6b7a8f" stroke-width="3"/>
+          <rect x="246" y="288" width="24" height="14" rx="6" fill="#ff5d6c" stroke="#a83440" stroke-width="2.5"/>
+          <circle cx="214" cy="354" r="40" fill="#3b4658"/>
+          <circle cx="214" cy="354" r="31" fill="url(#lensG)"/>
+          <circle cx="214" cy="354" r="31" fill="none" stroke="#9aa7b8" stroke-width="3"/>
+          <circle cx="203" cy="342" r="8" fill="#fff" opacity=".85"/>
+          <circle cx="226" cy="366" r="3.5" fill="#fff" opacity=".6"/>
+        </g>
+        <circle class="cam-flash" cx="171" cy="295" r="70" fill="url(#flashG)"/>
+      </svg>
+    </div>
+    <div style="position:absolute;right:calc(var(--u)*4);bottom:calc(var(--u)*4);display:flex;align-items:flex-end;gap:calc(var(--u)*.6)">
+      <img src="assets/seed_glowing_loop.png" style="height:calc(var(--u)*15)"><img src="assets/seed_listening_fan.png" style="height:calc(var(--u)*12)"><img src="assets/seed_bouncing_beads.png" style="height:calc(var(--u)*11)"><img src="assets/seed_uncoiling_spiral.png" style="height:calc(var(--u)*14)"><img src="assets/seed_collecting_sounds.png" style="height:calc(var(--u)*15)"></div>
+    <div class="coll"><div class="k">📔</div>My Album<br><b id="collCount">0</b></div>
+    <div class="agebox">연령(보호자 설정) <button class="chip" data-age="5">5세</button><button class="chip" data-age="6">6세</button><button class="chip" data-age="7">7세</button></div>
+    <button class="btn start" id="startBtn">START</button>
+  </section>
+
+  <section class="screen" id="game">
+    <div class="topbar">
+      <div class="row"><div class="pill">⭐ <span id="starSum">0</span></div><div class="progress" id="progress"></div></div>
+      <div class="row"><div class="pill" id="lvPill">LEVEL 1</div><button class="btn alt" id="reQ">💬</button></div>
+      <div class="row"><button class="btn alt sndBtn">🔊</button><button class="btn" id="exitBtn">✕</button></div>
+    </div>
+    <div id="view"><div id="scene"></div><div id="focusBox"></div><div id="vf"></div><div class="edge l" id="edgeL"></div><div class="edge r" id="edgeR"></div><div id="flash"></div></div>
+    <div id="side" data-hide-on-speak>
+      <div id="card"><div class="ph" id="ph"></div><div class="cap" id="cap"></div><button id="mSay">🔊 mission</button></div>
+      <button class="btn gold" id="shutter">📷</button>
+      <button class="btn alt" id="zoomBtn">🔍 큰 렌즈</button>
+    </div>
+    <div id="album" data-hide-on-speak></div>
+    <img class="tutor" id="tutor" src="assets/nunu_neutral.png" alt="Nunu">
+    <div class="bubble" id="bubble"></div>
+    <button class="btn green big" id="nextBtn">Next ▶</button>
+  </section>
+
+  <section class="screen" id="result">
+    <div class="card-res"><h2 id="resTitle">Look at our album!</h2><div class="res-hero" id="resHero"></div><div class="bigstars" id="resStars"></div><div class="resmeta" id="resMeta"></div><div id="resLv"></div>
+      <div class="reswords" id="resWords"></div><div class="resmeta" id="resReward"></div>
+      <div class="resbtns"><button class="btn alt" id="homeBtn">🏠 Home</button><button class="btn" id="againBtn">↻ Again</button><button class="btn green" id="nextRoundBtn">Next ▶</button></div></div>
+  </section>
+</div>
+<script src="../_shared/kit.js"></script>
+<script>
+'use strict';
+const {$, sleep, rnd, shuffle, NUM} = KIT;
+KIT.L = {
+  hello:{en:"Hi! I'm Nunu. Welcome to Safari Camp!", ko:'안녕! 나는 누누야. 사파리 캠프에 온 걸 환영해!'},
+  demo1:{en:'Move the camera to a hiding spot.', ko:'카메라를 숨은 곳으로 옮겨 봐.'},
+  demo2:{en:'When you see the box, tap the button!', ko:'네모 상자가 보이면 버튼을 눌러!'},
+  look:{en:'Swipe to look around!', ko:'밀어서 둘러봐!'},
+  empty:{en:'Nothing there. Look for a hiding spot!', ko:'거긴 아무것도 없어. 숨은 곳을 찾아봐!'},
+  hint:{en:'Look over there!', ko:'저쪽을 봐!'},
+  show:{en:'Here it is!', ko:'여기 있었어!'},
+  friend:{en:'A hidden friend! Nice photo!', ko:'숨은 친구다! 멋진 사진!'},
+  ask:{en:'What did you take?', ko:'뭘 찍었어?'},
+  idle:{en:'Move the camera around!', ko:'카메라를 움직여 봐!'},
+  great:{en:['Click! Great shot!','Nice photo!','You found it!','Say cheese!'], ko:['찰칵! 멋진 사진!','잘 찍었어!','찾았다!','김치~!']},
+  clear:{en:'Look at our album!', ko:'우리 앨범을 봐!'},
+  levelUp:{en:'Level up! Friends hide better now!', ko:'레벨 업! 친구들이 더 잘 숨을 거야!'},
+};
+const FACE={listen:'neutral', joy:'joy', oops:'surprise', neutral:'neutral'};
+KIT.face=f=>{ $('tutor').src=`assets/nunu_${FACE[f]||'neutral'}.png`; if(f==='joy') KIT.anim($('tutor'),'bounce'); if(f==='oops') KIT.anim($('tutor'),'oops'); };
+
+/* ---------- scene spots (TRD 4-1: coordinates, size, position name, cover) ---------- */
+const SPOTS=[
+  {id:'tent', name:'behind the tent', x:9, y:70, w:20, h:17, cv:'emo', e:'⛺'},
+  {id:'bush', name:'behind the bush', x:26, y:76, w:16, h:12, cv:'bush'},
+  {id:'rock', name:'on the rock', x:39, y:84, w:12, h:8, cv:'rock', on:true},
+  {id:'leaf', name:'under the leaf', x:50, y:93, w:12, h:10, cv:'emo', e:'🍃'},
+  {id:'box', name:'in the box', x:61, y:80, w:11, h:10, cv:'emo', e:'📦'},
+  {id:'tree', name:'in the tree', x:73, y:58, w:18, h:26, cv:'emo', e:'🌳'},
+  {id:'log', name:'behind the log', x:86, y:88, w:16, h:7, cv:'log'},
+  {id:'mat', name:'under the mat', x:20, y:96, w:14, h:4, cv:'mat'},
+  {id:'stump', name:'next to the tree', x:82, y:70, w:8, h:7, cv:'rock'},
+  {id:'pine', name:'behind the pine', x:95, y:62, w:12, h:22, cv:'emo', e:'🌲'},
+  {id:'bush2', name:'behind the flowers', x:33, y:62, w:12, h:8, cv:'emo', e:'🌼'},
+  {id:'rock2', name:'behind the rock', x:56, y:66, w:10, h:7, cv:'rock'},
+];
+const FRIEND_SPOTS=[ {id:'f1', x:3, y:52, w:8, h:6, cv:'bush'}, {id:'f2', x:45, y:50, w:8, h:5, cv:'bush'}, {id:'f3', x:98, y:80, w:7, h:6, cv:'rock'} ];
+const SEEDS=['glowing_loop','listening_fan','bouncing_beads','uncoiling_spiral','collecting_sounds'];
+const LV={ 1:{hidden:4,reveal:.5,similar:0,peek:0,tol:1.6,lens:true}, 2:{hidden:5,reveal:.4,similar:1,peek:0,tol:1.5,lens:true}, 3:{hidden:6,reveal:.3,similar:1,peek:0,tol:1.4,lens:true},
+           4:{hidden:8,reveal:.25,similar:2,peek:0,tol:1.3,lens:false}, 5:{hidden:10,reveal:.2,similar:3,peek:2,tol:1.2,lens:false}, 6:{hidden:12,reveal:.15,similar:4,peek:3,tol:1.1,lens:false} };
+const QCOUNT={5:6,6:8,7:10};
+const EMO6=['monkey','mushroom','mitt','mug','mouse','mask'];
+const OTHERS=['moon','map','milk','mop','mirror','mail','monkey','mouse','mug','mitt','mask','mushroom'];
+
+function makeMission(age, lv){
+  const P=LV[lv]; const spots=shuffle(SPOTS); const objs=[]; let target;
+  if(age===5){ const svg=rnd(['mug','mitt','mask','mushroom']); const colors=shuffle(['red','blue','yellow','green','brown','pink']); target={kind:'svg', svg, color:colors[0], n:1};
+    objs.push({...target, spot:spots[0]}); for(let i=0;i<P.similar;i++) objs.push({kind:'svg', svg, color:colors[1+i], n:1, spot:spots[1+i]}); }
+  if(age===6){ const w=rnd(EMO6); const n=1+Math.floor(Math.random()*3); target={kind:'emo', w, n}; objs.push({...target, spot:spots[0]});
+    const others=[1,2,3].filter(k=>k!==n); for(let i=0;i<P.similar;i++) objs.push({kind:'emo', w, n:others[i%others.length], spot:spots[1+i]}); }
+  if(age===7){ const w=rnd(['mouse','monkey','mug','mitt','mask','mushroom']); target={kind:'emo', w, n:1, spot:spots[0]}; objs.push({...target});
+    for(let i=0;i<Math.max(1,P.similar);i++) objs.push({kind:'emo', w, n:1, spot:spots[1+i]}); }
+  const used=new Set(objs.map(o=>o.spot.id)); const pool=shuffle(OTHERS.filter(w=>w!==target.w && w!==target.svg)); let k=0;
+  for(const s of spots){ if(objs.length>=P.hidden) break; if(used.has(s.id)) continue; objs.push({kind:'emo', w:pool[k++%pool.length], n:1, spot:s}); used.add(s.id); }
+  objs.forEach((o,i)=>{ o.id=i; o.isTarget=(i===0); });
+  const tsp=objs[0].spot; const noun = target.svg||target.w;
+  const m={age, lv, objs, target:objs[0]};
+  if(age===5){ m.text=`Take a photo of the ${target.color} ${noun}.`; m.phrase=`${target.color} ${noun}`; m.keys=[target.color, noun]; }
+  if(age===6){ m.text=`Take a photo of ${target.n===1?'one':NUM[target.n]} ${KIT.plural(noun,target.n)}.`; m.phrase=`${NUM[target.n]} ${KIT.plural(noun,target.n)}`; m.keys = noun==='mouse'? [NUM[target.n]] : [NUM[target.n], noun]; }
+  if(age===7){ m.text=`Find the ${noun} ${tsp.name}.`; m.phrase=`The ${noun} is ${tsp.name}.`; m.keys=[noun, tsp.name.split(' ')[0]]; }
+  m.friend = {seed:rnd(SEEDS), spot:rnd(FRIEND_SPOTS)};
+  return m;
+}
+const objPic = o => o.kind==='svg' ? `<div class="itm">${KIT.SVG[o.svg](KIT.COLORS[o.color])}</div>` : Array(o.n).fill(`<span class="emo">${KIT.word(o.w).e}</span>`).join('');
+function describe(o){ const noun=o.svg||o.w; if(G.age===5 && o.kind==='svg') return `the ${o.color} ${noun}`; if(G.age===6) return `${o.n===1?'one':NUM[o.n]} ${KIT.plural(noun,o.n)}`; if(G.age===7) return `the ${noun} ${o.spot.name}`; return `a ${noun}`; }
+
+/* ---------- render scene ---------- */
+const U=()=>KIT.u;
+function render(){
+  const m=G.m, sc=$('scene'); sc.className=''; sc.innerHTML='<div class="sun"></div><div class="hill" style="left:-5%"></div><div class="hill" style="left:35%;width:30%"></div><div class="hill" style="left:70%"></div>';
+  const P=LV[G.lv]; const peekers=shuffle(m.objs.filter(o=>!o.isTarget)).slice(0,P.peek).map(o=>o.id);
+  const addSpot=(sp, inner, o)=>{ const d=document.createElement('div'); d.className='spot'; d.style.left=sp.x+'%'; d.style.top=sp.y+'%'; d.style.width=`calc(var(--u)*${sp.w})`; d.style.height=`calc(var(--u)*${sp.h})`;
+    // object bottom b (u, upward from the spot bottom): visible part above the cover top = reveal × object size
+    const size=Math.min(sp.w*0.8, 10, sp.h*1.3+2)*(o&&o.n>1?0.7:1); const reveal = sp.on? 1 : P.reveal;
+    const b = sp.on ? sp.h : Math.max(0, sp.h - (1-reveal)*size), bp = Math.max(0, sp.h - 0.2*size);
+    d.style.setProperty('--hide', `calc(var(--u)*${-b})`); d.style.setProperty('--peek', `calc(var(--u)*${-Math.max(b,bp)})`);
+    const coverHTML = sp.cv==='emo' ? `<span class="cv-emo" style="font-size:calc(var(--u)*${sp.h})">${sp.e}</span>` : `<div class="cv-${sp.cv}"></div>`;
+    d.innerHTML=`<div class="obj" style="font-size:calc(var(--u)*${size})">${inner}</div><div class="cover" style="width:100%;height:100%">${coverHTML}</div>`;
+    sc.appendChild(d); return d; };
+  m.objs.forEach(o=>{ o.el=addSpot(o.spot, objPic(o), o); o.el.dataset.oid=o.id; if(peekers.includes(o.id)) o.el.classList.add('peekaboo'); });
+  const f=m.friend; f.el=addSpot(f.spot, `<img src="assets/seed_${f.seed}.png" style="height:1em">`, null); f.el.classList.add('friend'); f.el.querySelector('.obj').style.fontSize=`calc(var(--u)*7)`;
+  G.pan=0; applyPan(); placeVF(56*U(), 35*U());
+}
+function applyPan(){ G.pan=KIT.clamp(G.pan, -56*U(), 0); $('scene').style.transform=`translateX(${G.pan}px)`; }
+function vfSize(){ return (G.bigLens?34:26)*U(); }
+function placeVF(x,y){ const s=vfSize(); const vw=112*U(), vh=70*U(); G.vx=KIT.clamp(x,s/2,vw-s/2); G.vy=KIT.clamp(y,s/2,vh-s/2); const vf=$('vf');
+  Object.assign(vf.style,{width:s+'px',height:s+'px',left:(G.vx-s/2)+'px',top:(G.vy-s/2)+'px'}); updateFocus(); }
+function focusTarget(){ const vr=$('view').getBoundingClientRect(); const cx=vr.left+G.vx, cy=vr.top+G.vy; const tol=LV[G.lv].tol; let best=null, bd=1e9;
+  const cands=[...G.m.objs.map(o=>({o, el:o.el})), {o:{friend:true}, el:G.m.friend.el}];
+  for(const c of cands){ if(c.o.shot) continue; const r=c.el.getBoundingClientRect(); const ox=r.left+r.width/2, oy=r.top+r.height*0.35; const d=Math.hypot(cx-ox, cy-oy); const lim=Math.max(r.width, r.height)*0.5*tol;
+    if(d<lim && d<bd){ best=c; bd=d; } } return best; }
+function updateFocus(){ const fb=$('focusBox'); document.querySelectorAll('.spot.focus').forEach(s=>s.classList.remove('focus')); const t=focusTarget(); G.focus=t;
+  if(!t){ fb.style.display='none'; return; } t.el.classList.add('focus'); const vr=$('view').getBoundingClientRect(), r=t.el.getBoundingClientRect();
+  Object.assign(fb.style,{display:'block', left:(r.left-vr.left-6)+'px', top:(r.top-vr.top-r.height*0.9)+'px', width:(r.width+12)+'px', height:(r.height*1.9)+'px'}); }
+
+/* ---------- gestures: viewfinder drag vs scene pan (TRD 9) ---------- */
+let gst=null;
+$('vf').addEventListener('pointerdown',e=>{ if(!G||!G.accepting) return; e.stopPropagation(); gst={mode:'vf', x:e.clientX, y:e.clientY, vx:G.vx, vy:G.vy}; $('vf').setPointerCapture(e.pointerId); touched(); });
+$('view').addEventListener('pointerdown',e=>{ if(!G||!G.accepting||gst) return; gst={mode:'pan', x:e.clientX, pan:G.pan}; $('view').setPointerCapture(e.pointerId); touched(); });
+addEventListener('pointermove',e=>{ if(!gst) return; if(gst.mode==='vf'){ placeVF(gst.vx+e.clientX-gst.x, gst.vy+e.clientY-gst.y); edgeScroll(); } else { $('scene').style.transition='none'; G.pan=gst.pan+(e.clientX-gst.x); applyPan(); updateFocus(); } });
+addEventListener('pointerup',()=>{ $('scene').style.transition=''; gst=null; clearInterval(G?.edgeT); });
+function edgeScroll(){ const vw=112*U(), s=vfSize(); clearInterval(G.edgeT); const dir = G.vx>=vw-s/2-2 ? -1 : G.vx<=s/2+2 ? 1 : 0; if(!dir) return;
+  G.edgeT=setInterval(()=>{ if(!gst){ clearInterval(G.edgeT); return; } $('scene').style.transition='none'; G.pan+=dir*U()*1.2; applyPan(); updateFocus(); },30); }
+$('zoomBtn').onclick=()=>{ G.bigLens=!G.bigLens; G.usedLens=G.usedLens||G.bigLens; placeVF(G.vx,G.vy); };
+addEventListener('keydown',e=>{ if(!G||!G.accepting) return; const st=(e.shiftKey?5:2)*U(); const m={ArrowLeft:[-st,0],ArrowRight:[st,0],ArrowUp:[0,-st],ArrowDown:[0,st]}[e.key];
+  if(m){ e.preventDefault(); placeVF(G.vx+m[0],G.vy+m[1]); touched(); } if(e.key===' '){ e.preventDefault(); $('shutter').click(); } if(e.key==='a'||e.key==='A'){ G.pan+=10*U(); applyPan(); updateFocus(); } if(e.key==='d'||e.key==='D'){ G.pan-=10*U(); applyPan(); updateFocus(); } });
+
+/* ---------- shutter & judging (TRD 4-1, 4-3) ---------- */
+$('shutter').onclick=async()=>{
+  if(!G||!G.accepting) return; touched(); KIT.sfx.shutter(); const fl=$('flash'); fl.style.opacity=.85; setTimeout(()=>fl.style.opacity=0,150); updateFocus();
+  const t=G.focus; if(!t){ await KIT.tutor('empty'); return; }   // empty shot: not counted as a try
+  if(t.o.friend){ G.friends.push(G.m.friend.seed); t.o.shot=true; G.m.friend.el.classList.add('shown'); addPhoto(`<img src="assets/seed_${G.m.friend.seed}.png">`); KIT.sfx.coin(); await KIT.tutor('friend'); return; }
+  const o=t.o; if(o.isTarget) return success(o);
+  const me=G; G.wrong++; KIT.sfx.bad(); KIT.face('oops'); addPhoto(objPic(o), true);
+  await KIT.sayLine(`That's ${describe(o)}. Find ${describe(G.m.target)}!`); if(G!==me) return;
+  if(G.wrong===2){ await KIT.tutor('hint'); if(G!==me) return; hint(); }
+  if(G.wrong>=3){ G.accepting=false; KIT.clearIdle(); await KIT.tutor('show'); if(G!==me) return; await focusOn(G.m.target); G.m.target.el.classList.add('shown'); KIT.sfx.shutter(); addPhoto(objPic(G.m.target)); await KIT.say(G.m.phrase); record(0,false); $('nextBtn').style.display='block'; }
+};
+async function focusOn(o){ const vw=112*U(); const r=o.el.getBoundingClientRect(), vr=$('view').getBoundingClientRect(); const ox=r.left-vr.left+r.width/2;
+  G.pan += (vw/2 - ox); applyPan(); await sleep(500); const r2=o.el.getBoundingClientRect(); placeVF(r2.left-vr.left+r2.width/2, r2.top-vr.top+r2.height*0.35); }
+function hint(){ const o=G.m.target; o.el.classList.add('glow'); const vr=$('view').getBoundingClientRect(), r=o.el.getBoundingClientRect();
+  const side = r.left+r.width/2 < vr.left ? 'l' : r.left > vr.right ? 'r' : null; if(side){ $(side==='l'?'edgeL':'edgeR').classList.add('on'); G.pan += side==='l'? 20*U() : -20*U(); applyPan(); setTimeout(updateFocus,500); } }
+function addPhoto(html, bw){ const a=$('album'); const p=document.createElement('div'); p.className='photo'+(bw?' bw':''); p.innerHTML=html; a.appendChild(p); while(a.children.length>9) a.firstChild.remove(); }
+
+/* ---------- flow ---------- */
+let G=null;
+function touched(){ if(!G) return; G.interacted=true; KIT.clearIdle(); KIT.armIdle(idle); }
+async function idle(){ if(!G||!G.accepting) return; await KIT.tutor('idle'); KIT.showHand($('vf')); }
+async function startRound(){
+  const age=KIT.SAVE.age, lv=KIT.levelFor(age); G={age, lv, total:QCOUNT[age], idx:0, stars:[], words:[], friends:[], photos:[]}; const me=G;
+  $('lvPill').textContent=`LEVEL ${lv} · ${age}세`; KIT.show('game'); KIT.renderProgress(G); $('album').innerHTML='';
+  if(KIT.demoNeeded()) await runDemo(); if(G!==me) return; nextMission();
+}
+function renderCard(m){ const t=m.target; const ph=$('ph');
+  if(m.age===5){ ph.className='ph blur'; ph.innerHTML=objPic(t); $('cap').textContent=''; }
+  else if(m.age===6){ ph.className='ph'; ph.innerHTML= m.lv<=2 ? `<span class="emo" style="font-size:calc(var(--u)*7)">${KIT.word(t.w).e}</span>` : '<span class="emo">📷</span>'; $('cap').textContent=''; }
+  else { ph.className='ph'; ph.innerHTML='<span class="emo">📷</span>'; $('cap').textContent = m.lv>=4 ? m.text : ''; } }
+async function nextMission(){
+  if(G.idx>=G.total) return finish();
+  const me=G; $('nextBtn').style.display='none'; ['edgeL','edgeR'].forEach(id=>$(id).classList.remove('on'));
+  const m=G.m=makeMission(G.age,G.lv); G.wrong=0; G.bigLens=false; G.usedLens=false; G.accepting=false; G.interacted=false; KIT.renderProgress(G);
+  render(); renderCard(m); $('zoomBtn').style.display=LV[G.lv].lens?'block':'none';
+  await KIT.sayLine(m.text); if(G!==me) return; if(G.idx===0){ await KIT.tutor('look'); if(G!==me) return; }
+  G.accepting=true; KIT.armIdle(idle);
+}
+$('mSay').onclick=()=>{ if(G&&G.m) KIT.say(G.m.text); }; $('reQ').onclick=()=>$('mSay').click();
+async function success(o){
+  const me=G; G.accepting=false; KIT.clearIdle(); o.el.classList.add('shown'); o.shot=true; KIT.sfx.ok(); KIT.face('joy'); addPhoto(objPic(o)); $('ph').className='ph'; $('ph').innerHTML=objPic(o);
+  const star=1+(G.wrong===0&&!G.usedLens?1:0); const g=KIT.line('great'); KIT.bubble(g.t+(g.lang==='ko'?`<span class="en">${g.en}</span>`:'')); await KIT.say(g.t,g.lang); if(G!==me) return;
+  await KIT.tutor('ask',{keep:true}); if(G!==me) return;
+  const spoke=await KIT.speak({phrase:G.m.phrase, keys:G.m.keys, isAlive:()=>G===me}); if(G!==me) return;
+  record(star+(spoke?1:0), spoke); KIT.sfx.coin(); $('nextBtn').style.display='block';
+}
+function record(s,spoke){ G.stars[G.idx]=s; G.photos.push(objPic(G.m.target)); G.words.push({text:G.m.phrase, phrase:G.m.phrase, stars:s, spoke}); KIT.renderProgress(G); }
+$('nextBtn').onclick=()=>{ G.idx++; nextMission(); };
+
+async function runDemo(){
+  KIT.demoStart(); const me=G; G.lv=1; G.m=makeMission(5,1); render(); renderCard(G.m); G.accepting=false;
+  const steps=[ async()=>{ await KIT.tutor('demo1',{keep:true}); },
+    async()=>{ const o=G.m.target; await focusOn(o); KIT.showHand($('vf'),true); await sleep(700); },
+    async()=>{ await KIT.tutor('demo2',{keep:true}); KIT.showHand($('shutter'),true); await sleep(700); KIT.sfx.shutter(); $('flash').style.opacity=.85; setTimeout(()=>$('flash').style.opacity=0,150); G.m.target.el.classList.add('shown'); KIT.sfx.ok(); KIT.face('joy'); await sleep(600); },
+    async()=>{ KIT.hideHand(); await KIT.tutor('demoEnd',{keep:true}); } ];
+  for(const s of steps){ if(KIT.skipDemo||G!==me) break; await s(); }
+  KIT.demoEnd(); if(G){ G.lv=KIT.levelFor(G.age); KIT.face('neutral'); }
+}
+async function finish(){ KIT.clearIdle(); const hero=G.photos.slice(-4).map(p=>`<div class="photo" style="height:100%;width:auto;aspect-ratio:1">${p}</div>`).join('')+G.friends.slice(0,2).map(f=>`<img src="assets/seed_${f}.png">`).join('');
+  await KIT.result(G,{title:'Look at our album!', heroHtml:hero, icon:'📔', unit:'스티커', collName:'My Album', per:3}); }
+KIT.init({prefix:'ps', onStart:startRound, onExit:()=>{ if(G) clearInterval(G.edgeT); G=null; }});
+addEventListener('resize',()=>{ if(G&&G.m&&$('game').classList.contains('on')) { applyPan(); placeVF(G.vx,G.vy); } });
+window.__ps=()=>G;
+</script>
+</body>
+</html>
