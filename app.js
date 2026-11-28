@@ -2,7 +2,7 @@
 'use strict';
 (function () {
   const $ = (id) => document.getElementById(id);
-  const TYPE_CHIPS = ['전체', '1인', '2인', '말하기', '레슨팩', '문법'];
+  const TYPE_CHIPS = ['전체', '어휘·생각', '보드게임', '1인', '2인', '교실', '말하기', '레슨팩', '문법'];
   const STATUS_CHIPS = ['전체', '있음', '일부', '없음', '해당 없음'];
   const PRIO_CHIPS = ['전체', '높음', '중간', '낮음'];
   const state = { games: [], type: '전체', query: '', game: '전체', status: '전체', prio: '전체', selected: new Set(), trdCache: {} };

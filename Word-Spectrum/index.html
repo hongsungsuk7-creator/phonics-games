@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Word Spectrum</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<link rel="stylesheet" href="../_shared/kit.css">
+<style>
+  :root { --s1:#ffe27a; --s2:#f5b82e; --ss:#b97a0a; --st:#4a2c00; --ink:#4a2c00; --b1:#ffb36b; --b2:#f0812a; --bs:#b3561a; --a1:#7ec8a9; --a2:#3e9c78; --as:#25684f; }
+  #stage { background: linear-gradient(#fff4d6 0%, #ffe9b8 58%, #e8c48c 58%, #d9ad6f 100%); }
+  .wall { position:absolute; left:0; right:0; top:0; height:58%; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.35) 0 calc(var(--u)*6), transparent calc(var(--u)*6) calc(var(--u)*12)); pointer-events:none; }
+  .rug { position:absolute; left:calc(var(--u)*14); right:calc(var(--u)*14); top:calc(var(--u)*62); height:calc(var(--u)*12); border-radius:50%; background:radial-gradient(#f39a86,#d9705a); opacity:.55; pointer-events:none; }
+  .famrow { position:absolute; bottom:calc(var(--u)*3); display:flex; align-items:flex-end; gap:calc(var(--u)*1); }
+  .famrow img { display:block; }
+  /* mat */
+  #mat { position:absolute; left:calc(var(--u)*24); width:calc(var(--u)*130); top:calc(var(--u)*38); height:calc(var(--u)*24); display:flex; gap:calc(var(--u)*1); padding:calc(var(--u)*1);
+    border-radius:calc(var(--u)*3); background:linear-gradient(90deg,#9fd2ff,#fff2b3 50%,#ffb08a); box-shadow:0 calc(var(--u)*1) 0 #c48a4a, 0 calc(var(--u)*1.6) calc(var(--u)*2.4) rgba(0,0,0,.25); z-index:5; }
+  #mat.temp { background:linear-gradient(90deg,#8fd0ff,#e9f6ff 45%,#ffd38a 55%,#ff8a6a); }
+  #mat.speed { background:linear-gradient(90deg,#c8e6b0,#fff2b3 50%,#ffb0d0); }
+  #mat.height { background:linear-gradient(90deg,#c9c2ff,#fff2b3 50%,#a6ecd7); }
+  .slot { flex:1; border-radius:calc(var(--u)*2); background:rgba(255,255,255,.55); border:calc(var(--u)*.45) dashed rgba(120,80,30,.35); display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer; }
+  .slot.hi { background:rgba(255,255,255,.9); border-style:solid; border-color:#f0812a; }
+  .slot.secret::after { content:"★"; position:absolute; top:calc(var(--u)*-.5); right:calc(var(--u)*.8); color:#f5b82e; font-size:calc(var(--u)*3); }
+  .slot.reveal { background:#fff3b0; box-shadow:0 0 0 calc(var(--u)*.7) #f5b82e, 0 0 calc(var(--u)*3) #ffd24d; }
+  .slot.guess { background:#d9f3ff; border-style:solid; border-color:#3d7be0; }
+  .slot .num { position:absolute; bottom:calc(var(--u)*.4); font-size:calc(var(--u)*1.8); color:rgba(80,50,10,.45); }
+  /* ends */
+  .end { position:absolute; top:calc(var(--u)*28); width:calc(var(--u)*21); height:calc(var(--u)*36); display:flex; flex-direction:column; align-items:center; justify-content:flex-end; z-index:6; pointer-events:none; }
+  #endL { left:calc(var(--u)*2); } #endR { right:calc(var(--u)*2); }
+  .end img { max-height:calc(var(--u)*28); max-width:calc(var(--u)*21); }
+  .end .emo { font-size:calc(var(--u)*13); }
+  .end .w { margin-top:calc(var(--u)*.4); background:rgba(255,255,255,.9); border-radius:calc(var(--u)*2); padding:0 calc(var(--u)*1.6); font-size:calc(var(--u)*3); visibility:hidden; }
+  .end.words .w { visibility:visible; }
+  .end.glow img, .end.glow .emo { animation: wave .7s infinite; filter:drop-shadow(0 0 calc(var(--u)*2) #ffd24d); }
+  @keyframes wave { 50% { transform:rotate(-6deg) translateY(calc(var(--u)*-1)); } }
+  .end.clap img, .end.clap .emo { animation: kbounce .6s; }
+  /* pictures */
+  #drawer { position:absolute; left:calc(var(--u)*30); right:calc(var(--u)*30); bottom:calc(var(--u)*3); height:calc(var(--u)*20); display:flex; gap:calc(var(--u)*2); justify-content:center; align-items:center;
+    background:rgba(255,255,255,.55); border-radius:calc(var(--u)*3); box-shadow:inset 0 calc(var(--u)*.6) 0 rgba(0,0,0,.08); z-index:7; }
+  .pic { width:calc(var(--u)*16); height:calc(var(--u)*16); border-radius:calc(var(--u)*2.4); background:#fff; display:flex; align-items:center; justify-content:center; position:relative; cursor:grab; touch-action:none;
+    box-shadow:0 calc(var(--u)*.7) 0 #e0c79a, 0 calc(var(--u)*1) calc(var(--u)*1.5) rgba(0,0,0,.2); transition: transform .25s; }
+  .pic .emo { font-size:calc(var(--u)*10); pointer-events:none; }
+  .pic .nm { position:absolute; bottom:calc(var(--u)*-.2); font-size:calc(var(--u)*2); color:#7a5a2a; pointer-events:none; }
+  .pic.sel { box-shadow:0 0 0 calc(var(--u)*.8) #3d7be0, 0 calc(var(--u)*1) calc(var(--u)*1.5) rgba(0,0,0,.2); transform:translateY(calc(var(--u)*-1.5)); }
+  .pic.mark { box-shadow:0 0 0 calc(var(--u)*.8) #f0812a; }
+  .pic.ok { box-shadow:0 0 0 calc(var(--u)*.8) #2fb457, 0 0 calc(var(--u)*3) #7be08a; }
+  .slot .pic { width:calc(var(--u)*15); height:calc(var(--u)*15); }
+  .pic.hop { animation: hop .6s; } @keyframes hop { 40% { transform:translateY(calc(var(--u)*-4)); } }
+  .ghost { position:absolute; z-index:80; pointer-events:none; transform:translate(-50%,-80%); filter:drop-shadow(0 calc(var(--u)*1) calc(var(--u)*1) rgba(0,0,0,.35)); }
+  #okBtn { position:absolute; left:calc(var(--u)*6); bottom:calc(var(--u)*6); display:none; z-index:20; }
+  #hintCard { position:absolute; left:50%; top:calc(var(--u)*12); transform:translateX(-50%); width:calc(var(--u)*30); height:calc(var(--u)*22); background:#fff; border-radius:calc(var(--u)*2.6); display:none; z-index:9;
+    flex-direction:column; align-items:center; justify-content:center; box-shadow:0 calc(var(--u)*.8) 0 #e0c79a, 0 calc(var(--u)*1.2) calc(var(--u)*2) rgba(0,0,0,.25); cursor:pointer; }
+  #hintCard .emo { font-size:calc(var(--u)*11); } #hintCard .w { font-size:calc(var(--u)*3.2); }
+  #hintCard .tag { position:absolute; top:calc(var(--u)*-2.4); background:#f5b82e; color:#4a2c00; border-radius:calc(var(--u)*2); padding:0 calc(var(--u)*1.6); font-size:calc(var(--u)*2.2); }
+  #sent { position:absolute; left:calc(var(--u)*30); right:calc(var(--u)*30); bottom:calc(var(--u)*3); height:calc(var(--u)*20); display:none; gap:calc(var(--u)*2); justify-content:center; align-items:center; z-index:8; }
+  .scard { background:#fff; border-radius:calc(var(--u)*2.4); padding:calc(var(--u)*1.6) calc(var(--u)*2.6); font-size:calc(var(--u)*3.2); cursor:pointer; position:relative; box-shadow:0 calc(var(--u)*.7) 0 #e0c79a; }
+  .scard.ok { box-shadow:0 0 0 calc(var(--u)*.8) #2fb457; } .scard.dim { opacity:.35; pointer-events:none; }
+  .tutor { right:calc(var(--u)*3); top:calc(var(--u)*11); height:calc(var(--u)*22); }
+  .tutor.nod { animation: nod .9s; } @keyframes nod { 25% { transform:translateY(calc(var(--u)*1.6)) scaleY(.94);} 50% { transform:none;} 75% { transform:translateY(calc(var(--u)*1.6)) scaleY(.94);} }
+  .bubble { left:calc(var(--u)*24); top:calc(var(--u)*12); width:calc(var(--u)*40); }
+  .bubble::after { left:auto; right:calc(var(--u)*-2.4); bottom:auto; top:calc(var(--u)*2); border-top-color:transparent; border-left-color:#fff; }
+  #teamPill { display:none; } #teamPill.on { display:flex; }
+  #modeBox { position:absolute; left:50%; bottom:calc(var(--u)*33); transform:translateX(-50%); display:flex; gap:calc(var(--u)*1.2); z-index:20; background:rgba(255,255,255,.78); padding:calc(var(--u)*.8); border-radius:calc(var(--u)*4); }
+  .close { position:absolute; left:50%; top:calc(var(--u)*30); transform:translateX(-50%); font-size:calc(var(--u)*4); color:#b3561a; z-index:9; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="wall"></div><div class="rug"></div>
+
+  <section class="screen on" id="title">
+    <div class="topbar"><div class="row"><button class="btn alt" id="keyBtn">🔑</button></div><div class="row"><button class="btn alt" id="langBtn">한국어</button><button class="btn alt sndBtn">🔊</button></div></div>
+    <div class="logo">Word Spectrum<small>워드 스펙트럼 · 반대말 막대 위 알맞은 자리에 놓아요</small></div>
+    <div class="famrow" style="left:calc(var(--u)*4)"><img src="assets/feet.png" style="height:calc(var(--u)*20)" alt="Little Feet"><img src="assets/big.png" style="height:calc(var(--u)*40)" alt="Big House"></div>
+    <div class="famrow" style="right:calc(var(--u)*4)"><img src="assets/flat.png" style="height:calc(var(--u)*11)" alt="Flat One"><img src="assets/long.png" style="height:calc(var(--u)*40)" alt="Long One"></div>
+    <div class="coll" style="top:calc(var(--u)*14);right:calc(var(--u)*5)"><div class="k">🏷️</div>Size Wall<br><b id="collCount">0</b></div>
+    <div id="modeBox"><button class="chip on" data-mode="solo">혼자 하기</button><button class="chip" data-mode="class">교실 모드</button></div>
+    <div class="agebox">연령(보호자 설정) <button class="chip" data-age="5">5세</button><button class="chip" data-age="6">6세</button><button class="chip" data-age="7">7세</button><button class="chip" data-age="8">초1</button></div>
+    <button class="btn start" id="startBtn">START</button>
+  </section>
+
+  <section class="screen" id="game">
+    <div class="topbar">
+      <div class="row"><div class="pill">⭐ <span id="starSum">0</span></div><div class="progress" id="progress"></div></div>
+      <div class="row"><div class="pill" id="teamPill">🔴 빨강 팀</div><div class="pill" id="lvPill">LEVEL 1</div><button class="btn alt" id="reQ">💬</button></div>
+      <div class="row"><button class="btn alt sndBtn">🔊</button><button class="btn" id="exitBtn">✕</button></div>
+    </div>
+    <div class="end" id="endL"><div class="fig"></div><div class="w"></div></div>
+    <div class="end" id="endR"><div class="fig"></div><div class="w"></div></div>
+    <div id="mat"></div>
+    <div id="hintCard"><div class="tag">Hint</div><div class="emo"></div><div class="w"></div></div>
+    <div class="close" id="closeTxt"></div>
+    <div id="drawer" data-hide-on-speak></div>
+    <div id="sent" data-hide-on-speak></div>
+    <button class="btn green big" id="okBtn">OK ✔</button>
+    <img class="tutor" id="tutor" src="assets/big.png" alt="Big House">
+    <div class="bubble" id="bubble"></div>
+  </section>
+
+  <section class="screen" id="result">
+    <div class="card-res"><h2 id="resTitle">Size Wall!</h2><div class="res-hero" id="resHero"></div><div class="bigstars" id="resStars"></div><div class="resmeta" id="resMeta"></div><div id="resLv"></div>
+      <div class="reswords" id="resWords"></div><div class="resmeta" id="resReward"></div>
+      <div class="resbtns"><button class="btn alt" id="homeBtn">🏠 Home</button><button class="btn" id="againBtn">↻ Again</button><button class="btn green" id="nextRoundBtn">Next ▶</button></div></div>
+  </section>
+</div>
+<script src="../_shared/kit.js"></script>
+<script>
+'use strict';
+const {$, sleep, rnd, shuffle} = KIT;
+const ageText = a => a===8 ? '초1' : a+'세';
+KIT.L = {
+  hello:{en:"Hi, I'm Big House! Big or small? Let's find out!", ko:'안녕, 나는 빅하우스야! 클까 작을까? 같이 알아보자!'},
+  demo1:{en:'Big is here. Small is there.', ko:'큰 건 여기, 작은 건 저기야.'},
+  demo2:{en:'Put the picture in the right place!', ko:'그림을 알맞은 자리에 놓아 봐!'},
+  order6:{en:'Small to big, please!', ko:'작은 것부터 큰 것까지 놓아 줘!'},
+  place7:{en:'Put each picture in the right place!', ko:'그림을 하나씩 알맞은 자리에 놓아 줘!'},
+  pick7:{en:'Which one is right?', ko:'어느 문장이 맞을까?'},
+  guess:{en:'Listen to the hint. Where is the spot?', ko:'힌트를 듣고 자리를 짐작해 봐!'},
+  hintEnd:{en:'Look over here!', ko:'여기를 봐!'},
+  close:{en:'Close! Just a little more.', ko:'아깝다! 조금만 더.'},
+  idle:{en:'Drag the picture onto the mat!', ko:'그림을 매트 위로 끌어 봐!'},
+  idleGuess:{en:'Tap a spot on the mat!', ko:'매트에서 자리를 하나 눌러 봐!'},
+  great:{en:["That's right!",'Big and small, you know it all!','Good thinking!','Wonderful!'], ko:['맞았어!','크고 작은 걸 다 아는구나!','생각 잘했어!','멋져!']},
+  red:{en:'Red team, your turn!', ko:'빨강 팀 차례야!'}, blue:{en:'Blue team, your turn!', ko:'파랑 팀 차례야!'},
+  together:{en:'Everybody, say it together!', ko:'다 같이 말해 보자!'},
+  clear:{en:'Look at our Size Wall!', ko:'우리 크기 벽을 봐!'},
+  levelUp:{en:'Level up! The mat is getting longer!', ko:'레벨 업! 매트가 더 길어져!'},
+};
+KIT.face = f => { const t=$('tutor'); if(f==='joy') { t.classList.remove('nod'); void t.offsetWidth; t.classList.add('nod'); } if(f==='oops') KIT.anim(t,'oops'); };
+
+/* ---------- data (TRD 4-1 axes, 5-2 degree values 1~5) ---------- */
+const AXES = {
+  size:  {lo:'small', hi:'big',  loC:'smaller', hiC:'bigger', ko:['작은 쪽','큰 쪽'], L:{img:'feet.png'}, R:{img:'big.png'}},
+  height:{lo:'short', hi:'tall', loC:'shorter', hiC:'taller', ko:['낮은 쪽','높은 쪽'], L:{img:'flat.png'}, R:{img:'long.png'}},
+  temp:  {lo:'cold',  hi:'hot',  loC:'colder',  hiC:'hotter', ko:['차가운 쪽','뜨거운 쪽'], L:{e:'🧊'}, R:{e:'🔥'}},
+  speed: {lo:'slow',  hi:'fast', loC:'slower',  hiC:'faster', ko:['느린 쪽','빠른 쪽'], L:{e:'🐌'}, R:{e:'🚀'}},
+};
+const ITEMS = {
+  size:  [['ant','🐜',1],['ladybug','🐞',1],['mouse','🐭',1],['rabbit','🐇',2],['cat','🐈',3],['dog','🐕',3],['horse','🐴',4],['cow','🐄',4],['elephant','🐘',5],['whale','🐳',5]],
+  height:[['mushroom','🍄',1],['sprout','🌱',1],['flower','🌷',2],['dog','🐕',2],['man','👨',3],['house','🏠',4],['giraffe','🦒',5],['tree','🌳',5],['building','🏢',5]],
+  temp:  [['snowman','⛄',1],['ice cream','🍦',1],['milk','🥛',2],['water','💧',3],['soup','🍲',4],['mug','☕',4],['sun','☀️',5],['volcano','🌋',5]],
+  speed: [['turtle','🐢',1],['man','🚶',2],['bike','🚲',3],['horse','🐴',4],['car','🚗',4],['train','🚄',5],['plane','✈️',5]],
+};
+const AGE_AXES = {5:['size'], 6:['size','height','temp'], 7:['size','height','temp','speed'], 8:['size','height','temp','speed']};
+const QCOUNT = {5:6, 6:6, 7:6, 8:8};
+const LV = { // TRD 6-2
+  1:{n:2,d:3,axes:1,tol:1,sent:2,slots8:5}, 2:{n:3,d:2,axes:1,tol:1,sent:2,slots8:5}, 3:{n:3,d:2,axes:2,tol:1,sent:2,slots8:5},
+  4:{n:3,d:2,axes:2,tol:1,sent:3,slots8:5}, 5:{n:4,d:1,axes:3,tol:0,sent:3,slots8:7}, 6:{n:4,d:1,axes:3,tol:0,sent:3,slots8:7} };
+const VALS5 = lv => lv<=2 ? [1,5] : [1,2,4,5];
+const it = (axis,a) => ({axis, w:a[0], e:a[1], v:a[2], id:a[0]+'-'+axis});
+const the = w => 'The '+w;
+
+function pickSpread(axis, n, d){ // n items with pairwise value gap >= d
+  for(let t=0;t<200;t++){ const vals=shuffle([1,2,3,4,5]).slice(0,n).sort((a,b)=>a-b); if(vals.every((v,i)=>i===0||v-vals[i-1]>=d)){
+    const out=vals.map(v=>rnd(ITEMS[axis].filter(x=>x[2]===v))); if(new Set(out.map(o=>o[0])).size===n) return out.map(a=>it(axis,a)); } }
+  return null;
+}
+function makeQ(age, lv, axis){
+  const P=LV[lv];
+  if(age===5){ const pool=ITEMS.size.filter(x=>VALS5(lv).includes(x[2])); const a=it('size',rnd(pool)); return {type:'two', axis:'size', slots:2, items:[a], ans:{[a.id]:a.v<3?0:1}}; }
+  if(age===6){ const items=pickSpread(axis,P.n,P.d); const sorted=[...items].sort((a,b)=>a.v-b.v); const ans={}; sorted.forEach((x,i)=>ans[x.id]=i); return {type:'order', axis, slots:items.length, items:shuffle(items), ans}; }
+  if(age===7){ const items=pickSpread(axis,Math.min(P.n,4),P.d); const ans={}; items.forEach(x=>ans[x.id]=x.v-1); return {type:'bar', axis, slots:5, items:shuffle(items), ans, tol:P.tol}; }
+  // 초1: hidden spot
+  const S=P.slots8, mid=(S-1)/2; let secret; do { secret=Math.floor(Math.random()*S); } while(secret===mid);
+  const v=1+secret*4/(S-1); const best=Math.min(...ITEMS[axis].map(x=>Math.abs(x[2]-v))); const hint=it(axis, rnd(ITEMS[axis].filter(x=>Math.abs(x[2]-v)===best)));
+  return {type:'hidden', axis, slots:S, items:[], secret, hint, side: secret>mid?'hi':'lo'};
+}
+
+/* ---------- board ---------- */
+let G=null, drag=null, selected=null;
+function axisWords(ax){ return AXES[ax]; }
+function setupBoard(q){
+  const A=AXES[q.axis];
+  const mat=$('mat'); mat.className=q.axis==='size'?'':q.axis; mat.innerHTML='';
+  for(let i=0;i<q.slots;i++){ const s=document.createElement('div'); s.className='slot'; s.dataset.i=i; if(q.type==='hidden'||q.type==='bar') s.innerHTML=`<span class="num">${'·'.repeat(0)}</span>`; s.onclick=()=>onSlotTap(i); mat.appendChild(s); }
+  const fig=(el,o)=>{ el.querySelector('.fig').innerHTML = o.img? `<img src="assets/${o.img}" alt="">` : `<div class="emo">${o.e}</div>`; };
+  fig($('endL'),A.L); fig($('endR'),A.R); $('endL').querySelector('.w').textContent=A.lo; $('endR').querySelector('.w').textContent=A.hi;
+  ['endL','endR'].forEach(id=>{ $(id).classList.toggle('words', G.age>=7); $(id).classList.remove('glow','clap'); });
+  $('hintCard').style.display='none'; $('sent').style.display='none'; $('drawer').style.display='flex'; $('closeTxt').textContent='';
+  $('drawer').innerHTML=''; q.place={}; q.items.forEach(x=>{ q.place[x.id]=null; $('drawer').appendChild(makePic(x)); });
+  $('okBtn').style.display = (q.type==='order'||q.type==='bar') ? 'block' : 'none'; $('okBtn').disabled=true;
+}
+function makePic(x){ const d=document.createElement('div'); d.className='pic'; d.dataset.id=x.id; d.innerHTML=`<div class="emo">${x.e}</div>`+(G.age>=7?`<div class="nm">${x.w}</div>`:'');
+  d.addEventListener('pointerdown', e=>picDown(e,d)); return d; }
+const itemById = id => G.q.items.find(x=>x.id===id);
+function render(){ const q=G.q; document.querySelectorAll('#mat .slot').forEach(s=>{ [...s.querySelectorAll('.pic')].forEach(p=>p.remove()); });
+  q.items.forEach(x=>{ const el=document.querySelector(`.pic[data-id="${CSS.escape(x.id)}"]`); const at=q.place[x.id];
+    if(at==null){ if(el.parentElement!==$('drawer')) $('drawer').appendChild(el); } else { const s=$('mat').children[at]; s.appendChild(el); } });
+  if(q.type==='order'||q.type==='bar') $('okBtn').disabled = q.items.some(x=>q.place[x.id]==null); }
+
+/* drag + tap (TRD 9: snap within 8u, finger offset 6u) */
+function picDown(e, el){ if(!G||!G.accepting||G.q.type==='hidden') return; e.preventDefault(); touched();
+  drag={el, id:el.dataset.id, x:e.clientX, y:e.clientY, moved:false}; el.setPointerCapture?.(e.pointerId);
+  el.onpointermove=ev=>{ if(!drag) return; if(!drag.moved && Math.hypot(ev.clientX-drag.x, ev.clientY-drag.y)>8){ drag.moved=true; showGhost(el); el.style.opacity=.3; } if(drag.moved) moveGhost(ev.clientX, ev.clientY); hiSlot(ev.clientX, ev.clientY); };
+  el.onpointerup=ev=>{ const d=drag; drag=null; el.onpointermove=null; el.onpointerup=null; el.style.opacity=1; hideGhost(); hiSlot(-1,-1); if(!d) return;
+    if(!d.moved){ // tap: select / return
+      if(G.q.place[d.id]!=null && !selected){ G.q.place[d.id]=null; render(); KIT.sfx.click(); return; }
+      selected = selected===d.id ? null : d.id; document.querySelectorAll('.pic').forEach(p=>p.classList.toggle('sel', p.dataset.id===selected)); KIT.sfx.click(); return; }
+    const i=slotAt(ev.clientX, ev.clientY); if(i!=null) drop(d.id,i); };
+  el.onpointercancel=()=>{ drag=null; el.style.opacity=1; hideGhost(); }; }
+function slotAt(x,y){ const r=$('mat').getBoundingClientRect(), pad=8*KIT.u; if(x<r.left-pad||x>r.right+pad||y<r.top-pad-6*KIT.u||y>r.bottom+pad) return null;
+  let best=null, bd=1e9; [...$('mat').children].forEach((s,i)=>{ const b=s.getBoundingClientRect(); const d=Math.abs(x-(b.left+b.width/2)); if(d<bd){ bd=d; best=i; } }); return best; }
+function hiSlot(x,y){ const i=drag&&drag.moved? slotAt(x,y) : null; [...$('mat').children].forEach((s,j)=>s.classList.toggle('hi', j===i)); }
+function showGhost(el){ let g=$('ghost'); if(!g){ g=document.createElement('div'); g.id='ghost'; g.className='ghost'; $('stage').appendChild(g); } g.innerHTML=el.outerHTML; g.style.display='block'; }
+function moveGhost(x,y){ const s=$('stage').getBoundingClientRect(), g=$('ghost'); g.style.left=(x-s.left)+'px'; g.style.top=(y-s.top)+'px'; }
+function hideGhost(){ const g=$('ghost'); if(g) g.style.display='none'; }
+function onSlotTap(i){ if(!G||!G.accepting) return; touched(); const q=G.q;
+  if(q.type==='hidden') return guess(i);
+  if(selected){ const id=selected; selected=null; document.querySelectorAll('.pic').forEach(p=>p.classList.remove('sel')); drop(id,i); } }
+function drop(id, i){ const q=G.q;
+  if(q.type==='order'){ const occ=Object.keys(q.place).find(k=>q.place[k]===i && k!==id); if(occ) q.place[occ]=null; }
+  q.place[id]=i; KIT.sfx.pop(); render(); if(q.type==='two') judge(); }
+
+/* ---------- judging (TRD 4-3) ---------- */
+function sentence(x, side){ const A=AXES[x.axis]; return `${the(x.w)} is ${side==='hi'?A.hi:A.lo}.`; }
+async function judge(){
+  const q=G.q, me=G; if(!G.accepting) return; G.accepting=false; KIT.clearIdle();
+  const tol = q.type==='bar' ? q.tol : 0;
+  const bad = q.items.filter(x=>Math.abs(q.place[x.id]-q.ans[x.id])>tol);
+  const closeOnly = q.type==='bar' && tol===0 && bad.length && bad.every(x=>Math.abs(q.place[x.id]-q.ans[x.id])===1);
+  if(!bad.length || closeOnly){
+    if(closeOnly){ G.close=true; $('closeTxt').textContent='Close!'; await KIT.tutor('close'); if(G!==me) return; bad.forEach(x=>q.place[x.id]=q.ans[x.id]); render(); }
+    return success();
+  }
+  G.wrong++; KIT.sfx.bad(); KIT.face('oops');
+  bad.forEach(x=>{ const el=document.querySelector(`.pic[data-id="${CSS.escape(x.id)}"]`); KIT.anim(el,'shake'); });
+  await sleep(450); if(G!==me) return;
+  if(G.wrong>=3){ q.items.forEach(x=>q.place[x.id]=q.ans[x.id]); render(); await sleep(400); const x=q.items[0]; await KIT.sayLine(phraseFor(x, true).phrase); if(G!==me) return; record(0,false, q.items[0]); return nextQ(); }
+  bad.forEach(x=>q.place[x.id]=null); render();
+  const A=AXES[q.axis];
+  if(G.wrong===1){ await KIT.sayLine(`Hmm, look again. Is it ${A.hi} or ${A.lo}?`, `음, 다시 봐. ${A.ko[1]}일까, ${A.ko[0]}일까?`); }
+  else { const x=bad[0]; const side=q.ans[x.id] >= (q.slots-1)/2 ? 'endR' : 'endL'; $(side).classList.add('glow'); await KIT.tutor('hintEnd'); }
+  if(G!==me) return; G.accepting=true; KIT.armIdle(idle);
+}
+function phraseFor(x, forceSimple){ const A=AXES[x.axis]; const side = x.v>=3 ? 'hi':'lo';
+  if(G.age===5) return {phrase: side==='hi'?A.hi:A.lo, keys:[side==='hi'?A.hi:A.lo], say:sentence(x,side)};
+  return {phrase: sentence(x,side), keys:[x.w.split(' ').pop(), side==='hi'?A.hi:A.lo], say:sentence(x,side)}; }
+async function success(){
+  const q=G.q, me=G; KIT.sfx.ok(); KIT.face('joy');
+  q.items.forEach(x=>{ const el=document.querySelector(`.pic[data-id="${CSS.escape(x.id)}"]`); el.classList.add('ok','hop'); });
+  const x = q.items[0], sideEl = x.v>=3 ? 'endR':'endL'; $(sideEl).classList.add('clap');
+  const g=KIT.line('great'); KIT.bubble(g.t+(g.lang==='ko'?`<span class="en">${g.en}</span>`:'')); await KIT.say(g.t,g.lang); if(G!==me) return;
+  let star = 1 + (G.wrong===0 && !G.close ? 1 : 0);
+  if(q.type==='bar'){ return pickSentence(star); }
+  const pf = phraseFor(q.type==='order' ? [...q.items].sort((a,b)=>b.v-a.v)[0] : x);
+  await KIT.sayLine(pf.say); if(G!==me) return;
+  await speakStep(star, pf, q.type==='order' ? [...q.items].sort((a,b)=>b.v-a.v)[0] : x);
+}
+async function speakStep(star, pf, x){ const me=G;
+  if(G.mode==='class'){ await KIT.tutor('together'); if(G!==me) return; await KIT.say(pf.phrase); if(G!==me) return; record(star,false,x,pf.phrase); return nextQ(); }
+  const spoke = await KIT.speak({phrase:pf.phrase, keys:pf.keys, isAlive:()=>G===me}); if(G!==me) return;
+  record(star+(spoke?1:0), spoke, x, pf.phrase); nextQ(); }
+
+/* 7세: comparison sentence (TRD 4-2) */
+async function pickSentence(star){
+  const q=G.q, me=G, A=AXES[q.axis]; const two=shuffle(q.items).slice(0,2).sort((a,b)=>b.v-a.v); const [a,b]=two; // a has larger value
+  const big = Math.random()<.5; const subj = big? a : b; const correct = `${the(subj.w)} is ${big?A.hiC:A.loC}.`;
+  const opts=[correct, `${the(subj.w)} is ${big?A.loC:A.hiC}.`]; if(LV[G.lv].sent>=3) opts.push(`${the((big?b:a).w)} is ${big?A.hiC:A.loC}.`);
+  document.querySelectorAll('.pic').forEach(p=>p.classList.toggle('mark', p.dataset.id===a.id||p.dataset.id===b.id));
+  $('drawer').style.display='none'; $('okBtn').style.display='none';
+  const box=$('sent'); box.innerHTML=''; box.style.display='flex';
+  shuffle(opts).forEach(s=>{ const c=document.createElement('div'); c.className='scard'; c.textContent=s; c.dataset.s=s; c.onclick=()=>chooseSent(c,s); box.appendChild(c); });
+  G.sent={correct, a:subj, keys:[subj.w.split(' ').pop(), big?A.hiC:A.loC], star, wrongS:0}; G.phase='sent';
+  await KIT.sayLine(`${the(a.w)} and ${the(b.w).toLowerCase()}.`); if(G!==me) return; await KIT.tutor('pick7'); if(G!==me) return; G.accepting=true; KIT.armIdle(idle);
+}
+async function chooseSent(card, s){ if(!G||!G.accepting||G.phase!=='sent') return; touched(); const me=G, S=G.sent;
+  KIT.say(s);
+  if(s===S.correct){ G.accepting=false; KIT.clearIdle(); card.classList.add('ok'); KIT.sfx.ok(); KIT.face('joy'); await sleep(900); if(G!==me) return;
+    const star = S.wrongS? Math.min(S.star,1) : S.star; G.phase='speak'; return speakStep(star, {phrase:S.correct, keys:S.keys}, S.a); }
+  S.wrongS++; KIT.sfx.bad(); card.classList.add('dim'); KIT.face('oops');
+  if(S.wrongS>=2){ G.accepting=false; const ok=[...$('sent').children].find(c=>c.dataset.s===S.correct); ok.classList.add('ok'); await KIT.sayLine(S.correct); if(G!==me) return; record(1,false,S.a,S.correct); return nextQ(); }
+  await KIT.sayLine('Hmm, look again.', '음, 다시 봐.');
+}
+
+/* 초1: hidden spot (TRD 4-2) */
+async function startHidden(){ const q=G.q, me=G; G.phase='guess';
+  const c=$('hintCard'); c.style.display='flex'; c.querySelector('.emo').textContent=q.hint.e; c.querySelector('.w').textContent=q.hint.w; c.onclick=()=>KIT.say(q.hint.w);
+  $('drawer').style.display='none';
+  if(G.mode==='class' || KIT.params.get('secret')) $('mat').children[q.secret].classList.add('secret');
+  await KIT.tutor('guess',{keep:true}); if(G!==me) return; await KIT.say(q.hint.w); if(G!==me) return; G.accepting=true; KIT.armIdle(idle); }
+async function guess(i){ const q=G.q, me=G; if(G.phase!=='guess') return; G.accepting=false; KIT.clearIdle(); G.phase='reveal';
+  const kids=$('mat').children; kids[i].classList.add('guess'); KIT.sfx.click(); await sleep(500); if(G!==me) return;
+  kids[q.secret].classList.add('reveal'); const dist=Math.abs(i-q.secret); const pts = dist===0?3: dist===1?2: dist===2?1:0;
+  const A=AXES[q.axis]; const adj = q.side==='hi'?A.hi:A.lo; const phrase=`${the(q.hint.w)} is ${adj}.`;
+  if(pts>=2){ KIT.sfx.ok(); KIT.face('joy'); const g=KIT.line('great'); KIT.bubble(g.t); await KIT.say(g.t,g.lang); }
+  else { KIT.face('oops'); await KIT.sayLine('Here is the spot!', '비밀 자리는 여기야!'); }
+  if(G!==me) return; KIT.toast(`${pts}점`); await KIT.sayLine(phrase); if(G!==me) return;
+  const star = pts===3?2 : pts===2?1 : 0; // TRD 4-4 note
+  await speakStep(star, {phrase, keys:[q.hint.w.split(' ').pop(), adj]}, q.hint);
+}
+
+/* ---------- flow ---------- */
+function touched(){ if(!G) return; KIT.clearIdle(); KIT.armIdle(idle); }
+async function idle(){ if(!G||!G.accepting) return; if(G.phase==='guess'){ await KIT.tutor('idleGuess'); KIT.showHand($('mat')); return; }
+  if(G.phase==='sent'){ await KIT.tutor('pick7'); KIT.showHand($('sent').firstChild); return; }
+  await KIT.tutor('idle'); const p=$('drawer').querySelector('.pic'); KIT.showHand(p||$('okBtn')); }
+let MODE='solo';
+document.querySelectorAll('.chip[data-mode]').forEach(c=>c.onclick=()=>{ MODE=c.dataset.mode; document.querySelectorAll('.chip[data-mode]').forEach(x=>x.classList.toggle('on',x===c)); });
+async function startRound(){
+  const age=KIT.SAVE.age, lv=KIT.levelFor(age); const n=LV[lv].axes; const pool=AGE_AXES[age]; const axes=shuffle(pool).slice(0,Math.min(n,pool.length));
+  G={age, lv, mode:MODE, total:QCOUNT[age], idx:0, stars:[], words:[], axes, team:0}; const me=G;
+  $('lvPill').textContent=`LEVEL ${lv} · ${ageText(age)}`; $('teamPill').classList.toggle('on', MODE==='class'); KIT.show('game'); KIT.renderProgress(G);
+  if(KIT.demoNeeded()) await runDemo(); if(G!==me) return; nextQ(true);
+}
+async function nextQ(first){
+  if(!first){ await sleep(700); }
+  if(!G) return; if(!first) G.idx++;
+  if(G.idx>=G.total) return finish();
+  const me=G; G.wrong=0; G.close=false; G.accepting=false; G.phase='place'; selected=null;
+  const axis=G.axes[G.idx % G.axes.length]; const q=G.q=makeQ(G.age,G.lv,axis); setupBoard(q); KIT.renderProgress(G);
+  if(G.mode==='class'){ G.team=G.idx%2; $('teamPill').textContent = G.team? '🔵 파랑 팀':'🔴 빨강 팀'; await KIT.tutor(G.team?'blue':'red'); if(G!==me) return; }
+  const A=AXES[q.axis]; KIT.bubble(`${A.hi}… ${A.lo}`+(KIT.SAVE.lang==='ko'?`<span class="en">${A.ko[1]}, ${A.ko[0]}!</span>`:''));
+  $('endR').classList.add('clap'); await KIT.say(A.hi); $('endR').classList.remove('clap'); $('endL').classList.add('clap'); await KIT.say(A.lo); $('endL').classList.remove('clap'); if(G!==me) return;
+  if(q.type==='hidden') return startHidden();
+  if(q.type==='order') await KIT.tutor('order6'); else if(q.type==='bar') await KIT.tutor('place7');
+  if(G!==me) return; for(const x of q.items){ await KIT.say(x.w); if(G!==me) return; }
+  if(G.lv<=2 && q.type!=='hidden'){ $('endL').classList.add('glow'); $('endR').classList.add('glow'); setTimeout(()=>{ $('endL').classList.remove('glow'); $('endR').classList.remove('glow'); },1800); }
+  G.accepting=true; KIT.armIdle(idle);
+}
+$('okBtn').onclick=()=>{ if(G&&G.accepting&&G.q&&(G.q.type==='order'||G.q.type==='bar')&&!$('okBtn').disabled) judge(); };
+function record(s, spoke, x, phrase){ G.stars[G.idx]=s; G.words.push({text:`${x.e} ${phrase||x.w}`, phrase:phrase||x.w, stars:s, spoke}); KIT.renderProgress(G); }
+$('reQ').onclick=()=>{ if(!G||!G.q) return; const q=G.q; if(q.type==='hidden') KIT.say(q.hint.w); else KIT.say(q.items.map(x=>x.w).join(', ')); };
+addEventListener('keydown',e=>{ if(!G||!G.accepting) return; if(e.key==='Enter') $('okBtn').click(); const n=parseInt(e.key); if(n>=1&&n<=7&&G.q.type==='hidden') guess(n-1); });
+
+async function runDemo(){
+  KIT.demoStart(); const me=G; const q=G.q={type:'two', axis:'size', slots:2, items:[it('size',['elephant','🐘',5])], ans:{'elephant-size':1}}; setupBoard(q); $('okBtn').style.display='none';
+  const steps=[ async()=>{ $('endR').classList.add('glow'); $('endL').classList.add('glow'); await KIT.tutor('demo1',{keep:true}); $('endR').classList.remove('glow'); $('endL').classList.remove('glow'); },
+    async()=>{ await KIT.say('Elephant!'); const p=$('drawer').querySelector('.pic'); KIT.showHand(p,true); await sleep(800); KIT.showHand($('mat').children[1],true); await sleep(900); q.place['elephant-size']=1; render(); KIT.sfx.pop(); },
+    async()=>{ KIT.face('joy'); await KIT.sayLine('The elephant is big!'); }, async()=>{ KIT.hideHand(); await KIT.tutor('demo2',{keep:true}); }, async()=>KIT.tutor('demoEnd',{keep:true}) ];
+  for(const s of steps){ if(KIT.skipDemo||G!==me) break; await s(); }
+  KIT.demoEnd();
+}
+async function finish(){ KIT.clearIdle(); const keep=$('qaLevel').value; if(G.mode==='class') $('qaLevel').value=String(G.lv); // TRD 6-3: class mode keeps level
+  await KIT.result(G,{title: G.mode==='class'?'우리 반 Size Wall!':'Size Wall!', heroHtml:'<img src="assets/feet.png"><img src="assets/big.png"><img src="assets/long.png"><img src="assets/flat.png">', icon:'🏷️', unit:'스티커', collName:'Size Wall', per:3});
+  $('qaLevel').value=keep; }
+KIT.init({prefix:'sp', onStart:startRound, onExit:()=>{ G=null; KIT.clearIdle(); }});
+window.__sp=()=>G;
+if(KIT.params.get('mode')==='class'){ MODE='class'; document.querySelectorAll('.chip[data-mode]').forEach(x=>x.classList.toggle('on',x.dataset.mode==='class')); }
+/* QA: solve the current step */
+window.__spAuto=()=>{ if(!G||!G.accepting) return 'wait'; const q=G.q;
+  if(G.phase==='guess'){ guess(q.secret); return 'guess'; }
+  if(G.phase==='sent'){ const c=[...$('sent').children].find(c=>c.dataset.s===G.sent.correct); c&&c.click(); return 'sent'; }
+  if(G.phase==='place'){ q.items.forEach(x=>q.place[x.id]=q.ans[x.id]); render(); if(q.type==='two') judge(); else $('okBtn').click(); return 'place'; } return 'none'; };
+</script>
+</body>
+</html>

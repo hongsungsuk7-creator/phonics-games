@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Letter Tiles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<link rel="stylesheet" href="../_shared/kit.css">
+<style>
+  :root { --s1:#ffc58a; --s2:#f28c28; --ss:#b35d0c; --st:#4a2400; --ink:#3a2410; --b1:#ffb36b; --b2:#f28c28; --bs:#b35d0c; --a1:#9b8cf0; --a2:#6f5ad6; --as:#4a3aa0; --bg:#cfe8ff; }
+  #stage { background: linear-gradient(#cfeaff 0%, #e8f6ff 30%, #7cc6f0 31%, #5fb2e6 52%, #a8d98a 53%, #8cc66f 100%); }
+  .ripple { position:absolute; left:0; right:0; top:31%; height:21%; background: repeating-linear-gradient(90deg, rgba(255,255,255,.0) 0 calc(var(--u)*6), rgba(255,255,255,.25) calc(var(--u)*6) calc(var(--u)*7)); animation: flow 6s linear infinite; opacity:.6; }
+  @keyframes flow { to { background-position: calc(var(--u)*-70) 0; } }
+  .modeBtn { position:absolute; left:calc(var(--u)*3); bottom:calc(var(--u)*4); z-index:21; }
+  .modeBtn.on { background:linear-gradient(#ffd96a,#f5a623); color:#5a3300; box-shadow:0 calc(var(--u)*.7) 0 #c07a0c; }
+  .tutor { left:calc(var(--u)*0); bottom:calc(var(--u)*2); height:calc(var(--u)*34); transition: transform .5s; }
+  .bubble { top:calc(var(--u)*12); }
+  #target { position:absolute; left:50%; transform:translateX(-50%); top:calc(var(--u)*11); height:calc(var(--u)*19); min-width:calc(var(--u)*19); padding:0 calc(var(--u)*2); background:#fff; border-radius:calc(var(--u)*3);
+    display:flex; align-items:center; justify-content:center; gap:calc(var(--u)*1); z-index:12; box-shadow:0 calc(var(--u)*.8) 0 #b9c9e0; }
+  #target .emo { font-size:calc(var(--u)*13); } #target .ear { font-size:calc(var(--u)*10); }
+  #mat { position:absolute; left:50%; transform:translateX(-50%); top:calc(var(--u)*36); padding:calc(var(--u)*1.6) calc(var(--u)*2.4); background:linear-gradient(#ff8a74,#e9654f); border-radius:calc(var(--u)*3);
+    display:flex; gap:calc(var(--u)*1.6); z-index:12; box-shadow:0 calc(var(--u)*.9) 0 #a8432f; }
+  .slot { width:calc(var(--u)*15); height:calc(var(--u)*15); border-radius:calc(var(--u)*2); background:rgba(255,255,255,.35); border:calc(var(--u)*.5) dashed rgba(255,255,255,.85); position:relative;
+    display:flex; align-items:center; justify-content:center; font-size:calc(var(--u)*9); color:rgba(80,40,20,.25); font-family:"Jua",sans-serif; }
+  .slot.big { color:#7a2d1c; font-size:calc(var(--u)*10); background:rgba(255,255,255,.75); border-style:solid; }
+  .slot.pre { color:rgba(70,60,60,.45); background:rgba(255,255,255,.55); border-style:solid; }
+  .slot.glow { animation: kglow 1s infinite; }
+  .tile { width:calc(var(--u)*13); height:calc(var(--u)*13); border-radius:calc(var(--u)*2); background:linear-gradient(#ffc58a,#f29a4a); color:#4a2400; font-size:calc(var(--u)*8.4);
+    display:flex; align-items:center; justify-content:center; font-family:"Jua",sans-serif; cursor:grab; position:relative; touch-action:none;
+    box-shadow: inset 0 calc(var(--u)*-.8) 0 #c8702a, 0 calc(var(--u)*.6) calc(var(--u)*1) rgba(0,0,0,.25); }
+  .tile::before, .tile::after { content:""; position:absolute; top:50%; width:calc(var(--u)*2.2); height:calc(var(--u)*2.2); margin-top:calc(var(--u)*-1.1); border-radius:50%; background:#9b5de5; box-shadow: inset 0 0 0 calc(var(--u)*.5) #d8c4ff; }
+  .tile::before { left:calc(var(--u)*-1.1); } .tile::after { right:calc(var(--u)*-1.1); }
+  .slot .tile { width:calc(var(--u)*14); height:calc(var(--u)*14); }
+  .tile.drag { position:fixed; z-index:80; pointer-events:none; transform:scale(1.1); }
+  .tile.glow { animation: kglow 1s infinite; }
+  .tile.in { animation: rollin .6s cubic-bezier(.3,1.4,.5,1) backwards; }
+  @keyframes rollin { from { transform:translateX(calc(var(--u)*60)) rotate(180deg); opacity:0; } }
+  #holder { position:absolute; left:calc(var(--u)*40); right:calc(var(--u)*30); top:calc(var(--u)*68); height:calc(var(--u)*24); background:linear-gradient(#c8b8ff,#9b8cf0); border-radius:calc(var(--u)*3);
+    display:flex; gap:calc(var(--u)*2.6); align-items:center; justify-content:center; flex-wrap:wrap; padding:0 calc(var(--u)*2); z-index:12; box-shadow:0 calc(var(--u)*.9) 0 #6f5ad6; }
+  #fold { position:absolute; left:calc(var(--u)*30); top:calc(var(--u)*70); height:calc(var(--u)*20); z-index:11; }
+  #roll { position:absolute; right:calc(var(--u)*14); top:calc(var(--u)*72); height:calc(var(--u)*15); z-index:13; transition: transform .8s; }
+  #roll.go { animation: rollb .8s; } @keyframes rollb { from { transform:translateX(calc(var(--u)*30)) rotate(360deg); } }
+  #arch { position:absolute; right:calc(var(--u)*6); top:calc(var(--u)*32); height:calc(var(--u)*22); z-index:11; }
+  #bridge { position:absolute; left:50%; top:calc(var(--u)*53); height:calc(var(--u)*6); width:0; transform:translateX(-50%); background:repeating-linear-gradient(90deg,#f29a4a 0 calc(var(--u)*6),#e07e2c calc(var(--u)*6) calc(var(--u)*6.4)); border-radius:calc(var(--u)*1.5); z-index:10; transition: width .7s; }
+  #bridge.on { width:calc(var(--u)*120); }
+  #walker { position:absolute; left:calc(var(--u)*28); top:calc(var(--u)*44); height:calc(var(--u)*10); z-index:13; opacity:0; }
+  #walker.go { opacity:1; animation: cross 1.6s linear forwards; } @keyframes cross { to { transform:translateX(calc(var(--u)*120)) rotate(720deg); } }
+  #nextBtn { position:absolute; right:calc(var(--u)*3); bottom:calc(var(--u)*4); display:none; z-index:30; }
+  #teamPill { display:none; } #teamPill.red { display:flex; background:#ffd9d3; } #teamPill.blue { display:flex; background:#d6e4ff; }
+  .scoreTeams { font-size:calc(var(--u)*3); margin-top:calc(var(--u)*.6); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="ripple"></div>
+
+  <section class="screen on" id="title">
+    <div class="topbar"><div class="row"><button class="btn alt" id="keyBtn">🔑</button></div><div class="row"><button class="btn alt" id="langBtn">한국어</button><button class="btn alt sndBtn">🔊</button></div></div>
+    <div class="logo">Letter Tiles<small>알파벳 타일 · 글자 타일을 이어 단어 다리를 만들어요</small></div>
+    <img src="assets/sb_stretch.png" style="position:absolute;left:calc(var(--u)*8);bottom:calc(var(--u)*4);height:calc(var(--u)*42)" alt="Stretch">
+    <img src="assets/sb_roll.png" style="position:absolute;right:calc(var(--u)*30);bottom:calc(var(--u)*5);height:calc(var(--u)*15)" alt="Roll">
+    <img src="assets/sb_fold.png" style="position:absolute;right:calc(var(--u)*16);bottom:calc(var(--u)*4);height:calc(var(--u)*19)" alt="Fold">
+    <img src="assets/sb_expand.png" style="position:absolute;right:calc(var(--u)*3);bottom:calc(var(--u)*22);height:calc(var(--u)*16)" alt="Expand">
+    <div class="coll"><div class="k">🌉</div>Bridge Map<br><b id="collCount">0</b></div>
+    <div class="agebox">연령(보호자 설정) <button class="chip" data-age="5">5세</button><button class="chip" data-age="6">6세</button><button class="chip" data-age="7">7세</button><button class="chip" data-age="8">초1</button></div>
+    <button class="btn alt modeBtn" id="modeBtn">🏫 교실 모드: 끔</button>
+    <button class="btn start" id="startBtn">START</button>
+  </section>
+
+  <section class="screen" id="game">
+    <div class="topbar">
+      <div class="row"><div class="pill">⭐ <span id="starSum">0</span></div><div class="progress" id="progress"></div></div>
+      <div class="row"><div class="pill" id="teamPill"></div><div class="pill" id="lvPill">LEVEL 1</div><button class="btn alt" id="reQ">💬</button><button class="btn alt" id="swapBtn" title="타일 바꾸기">🔄</button></div>
+      <div class="row"><button class="btn alt sndBtn">🔊</button><button class="btn" id="exitBtn">✕</button></div>
+    </div>
+    <div id="target"></div>
+    <div id="bridge"></div>
+    <div id="mat"></div>
+    <img id="arch" src="assets/sb_expand.png" alt="">
+    <img id="walker" src="assets/sb_roll.png" alt="">
+    <img id="fold" src="assets/sb_fold.png" alt="">
+    <div id="holder" data-hide-on-speak></div>
+    <img id="roll" src="assets/sb_roll.png" alt="">
+    <img class="tutor" id="tutor" src="assets/sb_stretch.png" alt="Stretch">
+    <div class="bubble" id="bubble"></div>
+    <button class="btn gold big" id="nextBtn">Next ▶</button>
+  </section>
+
+  <section class="screen" id="result">
+    <div class="card-res"><h2 id="resTitle">Look at all our bridges!</h2><div class="res-hero" id="resHero"></div><div class="bigstars" id="resStars"></div><div class="resmeta" id="resMeta"></div><div id="resLv"></div>
+      <div class="resmeta scoreTeams" id="resTeams"></div>
+      <div class="reswords" id="resWords"></div><div class="resmeta" id="resReward"></div>
+      <div class="resbtns"><button class="btn alt" id="homeBtn">🏠 Home</button><button class="btn" id="againBtn">↻ Again</button><button class="btn green" id="nextRoundBtn">Next ▶</button></div></div>
+  </section>
+</div>
+<script src="../_shared/kit.js"></script>
+<script>
+'use strict';
+const {$, sleep, rnd, shuffle} = KIT;
+KIT.L = {
+  hello:{en:"Hi, I'm Stretch! Let's build word bridges!", ko:'안녕, 나는 스트레치야! 단어 다리를 만들자!'},
+  demo1:{en:'Put the letters in the boxes.', ko:'글자를 칸에 놓아 봐.'},
+  demo2:{en:'Click, click! A word bridge!', ko:'딸깍딸깍! 단어 다리야!'},
+  matchCase:{en:'Find the little one!', ko:'작은 글자 짝을 찾아 봐!'},
+  almost:{en:'Almost! Listen again.', ko:'거의 다 왔어! 다시 들어 봐.'},
+  ask:{en:'Read it!', ko:'읽어 봐!'},
+  idle:{en:'Drag a letter to the box!', ko:'글자를 칸으로 끌어 봐!'},
+  great:{en:['Bridge built!','Click, click, perfect!','You made a word!','Great building!'], ko:['다리 완성!','딸깍딸깍 완벽해!','단어를 만들었어!','최고의 건설가!']},
+  clear:{en:'Look at all our bridges!', ko:'우리가 만든 다리들 좀 봐!'},
+  levelUp:{en:'Level up! Trickier letters this time!', ko:'레벨 업! 이번엔 헷갈리는 글자가 나와!'},
+  teamRed:{en:'Red team!', ko:'빨간 팀!'}, teamBlue:{en:'Blue team!', ko:'파란 팀!'},
+};
+KIT.COMMON_LINES.say={en:'Read it!', ko:'읽어 봐!'};
+KIT.face=f=>{ if(f==='joy') KIT.anim($('tutor'),'bounce'); if(f==='oops') KIT.anim($('tutor'),'oops'); };
+const ageLabel=a=>a===8?'초1':a+'세';
+
+/* ---------- content (prototype stand-in, TRD 5) ---------- */
+// letter sounds: prototype approximations with browser voice (lesson pack has official recordings)
+const SOUND={a:'ah',b:'buh',c:'kuh',d:'duh',e:'eh',f:'fff',g:'guh',h:'huh',i:'ih',j:'juh',k:'kuh',l:'lll',m:'mmm',n:'nnn',o:'aw',p:'puh',q:'kwuh',r:'rrr',s:'sss',t:'tuh',u:'uh',v:'vvv',w:'wuh',x:'ks',y:'yuh',z:'zzz'};
+const SIM_SOUND={m:'n',n:'m',b:'p',p:'b',d:'t',t:'d',f:'v',v:'f',s:'z',z:'s',c:'k',k:'c',g:'k',e:'i',i:'e',a:'e',o:'u',u:'o',h:'f',r:'l',l:'r',w:'v',x:'s',j:'g',y:'i',q:'k'};
+const SIM_SHAPE={b:'d',d:'b',p:'q',q:'p',m:'n',n:'m',u:'n',w:'m',h:'n',i:'l',l:'i',c:'o',o:'c',a:'o',e:'c',f:'t',t:'f',g:'q',v:'y',y:'v',s:'z',z:'s',r:'n',k:'h',x:'k',j:'i'};
+const ABC='abcdefghijklmnopqrstuvwxyz'.split('');
+const L5=['m','a','s','t','b','c','d','f','h','o','p','r','e','n','g'];
+const W6=[['bear','🐻'],['cat','🐱'],['dog','🐶'],['sun','🌞'],['fox','🦊'],['egg','🥚'],['pig','🐷'],['hat','👒'],['kite','🪁'],['gift','🎁'],['ball','⚽'],['duck','🦆'],['moon','🌙'],['map','🗺️'],['milk','🥛'],['mug','☕'],['mouse','🐭'],['lion','🦁'],['net','🥅'],['rose','🌹'],['van','🚐'],['web','🕸️'],['zebra','🦓'],['tent','⛺']];
+const W7=[['cat','🐱'],['dog','🐶'],['sun','🌞'],['pig','🐷'],['bus','🚌'],['hat','👒'],['map','🗺️'],['mop','🧹'],['mug','☕'],['fox','🦊'],['bed','🛏️'],['box','📦'],['cup','🥤'],['hen','🐔'],['net','🥅'],['pen','🖊️'],['web','🕸️'],['bat','🦇'],['van','🚐'],['bug','🐛']];
+const W7L=[['milk','🥛'],['frog','🐸'],['duck','🦆'],['fish','🐟'],['bell','🔔'],['drum','🥁'],['crab','🦀'],['ship','🚢'],['gift','🎁'],['nest','🪺']];
+const W8=[['moon','🌙'],['milk','🥛'],['mask','🎭'],['mail','✉️'],['mouse','🐭'],['mitt','🧤'],['map','🗺️'],['mug','☕'],['cats','🐱🐱'],['dogs','🐶🐶'],['hats','👒👒'],['frog','🐸'],['duck','🦆'],['fish','🐟'],['apple','🍎'],['lemon','🍋']];
+const LV={ 1:{tiles:3,dist:'far',dots:'all',pre:2}, 2:{tiles:4,dist:'far',dots:'all',pre:2}, 3:{tiles:4,dist:'any',dots:'first',pre:1},
+           4:{tiles:5,dist:'sound',dots:'first',pre:1}, 5:{tiles:5,dist:'shape',dots:'none',pre:1}, 6:{tiles:6,dist:'both',dots:'none',pre:0} };
+const QCOUNT={5:6,6:8,7:8,8:8};
+
+function distractor(need, lv, avoid){
+  const P=LV[lv], last=need[need.length-1]; const cand=[];
+  if(P.dist==='sound'||P.dist==='both') need.forEach(l=>SIM_SOUND[l]&&cand.push(SIM_SOUND[l]));
+  if(P.dist==='shape'||P.dist==='both') need.forEach(l=>SIM_SHAPE[l]&&cand.push(SIM_SHAPE[l]));
+  for(const c of shuffle(cand)) if(!avoid.includes(c)) return c;
+  const far=ABC.filter(c=>!avoid.includes(c) && !need.some(l=>SIM_SHAPE[l]===c||SIM_SOUND[l]===c));
+  return rnd(far.length?far:ABC.filter(c=>!avoid.includes(c))) || last;
+}
+function makeProblem(age, lv, i, used){
+  const P=LV[lv];
+  if(age===5){ const kind = i%2===0 ? 'case' : 'find'; const l=rnd(L5.filter(x=>!used.has(x)))||rnd(L5); used.add(l);
+    return {kind, word:l, letters:[l], slots:[{need:l, pre:false}], tiles:fillTiles([l], Math.max(3,P.tiles), lv), phrase:l.toUpperCase(), keys:[l], emoji:''}; }
+  if(age===6){ const [w,e]=rnd(W6.filter(x=>!used.has(x[0])))||rnd(W6); used.add(w);
+    return {kind:'first', word:w, emoji:e, letters:[w[0]], slots:w.split('').map((ch,k)=>({need:ch, pre:k>0})), tiles:fillTiles([w[0]], Math.max(3,P.tiles), lv), phrase:w, keys:[w]}; }
+  let pool = age===7 ? (lv>=6? W7L : lv===5? [...W7,...W7L] : W7) : W8;
+  const [w,e]=rnd(pool.filter(x=>!used.has(x[0])))||rnd(pool); used.add(w); const letters=w.split('');
+  const n = age===8 ? 7 : Math.max(letters.length, P.tiles);
+  return {kind: age===7?'cvc':'lesson', word:w, emoji:e, letters, slots:letters.map(ch=>({need:ch, pre:false})), tiles:fillTiles(letters, n, lv), phrase:w, keys:[w.replace(/s$/,'')]};
+}
+function fillTiles(need, n, lv){ const t=[...need]; while(t.length<n) t.push(distractor(need, lv, t)); return shuffle(t); }
+
+/* ---------- tiles: drag & drop with snap, tap fallback (TRD 4-1) ---------- */
+let G=null, classroom=new URLSearchParams(location.search).get('classroom')==='1';
+if(classroom){ setTimeout(()=>{ $('modeBtn').textContent='🏫 교실 모드: 켬'; $('modeBtn').classList.add('on'); }); }
+$('modeBtn').onclick=()=>{ classroom=!classroom; $('modeBtn').textContent=`🏫 교실 모드: ${classroom?'켬':'끔'}`; $('modeBtn').classList.toggle('on',classroom); };
+const tileSound = l => G && G.age===5 ? l.toUpperCase() : SOUND[l];
+function makeTile(l, i){ const t=document.createElement('div'); t.className='tile in'; t.textContent = l; t.dataset.l=l; t.style.animationDelay=(i*0.08)+'s'; bindTile(t); return t; }
+function bindTile(t){
+  t.onpointerdown = e => { if(!G||!G.accepting) return; e.preventDefault(); touched(); const sx=e.clientX, sy=e.clientY; let drag=false; let ghost=null;
+    const move = ev => { if(!drag && Math.hypot(ev.clientX-sx, ev.clientY-sy)>8){ drag=true; if(t.parentElement.classList.contains('slot')) return; ghost=t; const r=t.getBoundingClientRect(); t.classList.add('drag'); t.style.width=r.width+'px'; t.style.height=r.height+'px'; }
+      if(ghost){ ghost.style.left=(ev.clientX-ghost.offsetWidth/2)+'px'; ghost.style.top=(ev.clientY-ghost.offsetHeight/2)+'px'; } };
+    const up = ev => { removeEventListener('pointermove',move); removeEventListener('pointerup',up); removeEventListener('pointercancel',up);
+      if(ghost){ ghost.classList.remove('drag'); ghost.style.left=ghost.style.top=ghost.style.width=ghost.style.height=''; const s=slotNear(ev.clientX, ev.clientY); if(s) placeTile(t, s); else KIT.sfx.bump(); return; }
+      if(t.parentElement.classList.contains('slot')){ returnTile(t); return; }   // tap in slot -> back to holder
+      const s=G.slotEls.find(x=>!x.classList.contains('pre') && !x.querySelector('.tile')); if(s) placeTile(t, s); };
+    addEventListener('pointermove',move); addEventListener('pointerup',up); addEventListener('pointercancel',up); };
+}
+function slotNear(x,y){ let best=null, bd=1e9; for(const s of G.slotEls){ if(s.classList.contains('pre')||s.querySelector('.tile')) continue; const r=s.getBoundingClientRect(); const d=Math.hypot(x-(r.left+r.width/2), y-(r.top+r.height/2)); if(d<bd){ bd=d; best=s; } }
+  if(!best) return null; const r=best.getBoundingClientRect(); return bd < r.width*1.1 ? best : null; }
+function placeTile(t, s){ s.textContent=''; s.appendChild(t); t.classList.remove('in','glow'); KIT.sfx.click(); KIT.say(tileSound(t.dataset.l)); s.classList.remove('glow'); checkFull(); }
+function returnTile(t){ $('holder').appendChild(t); t.classList.remove('glow'); KIT.sfx.pop(); restoreDots(); }
+function restoreDots(){ G.slotEls.forEach((s,k)=>{ if(!s.querySelector('.tile') && !s.classList.contains('pre') && !s.classList.contains('big')) s.textContent=dotFor(k); }); }
+function dotFor(k){ const P=LV[G.lv], p=G.p; if(p.kind==='case') return ''; if(P.dots==='all' || (P.dots==='first' && k===firstOpen())) return p.slots[k].need; return ''; }
+function firstOpen(){ return G.p.slots.findIndex(s=>!s.pre); }
+
+/* ---------- flow ---------- */
+function touched(){ if(!G) return; KIT.clearIdle(); KIT.armIdle(idle); }
+async function idle(){ if(!G||!G.accepting) return; await KIT.tutor('idle'); const k=G.slotEls.findIndex(s=>!s.classList.contains('pre') && !s.querySelector('.tile')); const need=k>=0?G.p.slots[k].need:null;
+  const t=[...$('holder').children].find(x=>x.dataset.l===need); if(t) KIT.showHand(t); }
+async function startRound(){
+  const age=KIT.SAVE.age, lv=KIT.levelFor(age); G={age, lv, total:QCOUNT[age], idx:0, stars:[], words:[], used:new Set(), classroom, team:'red', score:{red:0,blue:0}, swapUsed:false, accepting:false};
+  const me=G; $('lvPill').textContent=`LEVEL ${lv} · ${ageLabel(age)}`; $('teamPill').className='pill'; $('swapBtn').disabled=false; KIT.show('game'); KIT.renderProgress(G);
+  if(KIT.demoNeeded()) await runDemo(); if(G!==me) return; nextProblem();
+}
+function setup(p){
+  G.p=p; G.wrong=0; G.hinted=false; $('bridge').classList.remove('on'); $('walker').classList.remove('go');
+  const tg=$('target'); tg.innerHTML = p.kind==='case' ? `<span style="font-size:calc(var(--u)*5)">👆 a ↔ A</span>` : p.kind==='find' ? `<span class="ear">👂</span><button class="btn alt" id="tgSay">🔊</button>` : `<span class="emo">${p.emoji}</span><button class="btn alt" id="tgSay">🔊</button>`;
+  const ts=$('tgSay'); if(ts) ts.onclick=()=>sayTarget(true);
+  const mat=$('mat'); mat.innerHTML=''; G.slotEls=p.slots.map((s,k)=>{ const d=document.createElement('div'); d.className='slot'+(s.pre?' pre':'')+(p.kind==='case'?' big':''); d.textContent = s.pre? s.need : p.kind==='case'? s.need.toUpperCase() : ''; mat.appendChild(d); return d; });
+  if(p.kind==='case'){ // 대문자 칸 위에 소문자 타일을 놓음
+    const s=G.slotEls[0]; s.dataset.cap=p.word.toUpperCase(); }
+  restoreDots(); const h=$('holder'); h.innerHTML=''; p.tiles.forEach((l,i)=>h.appendChild(makeTile(l,i))); KIT.anim($('roll'),'go'); $('roll').classList.remove('go'); void $('roll').offsetWidth; $('roll').classList.add('go');
+}
+async function sayTarget(again){
+  const p=G.p;
+  if(p.kind==='case'){ await KIT.tutor('matchCase'); await KIT.say(p.word.toUpperCase()); return; }
+  if(p.kind==='find') return KIT.sayLine(`Find ${p.word.toUpperCase()}!`, `${p.word.toUpperCase()} 글자를 찾아 봐!`);
+  if(p.kind==='first') return KIT.sayLine(`What does ${p.word} start with?`, `'${p.word}'의 첫 글자는 뭘까?`);
+  return KIT.sayLine(`Let's make ${p.word}!`, `'${p.word}' 단어를 만들자!`);
+}
+async function nextProblem(){
+  if(G.idx>=G.total) return finish();
+  const me=G; $('nextBtn').style.display='none'; G.accepting=false; KIT.renderProgress(G);
+  const p=makeProblem(G.age, G.lv, G.idx, G.used); setup(p);
+  if(G.classroom){ $('teamPill').className='pill '+G.team; $('teamPill').textContent=G.team==='red'?'🔴 빨간 팀':'🔵 파란 팀'; await KIT.tutor(G.team==='red'?'teamRed':'teamBlue'); if(G!==me) return; }
+  const times = Math.max(1, LV[G.lv].pre); for(let i=0;i<times;i++){ await sayTarget(); if(G!==me) return; if(p.kind!=='case' && p.kind!=='find' && LV[G.lv].pre>0) await KIT.say(p.word); if(G!==me) return; }
+  G.accepting=true; touched();
+}
+async function checkFull(){
+  const open=G.slotEls.filter(s=>!s.classList.contains('pre')); if(open.some(s=>!s.querySelector('.tile'))) return;
+  const me=G; G.accepting=false; KIT.clearIdle(); await sleep(350); if(G!==me) return;
+  const bad=G.slotEls.filter((s,k)=>!s.classList.contains('pre') && s.querySelector('.tile').dataset.l!==G.p.slots[k].need);
+  if(!bad.length) return success();
+  G.wrong++; KIT.sfx.bad(); KIT.face('oops'); bad.forEach(s=>KIT.anim(s,'shake')); await sleep(420); if(G!==me) return;
+  bad.forEach(s=>returnTile(s.querySelector('.tile')));
+  if(G.wrong===1){ await KIT.tutor('almost'); if(G!==me) return; await KIT.say(G.p.kind==='case'||G.p.kind==='find'? G.p.word.toUpperCase() : G.p.word); }
+  else if(G.wrong===2){ G.hinted=true; const k=G.slotEls.findIndex(s=>!s.classList.contains('pre') && !s.querySelector('.tile')); const need=G.p.slots[k].need; G.slotEls[k].classList.add('glow');
+    [...$('holder').children].find(t=>t.dataset.l===need)?.classList.add('glow');
+    await KIT.sayLine(G.age===5? `This one is ${need.toUpperCase()}.` : `This box sounds like ${SOUND[need]}.`, G.age===5? `이 칸은 ${need.toUpperCase()}야.` : `이 칸은 ${SOUND[need]} 소리야.`); }
+  else { await reveal(); return; }
+  if(G===me){ G.accepting=true; touched(); }
+}
+async function reveal(){
+  const me=G; for(let k=0;k<G.slotEls.length;k++){ const s=G.slotEls[k]; if(s.classList.contains('pre')||s.querySelector('.tile')) continue; const need=G.p.slots[k].need;
+    let t=[...$('holder').children].find(x=>x.dataset.l===need); if(!t){ t=makeTile(need,0); } s.textContent=''; s.appendChild(t); t.classList.remove('in'); await sleep(300); }
+  if(G!==me) return; await buildBridge(); const spell=G.p.word.split('').join('-');
+  await KIT.sayLine(G.age===5? `Here it is: ${G.p.word.toUpperCase()}!` : `Here it is: ${spell}, ${G.p.word}!`, G.age===5? `여기 있어: ${G.p.word.toUpperCase()}!` : `여기 있어: ${spell}, ${G.p.word}!`);
+  record(1,false); $('nextBtn').style.display='block';
+}
+async function buildBridge(){ KIT.sfx.click(); await sleep(120); KIT.sfx.click(); $('bridge').classList.add('on'); KIT.anim($('tutor'),'bounce'); await sleep(600); $('walker').classList.add('go'); KIT.sfx.whoosh(); await sleep(900); }
+async function success(){
+  const me=G; KIT.sfx.ok(); KIT.face('joy'); await buildBridge(); if(G!==me) return;
+  if(G.age>5) await KIT.say(G.p.word); const g=KIT.line('great'); KIT.bubble(g.t+(g.lang==='ko'?`<span class="en">${g.en}</span>`:'')); await KIT.say(g.t,g.lang); if(G!==me) return;
+  const star=1+(G.wrong===0 && !G.hinted ? 1:0); let spoke=false;
+  if(!G.classroom){ spoke=await KIT.speak({phrase:G.p.phrase, keys:G.p.keys, isAlive:()=>G===me}); if(G!==me) return; }
+  if(G.classroom) G.score[G.team]+=1;
+  record(star+(spoke?1:0), spoke); KIT.sfx.star(); $('nextBtn').style.display='block';
+}
+function record(s,spoke){ G.stars[G.idx]=s; const p=G.p; G.words.push({text: p.kind==='case'? `${p.word.toUpperCase()} – ${p.word}` : p.kind==='find'? p.word.toUpperCase() : `${p.emoji} ${p.word}`, phrase:p.phrase, stars:s, spoke}); KIT.renderProgress(G); }
+$('nextBtn').onclick=()=>{ if(!G) return; G.idx++; if(G.classroom) G.team=G.team==='red'?'blue':'red'; nextProblem(); };
+$('reQ').onclick=()=>{ if(G&&G.p) sayTarget(true); };
+// 타일 바꾸기: 한 판 1회, Roll이 새 방해 타일을 굴려 옴
+$('swapBtn').onclick=()=>{ if(!G||!G.accepting||G.swapUsed) return; G.swapUsed=true; $('swapBtn').disabled=true; const p=G.p;
+  const inSlots=G.slotEls.map(s=>s.querySelector('.tile')?.dataset.l).filter(Boolean); const need=[...p.letters]; inSlots.forEach(l=>{ const i=need.indexOf(l); if(i>=0) need.splice(i,1); });
+  const h=$('holder'); h.innerHTML=''; fillTiles(need, Math.max(need.length, h.childElementCount, p.tiles.length-inSlots.length), G.lv).forEach((l,i)=>h.appendChild(makeTile(l,i)));
+  $('roll').classList.remove('go'); void $('roll').offsetWidth; $('roll').classList.add('go'); KIT.sfx.whoosh(); };
+
+/* ---------- demo (TRD 2-3) ---------- */
+async function runDemo(){
+  KIT.demoStart(); const me=G; const p={kind:'cvc', word:'cat', emoji:'🐱', letters:['c','a','t'], slots:'cat'.split('').map(ch=>({need:ch,pre:false})), tiles:['t','c','a'], phrase:'cat', keys:['cat']};
+  const saveLv=G.lv; G.lv=1; setup(p);
+  const steps=[ async()=>KIT.tutor('demo1',{keep:true}),
+    async()=>{ for(const l of ['c','a','t']){ if(KIT.skipDemo||G!==me) return; const t=[...$('holder').children].find(x=>x.dataset.l===l); KIT.showHand(t,true); await sleep(800);
+      const s=G.slotEls.find(x=>!x.querySelector('.tile')); s.textContent=''; s.appendChild(t); KIT.sfx.click(); await KIT.say(SOUND[l]); } },
+    async()=>{ KIT.hideHand(); await buildBridge(); await KIT.say('cat'); await KIT.tutor('demo2',{keep:true}); },
+    async()=>KIT.tutor('demoEnd',{keep:true}) ];
+  for(const s of steps){ if(KIT.skipDemo||G!==me) break; await s(); }
+  KIT.demoEnd(); if(G===me) G.lv=saveLv;
+}
+async function finish(){
+  KIT.clearIdle(); const q=$('qaLevel'); const keep=q.value; if(G.classroom) q.value=String(G.lv);
+  $('resTeams').textContent = G.classroom? `🔴 빨간 팀 ${G.score.red} : ${G.score.blue} 파란 팀 🔵` : '';
+  const pr=KIT.result(G,{title:'Look at all our bridges!', heroHtml:'<img src="assets/sb_stretch.png"><img src="assets/sb_roll.png"><img src="assets/sb_fold.png"><img src="assets/sb_expand.png">', icon:'🧱', unit:'블록', collName:'Bridge Map', per:10});
+  q.value=keep; await pr;
+}
+/* QA hook: one correct action per call */
+window.__lt=()=>G;
+window.__ltStep=()=>{
+  if(!G) return 'none';
+  if($('nextBtn').style.display==='block'){ $('nextBtn').click(); return 'next'; }
+  if(!G.accepting) return 'wait';
+  const k=G.slotEls.findIndex(s=>!s.classList.contains('pre') && !s.querySelector('.tile')); if(k<0) return 'wait';
+  const t=[...$('holder').children].find(x=>x.dataset.l===G.p.slots[k].need); if(t){ placeTile(t, G.slotEls[k]); return 'place'; } return 'stuck';
+};
+KIT.init({prefix:'lt', onStart:startRound, onExit:()=>{ G=null; }});
+</script>
+</body>
+</html>

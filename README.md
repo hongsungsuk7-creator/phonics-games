@@ -1,6 +1,8 @@
 # Phonics Games (FPR K · 파닉스 게임 모음)
 
-5~7세 어휘·생각 트랙 게임 7종 프로토타입과 런처입니다. 빌드 없이 정적 파일로 동작합니다.
+어휘·생각 트랙 7종(5~7세)과 보드게임 트랙 6종(5~7세·초1) 프로토타입과 런처입니다. 빌드 없이 정적 파일로 동작합니다.
+
+**어휘·생각 트랙** (1인, 연령 5·6·7세)
 
 | 게임 | 폴더 | 튜터 |
 |---|---|---|
@@ -11,6 +13,17 @@
 | Shop & Count | `Shop-Count/` | Tobi |
 | Maze Quest | `Maze-Quest/` | Bobo |
 | Photo Safari | `Photo-Safari/` | Nunu |
+
+**보드게임 트랙** (1인 + 교실 모드, 연령 5·6·7세·초1)
+
+| 게임 | 폴더 | 튜터 |
+|---|---|---|
+| Word Spot 워드 스팟 | `Word-Spot/` | Moru |
+| Story Cards 스토리 카드 | `Story-Cards/` | Popo |
+| Word Link 워드 링크 | `Word-Link/` | Dudu |
+| Letter Tiles 알파벳 타일 | `Letter-Tiles/` | Stretch |
+| Word Spectrum 워드 스펙트럼 | `Word-Spectrum/` | Big House |
+| Draw & Pass 그림 릴레이 (6세~) | `Draw-Pass/` | Flat One |
 
 ## 열기
 - 로컬: `start.bat` 실행 → http://localhost:5180 (파일을 더블클릭해 열면 `games.json`을 못 읽습니다)
@@ -29,4 +42,4 @@
 3. `games.json`의 `games` 배열에 항목을 추가합니다 (`id`, `title`, `titleKo`, `type`, `playUrl`, `trdUrl`, `thumbnail`, `checklist`).
 
 ## URL 옵션 (게임)
-`?age=5|6|7`, `?level=1..6`, `?mute=1`, `?speech=off`, `?demo=always`
+`?age=5|6|7|8`(8 = 초1, 보드게임 트랙), `?level=1..6`, `?mute=1`, `?speech=off`, `?demo=always`

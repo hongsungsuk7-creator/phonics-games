@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Story Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<link rel="stylesheet" href="../_shared/kit.css">
+<style>
+  :root { --s1:#ffe27a; --s2:#f5b82e; --ss:#b07c0a; --st:#3a2a00; --ink:#1b2f6b; --b1:#5b8cff; --b2:#2f5fd8; --bs:#1d3f9e; --a1:#4a74e8; --a2:#2a4fb8; --as:#1a3580; }
+  #stage { background: radial-gradient(ellipse at 50% 0%, #f4f7ff 0%, #d9e4ff 55%, #b8c9f5 100%); }
+  .rug { position:absolute; left:0; right:0; bottom:0; height:calc(var(--u)*28); background: repeating-linear-gradient(90deg, #2a4fb8 0 calc(var(--u)*1.2), #3d63cc calc(var(--u)*1.2) calc(var(--u)*6)); opacity:.25; }
+  #spread { position:absolute; left:calc(var(--u)*30); right:calc(var(--u)*4); top:calc(var(--u)*14); display:flex; flex-wrap:wrap; justify-content:center; gap:calc(var(--u)*2); z-index:10; }
+  .sc { position:relative; width:calc(var(--u)*22); height:calc(var(--u)*24); background:#fff; border-radius:calc(var(--u)*2.4); cursor:pointer;
+    box-shadow:0 calc(var(--u)*.6) 0 #c6d2f2, 0 calc(var(--u)*1) calc(var(--u)*2) rgba(0,0,0,.15); display:flex; align-items:center; justify-content:center;
+    transform:translateY(calc(var(--u)*-30)) rotate(-8deg); opacity:0; transition: transform .45s cubic-bezier(.3,1.4,.5,1), opacity .3s, box-shadow .2s; }
+  .sc.in { transform:none; opacity:1; }
+  .sc .itm { display:flex; align-items:center; justify-content:center; }
+  .sc .emo { line-height:1; }
+  .sc .feel { position:absolute; right:calc(var(--u)*1); top:calc(var(--u)*1); font-size:calc(var(--u)*4.2); }
+  .sc.ok { box-shadow:0 0 0 calc(var(--u)*.9) #2fb457, 0 0 calc(var(--u)*3) #7be08a; }
+  .sc.dim { opacity:.3; filter:grayscale(.8); pointer-events:none; }
+  .sc.mine { box-shadow:0 0 0 calc(var(--u)*.9) #f5b82e, 0 0 calc(var(--u)*3) #ffe27a; }
+  .sc.mine::after { content:'⭐ 내 카드'; position:absolute; left:50%; bottom:calc(var(--u)*-3.6); transform:translateX(-50%); font-size:calc(var(--u)*2.4); color:#8a5a00; white-space:nowrap; }
+  .sc.guess { animation: kglow 1s infinite; }
+  .sc .votes { position:absolute; left:calc(var(--u)*1); top:calc(var(--u)*1); background:#2f5fd8; color:#fff; border-radius:calc(var(--u)*2); padding:0 calc(var(--u)*1.2); font-size:calc(var(--u)*2.6); display:none; }
+  .sc .bar { position:absolute; left:0; bottom:0; height:calc(var(--u)*1.4); background:#2f5fd8; border-radius:0 0 calc(var(--u)*2.4) calc(var(--u)*2.4); width:0; transition: width .6s; }
+  #words { position:absolute; left:calc(var(--u)*30); right:calc(var(--u)*4); bottom:calc(var(--u)*5); display:none; flex-wrap:wrap; justify-content:center; gap:calc(var(--u)*1.6); z-index:22; }
+  .wc { position:relative; background:#fffaf0; border:none; border-radius:calc(var(--u)*2); padding:calc(var(--u)*1.2) calc(var(--u)*2.4) calc(var(--u)*1.2) calc(var(--u)*1.6); font-family:inherit;
+    font-size:calc(var(--u)*3.6); color:#1b2f6b; box-shadow:0 calc(var(--u)*.6) 0 #e2c98f; cursor:pointer; display:flex; align-items:center; gap:calc(var(--u)*1); }
+  .wc .ic { font-size:calc(var(--u)*3.2); width:calc(var(--u)*4); height:calc(var(--u)*4); display:flex; align-items:center; justify-content:center; }
+  .wc .sw { width:calc(var(--u)*3); height:calc(var(--u)*3); border-radius:50%; }
+  .wc.used { opacity:.35; pointer-events:none; }
+  #frame { position:absolute; left:calc(var(--u)*30); right:calc(var(--u)*4); top:calc(var(--u)*45); text-align:center; font-size:calc(var(--u)*4); color:#1b2f6b; z-index:21; display:none; }
+  #frame .slot { display:inline-block; min-width:calc(var(--u)*12); border-bottom:calc(var(--u)*.5) dashed #2f5fd8; margin:0 calc(var(--u)*.8); color:#2f5fd8; }
+  .tutor { left:calc(var(--u)*2); bottom:calc(var(--u)*5); height:calc(var(--u)*30); }
+  .bubble { top:calc(var(--u)*13); left:calc(var(--u)*2); width:calc(var(--u)*25); }
+  #nextBtn { position:absolute; right:calc(var(--u)*3); bottom:calc(var(--u)*4); display:none; z-index:30; }
+  #classBtn { position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*4); z-index:20; }
+  #classBar { position:absolute; left:calc(var(--u)*30); right:calc(var(--u)*4); bottom:calc(var(--u)*5); display:none; justify-content:center; gap:calc(var(--u)*2); z-index:29; }
+  #pocket { position:absolute; left:calc(var(--u)*14); bottom:calc(var(--u)*20); font-size:calc(var(--u)*5); z-index:25; opacity:0; transition: transform .5s, opacity .3s; }
+  #pocket.on { opacity:1; transform:translate(calc(var(--u)*12), calc(var(--u)*-14)) rotate(10deg); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="rug"></div>
+
+  <section class="screen on" id="title">
+    <div class="topbar"><div class="row"><button class="btn alt" id="keyBtn">🔑</button></div><div class="row"><button class="btn alt" id="langBtn">한국어</button><button class="btn alt sndBtn">🔊</button></div></div>
+    <div class="logo">Story Cards<small>스토리 카드 · 설명을 듣고 그림을 찾아요</small></div>
+    <img src="assets/popo.png" style="position:absolute;left:calc(var(--u)*10);bottom:calc(var(--u)*4);height:calc(var(--u)*38)" alt="Popo">
+    <div class="coll"><div class="k">👖</div>Popo의 주머니 앨범<br><b id="collCount">0</b></div>
+    <div class="agebox">연령(보호자 설정) <button class="chip" data-age="5">5세</button><button class="chip" data-age="6">6세</button><button class="chip" data-age="7">7세</button><button class="chip" data-age="8">초1</button></div>
+    <button class="btn alt" id="classBtn">🏫 교실 모드: 끔</button>
+    <button class="btn start" id="startBtn">START</button>
+  </section>
+
+  <section class="screen" id="game">
+    <div class="topbar">
+      <div class="row"><div class="pill">⭐ <span id="starSum">0</span></div><div class="progress" id="progress"></div></div>
+      <div class="row"><div class="pill" id="lvPill">LEVEL 1</div><button class="btn alt" id="reQ">💬</button></div>
+      <div class="row"><button class="btn alt sndBtn">🔊</button><button class="btn" id="exitBtn">✕</button></div>
+    </div>
+    <div id="spread"></div>
+    <div id="frame"></div>
+    <div id="words" data-hide-on-speak></div>
+    <div id="classBar"><button class="btn alt" id="peekBtn">👁 정답 살짝 보기</button><button class="btn gold" id="revealBtn">📊 결과 보기</button></div>
+    <div id="pocket">🃏</div>
+    <img class="tutor" id="tutor" src="assets/popo.png" alt="Popo">
+    <div class="bubble" id="bubble"></div>
+    <button class="btn gold big" id="nextBtn">Next ▶</button>
+  </section>
+
+  <section class="screen" id="result">
+    <div class="card-res"><h2 id="resTitle">Story Time!</h2><div class="res-hero" id="resHero"></div><div class="bigstars" id="resStars"></div><div class="resmeta" id="resMeta"></div><div id="resLv"></div>
+      <div class="reswords" id="resWords"></div><div class="resmeta" id="resReward"></div>
+      <div class="resbtns"><button class="btn alt" id="homeBtn">🏠 Home</button><button class="btn" id="againBtn">↻ Again</button><button class="btn green" id="nextRoundBtn">Next ▶</button></div></div>
+  </section>
+</div>
+<script src="../_shared/kit.js"></script>
+<script>
+'use strict';
+const {$, sleep, rnd, shuffle} = KIT;
+KIT.L = {
+  hello:{en:"Hi, I'm Popo! I have cards in my pocket.", ko:'안녕, 나는 포포야! 내 주머니에 카드가 있어.'},
+  demo1:{en:'Listen to my card.', ko:'내 카드 설명을 들어 봐.'},
+  demo2:{en:'Then find it!', ko:'그다음 찾아 봐!'},
+  listen:{en:'Which card is it? Listen!', ko:'어떤 카드일까? 들어 봐!'},
+  swap:{en:'Your turn! Tell me about your card.', ko:'네 차례야! 네 카드를 설명해 줘.'},
+  pick:{en:'Pick a word for your card.', ko:'네 카드에 맞는 단어를 골라.'},
+  build:{en:'Put the word cards here.', ko:'단어 카드를 여기 놓아 봐.'},
+  guess:{en:'Hmm… is it this one?', ko:'음… 이거야?'},
+  more:{en:'Tell me more!', ko:'조금 더 알려 줘!'},
+  showMe:{en:'Show me! Oh, I see.', ko:'보여 줘! 아, 그렇구나.'},
+  again:{en:'Listen again!', ko:'다시 들어 봐!'},
+  hintDim:{en:'Not this one.', ko:'이건 아니야.'},
+  readMine:{en:'Read your words to me!', ko:'네가 만든 말을 읽어 줘!'},
+  idle:{en:'Want to hear it again?', ko:'다시 들어 볼래?'},
+  great:{en:['You found it!','Great listening!',"That's my card!",'Good telling!'], ko:['찾았다!','잘 들었어!','내 카드야!','설명 최고야!']},
+  vote:{en:'Vote for the card!', ko:'카드에 투표해!'},
+  together:{en:'Say it together!', ko:'다 같이 말해 봐!'},
+  clear:{en:'My pocket is full of stories. Thank you!', ko:'내 주머니가 이야기로 가득해. 고마워!'},
+  levelUp:{en:'Level up! More cards this time!', ko:'레벨 업! 이번엔 카드가 더 많아!'},
+};
+const ageName=a=>a===8?'초1':a+'세';
+KIT.face=f=>{ if(f==='joy') KIT.anim($('tutor'),'bounce'); if(f==='oops') KIT.anim($('tutor'),'oops'); };
+
+/* ---------- card tags (TRD 5-2: colour · size · feeling · thing) — prototype stand-in ---------- */
+const OBJ=['mug','mitt','mask','mushroom','mail'], COLS=['red','blue','yellow','green'];
+const ANI={dog:'🐶',cat:'🐱',fox:'🦊',mouse:'🐭',monkey:'🐵',pig:'🐷'}, FEEL={happy:'😊',sad:'😢'};
+const KO={big:'큰',small:'작은',red:'빨간',blue:'파란',yellow:'노란',green:'초록',happy:'웃는',sad:'슬픈',
+  mug:'컵',mitt:'장갑',mask:'가면',mushroom:'버섯',mail:'편지',dog:'강아지',cat:'고양이',fox:'여우',mouse:'생쥐',monkey:'원숭이',pig:'돼지'};
+function mkCard(noun, size, mod){ const ani=!!ANI[noun]; const c={noun, size, ani}; if(ani) c.feel=mod; else c.color=mod;
+  c.adj=[size, mod]; c.tags=[size, mod, noun]; c.key=c.tags.join('-'); return c; }
+function randCard(){ if(Math.random()<.5) return mkCard(rnd(OBJ), rnd(['big','small']), rnd(COLS)); return mkCard(rnd(Object.keys(ANI)), rnd(['big','small']), rnd(Object.keys(FEEL))); }
+function nearOf(c){ const ch=rnd(['size','mod']); if(ch==='size') return mkCard(c.noun, c.size==='big'?'small':'big', c.adj[1]);
+  return mkCard(c.noun, c.size, c.ani? (c.feel==='happy'?'sad':'happy') : rnd(COLS.filter(x=>x!==c.color))); }
+const has=(c,tags)=>tags.every(t=>c.tags.includes(t));
+/* smallest tag set (noun first) that only `c` has among `all` */
+function minSet(c, all, withNoun=true){ const others=all.filter(o=>o!==c); const adj=c.adj;
+  const cands = withNoun ? [[c.noun],[adj[1],c.noun],[adj[0],c.noun],[adj[0],adj[1],c.noun]] : [[adj[0]],[adj[1]],[c.noun],[adj[1],c.noun],[adj[0],c.noun],[adj[0],adj[1]],[adj[0],adj[1],c.noun]];
+  return cands.find(s=>!others.some(o=>has(o,s))) || c.tags; }
+const ORDER=t=>t==='big'||t==='small'?0:(COLS.includes(t)||FEEL[t])?1:2;
+const sortT=ts=>[...ts].sort((a,b)=>ORDER(a)-ORDER(b));
+function phraseOf(tags, age){ const w=sortT(tags).join(' '); return age===5? w : age===8? `It is a ${w}.` : `a ${w}`; }
+const koOf=tags=>sortT(tags).map(t=>KO[t]||t).join(' ')+(KO[tags.find(t=>ORDER(t)===2)]?'래!':'');
+
+const CN5=[2,3,3,3,4,4], CN=[3,4,4,5,5,6], NEAR=[0,0,1,1,2,3], NEED=[1,1,1,2,2,2], WOPT=[3,3,4,4,5,5], REP=[2,2,1,1,1,1];
+const ROUNDS={5:5,6:6,7:6,8:8};
+function makeRound(age, lv, idx, used){
+  const n=(age===5?CN5:CN)[lv-1]; let ans; let guard=0; do{ ans=randCard(); }while(used.has(ans.noun) && guard++<20); used.add(ans.noun);
+  const cards=[ans]; const keys=new Set([ans.key]);
+  for(let i=0;i<NEAR[lv-1] && cards.length<n;i++){ const c=nearOf(rnd(cards.filter(x=>x.noun===ans.noun))); if(!keys.has(c.key)){ keys.add(c.key); cards.push(c); } }
+  let g=0; while(cards.length<n && g++<200){ const c=randCard(); if(keys.has(c.key)||c.noun===ans.noun) continue; if(NEAR[lv-1]===0 && cards.some(x=>x.noun===c.noun)) continue; keys.add(c.key); cards.push(c); }
+  const swap = age>=6 && idx%2===1;
+  const r={age, lv, ans, cards:shuffle(cards), swap};
+  // tutor hint: noun + distinguishing adjectives, padded to NEED (5세 keeps 1~2 words unless needed)
+  let set=minSet(ans, cards); const needAdj = age===5? 1 : NEED[lv-1];
+  for(const a of ans.adj){ if(set.length-1>=needAdj) break; if(!set.includes(a)) set=[a,...set]; }
+  r.hintTags=sortT(set); r.hint=phraseOf(r.hintTags, age===8?8:age===5?5:6); r.hintKo=koOf(r.hintTags);
+  r.desc=phraseOf(r.hintTags, age); r.phrase = age===5? ans.noun : r.desc; r.keys = age===5? [ans.noun] : r.hintTags;
+  if(swap){ r.good=minSet(ans, cards, false);
+    const other=shuffle([...new Set(cards.filter(c=>c!==ans).flatMap(c=>c.tags))].filter(t=>!ans.tags.includes(t)));
+    const mine=shuffle(ans.tags.filter(t=>!r.good.includes(t)));
+    // 7세·초1 build "adjective + noun": always offer the card's noun and at least one of its adjectives
+    let base=[...r.good]; if(age>=7){ if(!base.includes(ans.noun)) base.push(ans.noun); if(!base.some(t=>ans.adj.includes(t))) base.push(rnd(ans.adj)); }
+    const want=Math.max(WOPT[lv-1], base.length+2); let opts=[...base];
+    const otherAdj=other.filter(t=>ORDER(t)<2), otherNoun=other.filter(t=>ORDER(t)===2);
+    for(const t of shuffle([...otherAdj.slice(0,2), ...otherNoun.slice(0,2), ...other])){ if(opts.length>=want) break; if(!opts.includes(t)) opts.push(t); }
+    for(const t of mine){ if(opts.length>=want) break; if(!opts.includes(t)) opts.push(t); }
+    r.opts=shuffle(opts); r.pickN = age===6? 1 : 2; }
+  return r;
+}
+
+/* ---------- rendering ---------- */
+function cardHTML(c){ if(c.ani){ const fs=c.size==='big'?14:7.5; return `<div class="emo" style="font-size:calc(var(--u)*${fs})">${ANI[c.noun]}</div><div class="feel">${FEEL[c.feel]}</div>`; }
+  const s=c.size==='big'?17:9; return `<div class="itm" style="width:calc(var(--u)*${s});height:calc(var(--u)*${s})">${KIT.SVG[c.noun](KIT.COLORS[c.color])}</div>`; }
+async function layCards(r){ const box=$('spread'); box.innerHTML=''; const els=r.cards.map(c=>{ const d=document.createElement('div'); d.className='sc'; d.innerHTML=cardHTML(c)+'<div class="votes">0</div><div class="bar"></div>'; d.dataset.k=c.key;
+    if(c===r.ans) d.dataset.ans='1'; d.onclick=()=>onPick(d,c); box.appendChild(d); c.el=d; return d; });
+  for(const d of els){ await sleep(90); d.classList.add('in'); } KIT.sfx.whoosh(); }
+function wordIcon(t){ if(KIT.COLORS[t]) return `<span class="ic"><span class="sw" style="background:${KIT.COLORS[t]}"></span></span>`; if(FEEL[t]) return `<span class="ic">${FEEL[t]}</span>`;
+  if(t==='big') return '<span class="ic">⬛</span>'; if(t==='small') return '<span class="ic" style="font-size:calc(var(--u)*1.8)">⬛</span>';
+  if(ANI[t]) return `<span class="ic">${ANI[t]}</span>`; return `<span class="ic"><span class="itm" style="width:100%;height:100%">${KIT.SVG[t]('#8a98c8')}</span></span>`; }
+
+/* ---------- flow ---------- */
+let G=null, CLASS=false;
+function touched(){ if(!G) return; KIT.clearIdle(); KIT.armIdle(idle); }
+async function idle(){ if(!G||!G.accepting) return; await KIT.tutor('idle'); if(G.r.swap){ const w=[...document.querySelectorAll('.wc[data-good="1"]:not(.used)')][0]; if(w) KIT.showHand(w); } else KIT.showHand($('reQ')); }
+async function startRound(){
+  const age=KIT.SAVE.age, lv=KIT.levelFor(age); G={age, lv, total:ROUNDS[age], idx:0, stars:[], words:[], used:new Set(), cls:CLASS, classStars:0}; const me=G;
+  $('lvPill').textContent=`LEVEL ${lv} · ${ageName(age)}${CLASS?' · 교실':''}`; KIT.show('game'); KIT.renderProgress(G);
+  if(!CLASS && KIT.demoNeeded()) await runDemo(); if(G!==me) return; nextRound();
+}
+async function sayHint(times=1){ const r=G.r; for(let i=0;i<times;i++){ await KIT.sayLine(r.hint, r.hintKo); if(i<times-1) await sleep(300); } }
+async function nextRound(){
+  if(G.idx>=G.total) return finish();
+  const me=G; $('nextBtn').style.display='none'; $('words').style.display='none'; $('frame').style.display='none'; $('classBar').style.display='none';
+  const r=G.r=makeRound(G.age, G.lv, G.cls?0:G.idx, G.used); G.wrong=0; G.extra=0; G.picked=[]; G.accepting=false; G.votes={};
+  KIT.renderProgress(G); KIT.face('neutral');
+  const pk=$('pocket'); pk.classList.remove('on'); void pk.offsetWidth; pk.classList.add('on'); KIT.sfx.pop(); setTimeout(()=>pk.classList.remove('on'),900);
+  await layCards(r); if(G!==me) return;
+  if(r.swap) return swapRound();
+  if(G.cls){ document.querySelectorAll('.sc .votes').forEach(v=>v.style.display='block'); $('classBar').style.display='flex'; await KIT.tutor('vote',{keep:true}); if(G!==me) return; await sayHint(1); if(G!==me) return; G.accepting=true; return; }
+  await KIT.tutor('listen',{keep:true}); if(G!==me) return; await sayHint(REP[G.lv-1]); if(G!==me) return;
+  G.accepting=true; KIT.armIdle(idle);
+}
+async function onPick(el, c){
+  if(!G||!G.accepting) return; touched();
+  if(G.cls){ G.votes[c.key]=(G.votes[c.key]||0)+1; el.querySelector('.votes').textContent=G.votes[c.key]; KIT.sfx.click(); KIT.anim(el,'bounce'); return; }
+  if(G.r.swap) return;
+  if(c===G.r.ans) return success(el);
+  const me=G; G.wrong++; KIT.sfx.bad(); KIT.anim(el,'shake'); KIT.face('oops');
+  if(G.wrong===1){ await KIT.tutor('again'); if(G===me) await sayHint(1); }
+  else if(G.wrong===2){ const live=G.r.cards.filter(x=>!x.el.classList.contains('dim')); const bad=live.find(x=>x!==G.r.ans && !has(x,G.r.hintTags));
+    if(bad && live.length>2){ bad.el.classList.add('dim'); } else el.classList.add('dim'); await KIT.tutor('hintDim'); }
+  else { G.accepting=false; KIT.clearIdle(); G.r.ans.el.classList.add('ok'); await KIT.sayLine(`It was this one! ${cap(G.r.desc)}`, `이 카드였어!`); if(G!==me) return; record(1,false); $('nextBtn').style.display='block'; }
+}
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1)+(/[.!]$/.test(s)?'':'.');
+async function success(el){
+  const me=G; G.accepting=false; KIT.clearIdle(); el.classList.add('ok'); KIT.sfx.ok(); KIT.face('joy');
+  const g=KIT.line('great'); KIT.bubble(g.t+(g.lang==='ko'?`<span class="en">${g.en}</span>`:'')); await KIT.say(g.t,g.lang); if(G!==me) return;
+  const star=1+(G.wrong===0?1:0);
+  const spoke=await KIT.speak({phrase:G.r.phrase, keys:G.r.keys, targetHtml:G.r.phrase, isAlive:()=>G===me}); if(G!==me) return;
+  record(star+(spoke?1:0), spoke); $('nextBtn').style.display='block';
+}
+
+/* ---------- role swap (TRD 4-1, 4-3): child picks word cards, Popo guesses by tag overlap ---------- */
+async function swapRound(){
+  const me=G, r=G.r; r.ans.el.classList.add('mine');
+  await KIT.tutor('swap',{keep:true}); if(G!==me) return; await KIT.tutor(G.age===6?'pick':'build',{keep:true}); if(G!==me) return;
+  showFrame(); const box=$('words'); box.innerHTML=''; box.style.display='flex';
+  r.opts.forEach(t=>{ const b=document.createElement('button'); b.className='wc'; b.innerHTML=wordIcon(t)+`<span>${t}</span>`; if(r.good.includes(t)) b.dataset.good="1"; if(r.ans.tags.includes(t)) b.dataset.mine="1";
+    b.onclick=()=>pickWord(b,t); box.appendChild(b); });
+  G.accepting=true; KIT.armIdle(idle);
+}
+function showFrame(){ const f=$('frame'); if(G.age<7){ f.style.display='none'; return; } const s=G.picked.map(t=>`<span class="slot">${t}</span>`);
+  while(s.length<G.r.pickN+G.extra) s.push('<span class="slot">&nbsp;</span>'); f.innerHTML=(G.age===8?'It is a ':'a ')+s.join(' ')+(G.age===8?'.':''); f.style.display='block'; }
+async function pickWord(b,t){
+  if(!G||!G.accepting||!G.r.swap) return; touched(); const me=G; b.classList.add('used'); KIT.sfx.click(); G.picked.push(t); KIT.say(t); showFrame();
+  if(G.picked.length < G.r.pickN + G.extra) return;
+  G.accepting=false; KIT.clearIdle(); await sleep(500); if(G!==me) return;
+  await KIT.tutor('guess',{keep:true}); if(G!==me) return;
+  const score=c=>G.picked.filter(p=>c.tags.includes(p)).length; const best=Math.max(...G.r.cards.map(score)); const top=G.r.cards.filter(c=>score(c)===best);
+  if(top.length===1){ const c=top[0]; c.el.classList.add('guess'); await sleep(700); c.el.classList.remove('guess'); if(G!==me) return;
+    if(c===G.r.ans) return swapSuccess();
+    const w=G.picked.find(p=>c.tags.includes(p)) || c.noun; await KIT.sayLine(`Oh, this one is ${w} too!`, `앗, 이것도 ${KO[w]||w}!`); if(G!==me) return; }
+  else { top.forEach(c=>c.el.classList.add('guess')); await sleep(700); top.forEach(c=>c.el.classList.remove('guess')); }
+  if(G!==me) return;
+  const left=document.querySelectorAll('.wc:not(.used)').length;
+  if(G.extra>=2 || left===0){ await KIT.tutor('showMe'); if(G!==me) return; G.r.ans.el.classList.add('ok'); await KIT.sayLine(cap(G.r.desc)); if(G!==me) return; record(1,false); $('nextBtn').style.display='block'; return; }
+  G.extra++; await KIT.tutor('more'); if(G!==me) return; showFrame(); G.accepting=true; KIT.armIdle(idle);
+}
+async function swapSuccess(){
+  const me=G; G.r.ans.el.classList.add('ok'); KIT.sfx.ok(); KIT.face('joy'); const g=KIT.line('great'); KIT.bubble(g.t); await KIT.say(g.t,g.lang); if(G!==me) return;
+  const star=1+(G.extra===0?1:0); $('words').style.display='none';
+  await KIT.tutor('readMine',{keep:true}); if(G!==me) return;
+  const spoke=await KIT.speak({phrase:G.r.desc, keys:G.r.hintTags, targetHtml:G.r.desc, isAlive:()=>G===me}); if(G!==me) return;
+  record(star+(spoke?1:0), spoke); $('nextBtn').style.display='block';
+}
+
+/* ---------- classroom mode (stage A: one big screen, tap to vote, teacher reveals) ---------- */
+$('peekBtn').onclick=()=>{ if(!G||!G.cls||!G.r) return; const e=G.r.ans.el; e.classList.add('mine'); setTimeout(()=>e.classList.remove('mine'),1500); };
+$('revealBtn').onclick=async()=>{ if(!G||!G.cls||!G.accepting) return; const me=G; G.accepting=false; $('classBar').style.display='none';
+  const tot=Object.values(G.votes).reduce((a,b)=>a+b,0)||1; G.r.cards.forEach(c=>{ c.el.querySelector('.bar').style.width=((G.votes[c.key]||0)/tot*100)+'%'; });
+  const top=Math.max(0,...Object.values(G.votes)); const win=(G.votes[G.r.ans.key]||0)===top && top>0;
+  G.r.ans.el.classList.add('ok'); if(win){ KIT.sfx.clap(); G.classStars++; } await sleep(600); if(G!==me) return;
+  await KIT.sayLine(`It was this one! ${cap(G.r.desc)}`, '이 카드였어!'); if(G!==me) return; await KIT.tutor('together',{keep:true}); if(G!==me) return; await KIT.say(G.r.phrase); if(G!==me) return;
+  record(win?2:1,false); $('nextBtn').style.display='block'; };
+
+function record(s,spoke){ G.stars[G.idx]=s; const a=G.r.ans; G.words.push({text:`${a.ani?ANI[a.noun]:'🃏'} ${G.r.desc}`, phrase:G.r.age===5?G.r.hint:G.r.desc, stars:s, spoke}); KIT.renderProgress(G); }
+$('nextBtn').onclick=()=>{ if(!G) return; G.idx++; nextRound(); };
+$('reQ').onclick=()=>{ if(G&&G.r&&!G.r.swap) sayHint(1); };
+$('classBtn').onclick=e=>{ e.stopPropagation(); CLASS=!CLASS; $('classBtn').textContent=`🏫 교실 모드: ${CLASS?'켬':'끔'}`; };
+
+async function runDemo(){
+  KIT.demoStart(); const me=G; const keep={lv:G.lv}; G.lv=1; G.r=makeRound(5,1,0,new Set()); await layCards(G.r); G.accepting=false;
+  const steps=[ async()=>KIT.tutor('demo1',{keep:true}), async()=>sayHint(1), async()=>KIT.tutor('demo2',{keep:true}),
+    async()=>{ KIT.showHand(G.r.ans.el,true); await sleep(1000); G.r.ans.el.classList.add('ok'); KIT.sfx.ok(); KIT.face('joy'); await KIT.say(G.r.ans.noun); },
+    async()=>{ KIT.hideHand(); await KIT.tutor('demoEnd',{keep:true}); } ];
+  for(const s of steps){ if(KIT.skipDemo||G!==me) break; await s(); }
+  KIT.demoEnd(); if(G===me){ G.lv=keep.lv; G.used=new Set(); }
+}
+async function finish(){
+  KIT.clearIdle(); const hero='<img src="assets/popo.png">';
+  if(G.cls){ const q=$('qaLevel'), keep=q.value; q.value=String(G.lv);
+    await KIT.result(G,{title:'Class Story Time!', heroHtml:hero+`<div class="resmeta">반 별 ⭐ ${G.classStars} / ${G.total}</div>`, icon:'👖', unit:'주머니 카드', collName:'Popo의 주머니 앨범', per:10}); q.value=keep; return; }
+  await KIT.result(G,{title:'Story Time!', heroHtml:hero, icon:'👖', unit:'주머니 카드', collName:'Popo의 주머니 앨범', per:10});
+}
+KIT.init({prefix:'sc', onStart:startRound, onExit:()=>{ G=null; }});
+if(KIT.params.get('class')==='1'){ CLASS=true; $('classBtn').textContent='🏫 교실 모드: 켬'; }
+window.__sc=()=>G;
+</script>
+</body>
+</html>

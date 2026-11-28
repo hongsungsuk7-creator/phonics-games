@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Word Spot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<link rel="stylesheet" href="../_shared/kit.css">
+<style>
+  :root { --s1:#ffb7a3; --s2:#ff7f62; --ss:#c4502f; --st:#4a1505; --ink:#0f4d55; --b1:#46d9e6; --b2:#13a9b8; --bs:#0b7480; --a1:#2fb8c6; --a2:#138896; --as:#0b5f69; }
+  #stage { background: radial-gradient(ellipse at 50% 20%, #e8fbfd 0%, #bdeff4 55%, #8fdbe4 100%); }
+  .cloth { position:absolute; left:0; right:0; bottom:0; height:calc(var(--u)*30); background:
+    repeating-linear-gradient(45deg, rgba(255,127,98,.18) 0 calc(var(--u)*3), transparent calc(var(--u)*3) calc(var(--u)*6)), linear-gradient(#ffe9e1,#ffd3c5); }
+  .bigcard { position:absolute; top:calc(var(--u)*12); width:calc(var(--u)*58); height:calc(var(--u)*58); border-radius:50%; background:#fff;
+    box-shadow:0 0 0 calc(var(--u)*.8) #13a9b8, 0 calc(var(--u)*1.4) calc(var(--u)*3) rgba(0,0,0,.25); z-index:10; transition: transform .35s; }
+  #cardA { left:calc(var(--u)*30); } #cardB { left:calc(var(--u)*94); }
+  .bigcard.flip { transform: rotateY(90deg) scale(.9); }
+  .pic { position:absolute; transform:translate(-50%,-50%) rotate(var(--rot,0deg)) scale(var(--sc,1)); cursor:pointer; user-select:none; line-height:1;
+    display:flex; align-items:center; justify-content:center; border-radius:50%; transition: box-shadow .2s, transform .2s; }
+  .pic .emo { pointer-events:none; }
+  .pic.word { border-radius:calc(var(--u)*2); background:#eefbfd; padding:calc(var(--u)*.6) calc(var(--u)*1.6); font-size:calc(var(--u)*3.6); color:#0f4d55; box-shadow:0 calc(var(--u)*.3) 0 #9adbe3; }
+  .pic.found { box-shadow:0 0 0 calc(var(--u)*.8) #2fb457, 0 0 calc(var(--u)*3) #7be08a; z-index:3; transform:translate(-50%,-50%) rotate(0deg) scale(1.25); }
+  .pic.hint { animation: kglow 1.6s infinite; }
+  #link { position:absolute; inset:0; pointer-events:none; z-index:12; }
+  #pop { position:absolute; left:calc(var(--u)*88.9); top:calc(var(--u)*73); transform:translateX(-50%); text-align:center; z-index:30; opacity:0; transition: opacity .3s, transform .4s; pointer-events:none; }
+  #pop.on { opacity:1; transform:translate(-50%, calc(var(--u)*-2)); }
+  #pop .emo { font-size:calc(var(--u)*10); } #pop b { display:block; font-size:calc(var(--u)*4.6); color:#0f4d55; text-shadow:0 2px 0 #fff; }
+  #prompt { position:absolute; left:50%; top:calc(var(--u)*72.5); transform:translateX(-50%); background:#fff; border-radius:calc(var(--u)*3); padding:calc(var(--u)*.8) calc(var(--u)*2.6);
+    font-size:calc(var(--u)*3.4); color:#0f4d55; box-shadow:0 calc(var(--u)*.4) calc(var(--u)*1.2) rgba(0,0,0,.15); z-index:28; display:none; white-space:nowrap; }
+  .tutor { left:calc(var(--u)*2); bottom:calc(var(--u)*6); height:calc(var(--u)*24); transition: transform .25s; }
+  .tutor.inflate { animation: inflate .9s ease-out; }
+  @keyframes inflate { 0%{transform:scale(1)} 35%{transform:scale(1.35,1.3)} 55%{transform:scale(1.15,1.2) translateY(calc(var(--u)*-3))} 100%{transform:scale(1)} }
+  .bubble { top:calc(var(--u)*44); left:calc(var(--u)*2); width:calc(var(--u)*25); }
+  #nextBtn { position:absolute; right:calc(var(--u)*3); bottom:calc(var(--u)*4); display:none; z-index:30; }
+  #classBar { position:absolute; left:50%; top:calc(var(--u)*80); transform:translateX(-50%); display:none; gap:calc(var(--u)*2); z-index:29; align-items:center; }
+  .team { padding:calc(var(--u)*.8) calc(var(--u)*2.4); border-radius:calc(var(--u)*3); color:#fff; font-size:calc(var(--u)*3.2); opacity:.55; }
+  .team.red { background:#e94b4b; } .team.blue { background:#3d7be0; } .team.cur { opacity:1; box-shadow:0 0 0 calc(var(--u)*.6) #fff, 0 0 calc(var(--u)*2) rgba(0,0,0,.3); }
+  #classBtn { position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*4); z-index:20; }
+  #fast { position:absolute; right:calc(var(--u)*4); top:calc(var(--u)*12); font-size:calc(var(--u)*3); color:#c4502f; z-index:20; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="cloth"></div>
+
+  <section class="screen on" id="title">
+    <div class="topbar"><div class="row"><button class="btn alt" id="keyBtn">🔑</button></div><div class="row"><button class="btn alt" id="langBtn">한국어</button><button class="btn alt sndBtn">🔊</button></div></div>
+    <div class="logo">Word Spot<small>워드 스팟 · 두 카드에서 똑같은 그림을 찾아요</small></div>
+    <img src="assets/moru_base.png" style="position:absolute;left:calc(var(--u)*10);bottom:calc(var(--u)*5);height:calc(var(--u)*34)" alt="Moru">
+    <div class="coll"><div class="k">🫧</div>Moru 변신 도감<br><b id="collCount">0</b></div>
+    <div class="agebox">연령(보호자 설정) <button class="chip" data-age="5">5세</button><button class="chip" data-age="6">6세</button><button class="chip" data-age="7">7세</button><button class="chip" data-age="8">초1</button></div>
+    <button class="btn alt" id="classBtn">🏫 교실 모드: 끔</button>
+    <button class="btn start" id="startBtn">START</button>
+  </section>
+
+  <section class="screen" id="game">
+    <div class="topbar">
+      <div class="row"><div class="pill">⭐ <span id="starSum">0</span></div><div class="progress" id="progress"></div></div>
+      <div class="row"><div class="pill" id="lvPill">LEVEL 1</div><button class="btn alt" id="reQ">💬</button></div>
+      <div class="row"><button class="btn alt sndBtn">🔊</button><button class="btn" id="exitBtn">✕</button></div>
+    </div>
+    <div class="bigcard" id="cardA"></div><div class="bigcard" id="cardB"></div>
+    <svg id="link"></svg>
+    <div id="prompt"></div>
+    <div id="pop"></div>
+    <div id="fast"></div>
+    <div id="classBar"><div class="team red" id="teamR">🔴 빨강팀 ⭐ <span id="scR">0</span></div><button class="btn gold" id="togetherBtn">📣 Say it together!</button><div class="team blue" id="teamB">🔵 파랑팀 ⭐ <span id="scB">0</span></div></div>
+    <img class="tutor" id="tutor" src="assets/moru_base.png" alt="Moru">
+    <div class="bubble" id="bubble"></div>
+    <button class="btn gold big" id="nextBtn">Next ▶</button>
+  </section>
+
+  <section class="screen" id="result">
+    <div class="card-res"><h2 id="resTitle">Spotted!</h2><div class="res-hero" id="resHero"></div><div class="bigstars" id="resStars"></div><div class="resmeta" id="resMeta"></div><div id="resLv"></div>
+      <div class="reswords" id="resWords"></div><div class="resmeta" id="resReward"></div>
+      <div class="resbtns"><button class="btn alt" id="homeBtn">🏠 Home</button><button class="btn" id="againBtn">↻ Again</button><button class="btn green" id="nextRoundBtn">Next ▶</button></div></div>
+  </section>
+</div>
+<script src="../_shared/kit.js"></script>
+<script>
+'use strict';
+const {$, sleep, rnd, shuffle} = KIT;
+KIT.L = {
+  hello:{en:"Hi, I'm Moru! Stretch, squash and become!", ko:'안녕, 나는 모루야! 늘이고, 누르고, 변신!'},
+  demo1:{en:'Look at the two cards.', ko:'카드 두 장을 봐.'},
+  demo2:{en:'Only one picture is the same. Tap it!', ko:'똑같은 그림은 딱 하나야. 그걸 눌러!'},
+  same:{en:"What's the same?", ko:'뭐가 똑같지?'},
+  onset:{en:'Find two pictures with the same first sound!', ko:'첫소리가 같은 그림을 찾아 봐!'},
+  match:{en:'Find the picture and its word!', ko:'그림과 그 단어를 찾아 봐!'},
+  again:{en:'Look again!', ko:'다시 봐!'},
+  hintGlow:{en:'Look closely here!', ko:'여기를 잘 봐!'},
+  sayWith:{en:'Say it with me!', ko:'나랑 같이 말해!'},
+  ask:{en:'What is it?', ko:'이게 뭐지?'},
+  idle:{en:'Which one is the same?', ko:'어떤 게 똑같을까?'},
+  great:{en:['You spotted it!','Super eyes!','Same, same!','Wow, fast!'], ko:['찾았다!','눈이 최고야!','똑같아!','와, 빠르다!']},
+  together:{en:'Say it together!', ko:'다 같이 말해 봐!'},
+  clear:{en:'All done! Look at all my new shapes!', ko:'다 했다! 내가 변신한 모습 좀 봐!'},
+  levelUp:{en:'Level up! More pictures this time!', ko:'레벨 업! 이번엔 그림이 더 많아!'},
+};
+const ageName=a=>a===8?'초1':a+'세';
+KIT.face=f=>{ const t=$('tutor'); if(f==='joy'){ t.src='assets/moru_base.png'; t.classList.remove('inflate'); void t.offsetWidth; t.classList.add('inflate'); }
+  else if(f==='oops'){ t.src='assets/moru_flat.png'; clearTimeout(t._h); t._h=setTimeout(()=>t.src='assets/moru_base.png',800); }
+  else t.src='assets/moru_base.png'; };
+
+/* ---------- data (prototype stand-in for lesson pack FP.K.U1L1 + review words) ---------- */
+const CAT={moon:'sky',map:'thing',milk:'drink',mop:'thing',mug:'thing',mouse:'animal',monkey:'animal',mushroom:'food',mask:'wear',mail:'thing',mitt:'wear',meat:'food',mirror:'thing',man:'person',mouth:'body',
+  egg:'food',fox:'animal',gift:'thing',kite:'thing',doll:'thing',heart:'thing'};
+const EXTRA=[['bus','🚌','vehicle'],['car','🚗','vehicle'],['sun','☀️','sky'],['star','⭐','sky'],['hat','🎩','wear'],['sock','🧦','wear'],['cat','🐱','animal'],['dog','🐶','animal'],['pig','🐷','animal'],
+  ['duck','🦆','animal'],['bee','🐝','animal'],['fish','🐟','animal'],['apple','🍎','food'],['banana','🍌','food'],['cake','🍰','food'],['juice','🧃','drink'],['ball','⚽','thing'],['book','📖','thing'],['bed','🛏️','thing'],['tree','🌳','nature'],['lion','🦁','animal']];
+const POOL=[...KIT.MWORDS.filter(m=>m.w!=='mice'), ...KIT.OTHER.filter(o=>o.w!=='ten')].map(m=>({w:m.w,e:m.e,cat:CAT[m.w]||'thing',lesson:m.w.startsWith('m')}))
+  .concat(EXTRA.map(([w,e,cat])=>({w,e,cat,lesson:false})));
+const byW=w=>POOL.find(p=>p.w===w);
+const LESSON=POOL.filter(p=>p.lesson);
+const PROMPT={ food:{en:'Find the one you can eat.',ko:'먹을 수 있는 거!'}, drink:{en:'Find the one you can drink.',ko:'마실 수 있는 거!'}, animal:{en:'Find the animal.',ko:'동물!'},
+  vehicle:{en:'Find the one you can ride.',ko:'탈 수 있는 거!'}, sky:{en:'Find the one in the sky.',ko:'하늘에 있는 거!'}, wear:{en:'Find the one you can wear.',ko:'입거나 끼는 거!'} };
+const CONF={mouse:['mouth'],mouth:['mouse'],meat:['mitt'],mitt:['meat'],map:['mop','man'],mop:['map'],man:['map']};
+const PER={5:[3,4,4,5,5,6], 6:[4,5,6,6,7,8], 7:[4,5,6,7,8,8], 8:[4,5,6,6,7,8]};
+const LV={1:{mix:0,rot:0,dist:'other',fast:0},2:{mix:0,rot:0,dist:'other',fast:15},3:{mix:.12,rot:15,dist:'cat',fast:12},4:{mix:.12,rot:30,dist:'cat',fast:10},5:{mix:.25,rot:180,dist:'cat',fast:8},6:{mix:.25,rot:180,dist:'conf',fast:6}};
+const PAIRS={5:5,6:8,7:8,8:10};
+const art=w=>/^[aeiou]/.test(w)?'an':'a';
+
+/* ---------- pair generation (TRD 4-1: only two cards, exactly one shared picture) ---------- */
+function fillers(shared, n, lv, avoid){
+  const P=LV[lv]; const pick=[]; const ban=new Set([shared.w, ...avoid]);
+  let order;
+  if(P.dist==='other') order=shuffle(POOL.filter(p=>p.cat!==shared.cat));
+  else order=shuffle(POOL.filter(p=>p.cat===shared.cat)).concat(shuffle(POOL.filter(p=>p.cat!==shared.cat)));
+  if(P.dist==='conf') order=(CONF[shared.w]||[]).map(byW).filter(Boolean).concat(order);
+  else order=order.filter(p=>!(CONF[shared.w]||[]).includes(p.w));
+  for(const p of order){ if(pick.length>=n) break; if(ban.has(p.w)) continue; if(P.dist!=='conf' && pick.some(q=>(CONF[q.w]||[]).includes(p.w))) continue; ban.add(p.w); pick.push(p); }
+  for(const p of shuffle(POOL)){ if(pick.length>=n) break; if(!ban.has(p.w)){ ban.add(p.w); pick.push(p); } }
+  return pick;
+}
+function makePair(age, lv, used, retry){
+  const n=PER[age][lv-1]; const onsetMode = age===6 && lv>=5; const textMode = age===7; const promptMode = age===8;
+  let src = promptMode ? POOL.filter(p=>PROMPT[p.cat]) : LESSON;
+  let cand = src.filter(p=>!used.has(p.w)); if(!cand.length) cand=src;
+  const r = retry.find(w=>cand.some(c=>c.w===w));
+  const shared = r ? byW(r) : (promptMode ? rnd(cand.filter(c=>c.lesson).length && Math.random()<.6 ? cand.filter(c=>c.lesson) : cand) : rnd(cand));
+  used.add(shared.w);
+  if(onsetMode){
+    const L=shared.w[0]; const partner=rnd(POOL.filter(p=>p.w[0]===L && p.w!==shared.w && !(CONF[shared.w]||[]).includes(p.w)));
+    const rest=shuffle(POOL.filter(p=>p.w[0]!==L)); const A=[], B=[]; const oa=new Set(), ob=new Set();
+    for(const p of rest){ if(A.length<n-1 && !ob.has(p.w[0]) && !oa.has(p.w[0])){ A.push(p); oa.add(p.w[0]); continue; }
+      if(B.length<n-1 && !oa.has(p.w[0]) && !ob.has(p.w[0])){ B.push(p); ob.add(p.w[0]); } if(A.length>=n-1&&B.length>=n-1) break; }
+    // if letters ran out, allow same-letter words on the same card only
+    for(const p of rest){ if(A.length>=n-1) break; if(!A.includes(p)&&!B.includes(p)&&!ob.has(p.w[0])) A.push(p); }
+    for(const p of rest){ if(B.length>=n-1) break; if(!A.includes(p)&&!B.includes(p)&&!oa.has(p.w[0])) B.push(p); }
+    return {mode:'onset', n, ans:shared, partner, A:shuffle([shared,...A]), B:shuffle([partner,...B]), phrase:shared.w, keys:[shared.w]};
+  }
+  const f=fillers(shared, 2*(n-1), lv, []); const A=f.slice(0,n-1), B=f.slice(n-1);
+  const o={mode:textMode?'text':promptMode?'prompt':'pic', n, ans:shared, A:shuffle([shared,...A]), B:shuffle([shared,...B])};
+  o.phrase = promptMode ? `It's ${art(shared.w)} ${shared.w}.` : shared.w; o.keys=[shared.w];
+  if(promptMode) o.prompt=PROMPT[shared.cat];
+  return o;
+}
+
+/* ---------- layout ---------- */
+function slots(n){ // percent positions inside the round card
+  const s=[]; if(n<=3){ const r=.24; for(let i=0;i<n;i++){ const a=-Math.PI/2+i*2*Math.PI/n; s.push([50+Math.cos(a)*r*100, 50+Math.sin(a)*r*100]); } return s; }
+  s.push([50,50]); const m=n-1, r=n<=5?.27:.31; for(let i=0;i<m;i++){ const a=-Math.PI/2+i*2*Math.PI/m+.3; s.push([50+Math.cos(a)*r*100, 50+Math.sin(a)*r*100]); } return s; }
+function drawCard(el, items, isText, side){
+  el.innerHTML=''; const P=LV[G.lv]; const pos=shuffle(slots(items.length)); const n=items.length;
+  const base = n<=4? 10.5 : n<=6? 8.6 : 7.4;
+  items.forEach((it,i)=>{ const d=document.createElement('div'); d.className='pic'+(isText?' word':''); d.dataset.w=it.w; d.dataset.side=side;
+    const [x,y]=pos[i]; d.style.left=x+'%'; d.style.top=y+'%';
+    const sc = 1 + (P.mix? (Math.random()*2-1)*P.mix : 0); const rot = P.rot? (P.rot>=180? Math.random()*360-180 : (Math.random()*2-1)*P.rot) : 0;
+    d.style.setProperty('--sc', isText?1:sc.toFixed(2)); d.style.setProperty('--rot', (isText?0:rot).toFixed(0)+'deg');
+    if(isText) d.textContent=it.w; else d.innerHTML=`<div class="emo" style="font-size:calc(var(--u)*${base})">${it.e}</div>`;
+    if(isAns(it,side)) d.dataset.ans='1';
+    d.onclick=e=>{ e.stopPropagation(); onTap(d,it); }; el.appendChild(d); });
+}
+function isAns(it, side){ const p=G.p; if(p.mode==='onset') return (side==='A'&&it.w===p.ans.w)||(side==='B'&&it.w===p.partner.w); return it.w===p.ans.w; }
+function ansEls(){ return [...document.querySelectorAll('.pic[data-ans="1"]')]; }
+function drawLink(){ const s=$('stage').getBoundingClientRect(); const [a,b]=ansEls().map(e=>e.getBoundingClientRect()); const svg=$('link');
+  if(!a||!b){ svg.innerHTML=''; return; } const ax=a.left-s.left+a.width/2, ay=a.top-s.top+a.height/2, bx=b.left-s.left+b.width/2, by=b.top-s.top+b.height/2;
+  svg.setAttribute('viewBox',`0 0 ${s.width} ${s.height}`); svg.innerHTML=`<path d="M${ax} ${ay} Q ${(ax+bx)/2} ${Math.min(ay,by)-KIT.u*14} ${bx} ${by}" fill="none" stroke="#2fb457" stroke-width="${KIT.u*.9}" stroke-dasharray="${KIT.u*2} ${KIT.u*1.2}" stroke-linecap="round"/>`; }
+
+/* ---------- flow ---------- */
+let G=null, CLASS=false;
+function touched(){ if(!G) return; KIT.clearIdle(); KIT.armIdle(idle); }
+async function idle(){ if(!G||!G.accepting) return; await KIT.tutor('idle'); const a=ansEls()[0]; if(a) KIT.showHand(a.closest('.bigcard')); }
+async function startRound(){
+  const age=KIT.SAVE.age, lv=KIT.levelFor(age); G={age, lv, total:PAIRS[age], idx:0, stars:[], words:[], used:new Set(), fast:0, cls:CLASS, team:0, score:[0,0]}; const me=G;
+  $('lvPill').textContent=`LEVEL ${lv} · ${ageName(age)}${CLASS?' · 교실':''}`; KIT.show('game'); KIT.renderProgress(G);
+  $('classBar').style.display=CLASS?'flex':'none'; $('fast').textContent=''; updTeams();
+  if(!CLASS && KIT.demoNeeded()) await runDemo(); if(G!==me) return; nextPair();
+}
+function updTeams(){ if(!G) return; $('scR').textContent=G.score[0]; $('scB').textContent=G.score[1]; $('teamR').classList.toggle('cur',G.team===0); $('teamB').classList.toggle('cur',G.team===1); }
+function setupPair(p){
+  $('pop').classList.remove('on'); $('link').innerHTML=''; $('prompt').style.display='none';
+  drawCard($('cardA'), p.A, false, 'A'); drawCard($('cardB'), p.B, p.mode==='text', 'B');
+  ['cardA','cardB'].forEach(id=>{ const c=$(id); c.classList.add('flip'); requestAnimationFrame(()=>requestAnimationFrame(()=>c.classList.remove('flip'))); });
+}
+async function nextPair(){
+  if(G.idx>=G.total) return finish();
+  const me=G; $('nextBtn').style.display='none'; const p=G.p=makePair(G.age,G.lv,G.used,KIT.SAVE.retry||[]); G.wrong=0; G.accepting=false; G.t0=0;
+  KIT.renderProgress(G); setupPair(p); KIT.sfx.whoosh(); KIT.face('neutral');
+  if(p.mode==='prompt'){ $('prompt').textContent='🗣 '+p.prompt.en; $('prompt').style.display='block'; }
+  await sleep(350); if(G!==me) return;
+  await KIT.tutor(p.mode==='onset'?'onset':p.mode==='text'?'match':'same',{keep:p.mode!=='prompt'}); if(G!==me) return;
+  if(p.mode==='prompt') await KIT.sayLine(p.prompt.en, p.prompt.ko); if(G!==me) return;
+  G.accepting=true; G.t0=performance.now(); KIT.armIdle(idle);
+}
+async function onTap(el, it){
+  if(!G||!G.accepting) return; touched();
+  if(el.dataset.ans==='1') return success(el, it);
+  const me=G; G.wrong++; KIT.sfx.bad(); KIT.anim(el,'shake'); KIT.face('oops');
+  if(G.wrong===1) await KIT.tutor('again');
+  else if(G.wrong===2){ ansEls().forEach(e=>e.classList.add('hint')); await KIT.tutor('hintGlow'); }
+  else { G.accepting=false; KIT.clearIdle(); await reveal(); if(G!==me) return; await KIT.sayLine(`Here it is! The ${G.p.ans.w}!`, `여기 있어!`); record(1,false); $('nextBtn').style.display='block'; }
+}
+async function reveal(){ ansEls().forEach(e=>{ e.classList.remove('hint'); e.classList.add('found'); }); drawLink(); const w=G.p.ans; $('pop').innerHTML=`<div class="emo">${w.e}</div><b>${w.w}</b>`; $('pop').classList.add('on'); await KIT.say(w.w); }
+async function success(el, it){
+  const me=G; G.accepting=false; KIT.clearIdle(); KIT.sfx.ok(); KIT.face('joy');
+  const secs=(performance.now()-G.t0)/1000, F=LV[G.lv].fast; if(F && secs<=F && G.wrong===0){ G.fast++; $('fast').textContent='⚡ '.repeat(Math.min(G.fast,5)); KIT.toast('⚡ Wow, fast!'); }
+  if(G.p.mode==='onset'){ G.p.phrase=it.w; G.p.keys=[it.w]; }
+  await reveal(); if(G!==me) return; KIT.anim($('tutor'),'bounce');
+  const g=KIT.line('great'); KIT.bubble(g.t+(g.lang==='ko'?`<span class="en">${g.en}</span>`:'')); await KIT.say(g.t,g.lang); if(G!==me) return;
+  const star=1+(G.wrong===0?1:0);
+  if(G.cls){ G.score[G.team]+=star; updTeams(); await KIT.tutor('together',{keep:true}); if(G!==me) return; await KIT.say(G.p.phrase); record(star,false); G.team=1-G.team; updTeams(); $('nextBtn').style.display='block'; return; }
+  await KIT.tutor(G.age===5?'sayWith':'ask',{keep:true}); if(G!==me) return;
+  const spoke=await KIT.speak({phrase:G.p.phrase, keys:G.p.keys, targetHtml:`${G.p.ans.e} ${G.p.phrase}`, isAlive:()=>G===me}); if(G!==me) return;
+  record(star+(spoke?1:0), spoke); $('nextBtn').style.display='block';
+}
+function record(s,spoke){ G.stars[G.idx]=s; const w=G.p.ans; G.words.push({text:`${w.e} ${w.w}`, phrase:G.p.phrase, stars:s, spoke});
+  const R=new Set(KIT.SAVE.retry||[]); if(s<=1) R.add(w.w); else R.delete(w.w); KIT.SAVE.retry=[...R].slice(-8); KIT.writeSave(); KIT.renderProgress(G); }
+$('nextBtn').onclick=()=>{ if(!G) return; G.idx++; nextPair(); };
+$('reQ').onclick=()=>{ if(!G||!G.p) return; if(G.p.mode==='prompt') KIT.sayLine(G.p.prompt.en,G.p.prompt.ko); else KIT.tutor(G.p.mode==='onset'?'onset':G.p.mode==='text'?'match':'same'); };
+$('togetherBtn').onclick=()=>{ if(G&&G.p) { KIT.tutor('together'); setTimeout(()=>KIT.say(G.p.phrase),1200); } };
+$('classBtn').onclick=e=>{ e.stopPropagation(); CLASS=!CLASS; $('classBtn').textContent=`🏫 교실 모드: ${CLASS?'켬':'끔'}`; };
+
+async function runDemo(){
+  KIT.demoStart(); const me=G; const keep={lv:G.lv, age:G.age}; G.lv=1; G.age=5; G.p=makePair(5,1,new Set(),[]); setupPair(G.p); G.accepting=false;
+  const steps=[ async()=>KIT.tutor('demo1',{keep:true}), async()=>KIT.tutor('demo2',{keep:true}),
+    async()=>{ const a=ansEls(); KIT.showHand(a[0],true); await sleep(900); KIT.showHand(a[1],true); await sleep(900); KIT.sfx.ok(); KIT.face('joy'); await reveal(); },
+    async()=>{ KIT.hideHand(); await KIT.tutor('demoEnd',{keep:true}); } ];
+  for(const s of steps){ if(KIT.skipDemo||G!==me) break; await s(); }
+  KIT.demoEnd(); if(G===me){ G.lv=keep.lv; G.age=keep.age; G.used=new Set(); }
+}
+async function finish(){
+  KIT.clearIdle(); const hero='<img src="assets/moru_base.png">'+G.words.slice(0,6).map(w=>`<span class="emo" style="font-size:calc(var(--u)*6)">${w.text.split(' ')[0]}</span>`).join('');
+  if(G.cls){ // classroom: no level change (TRD 6-3)
+    const q=$('qaLevel'), keep=q.value; q.value=String(G.lv);
+    await KIT.result(G,{title:G.score[0]===G.score[1]?'Both teams win!':(G.score[0]>G.score[1]?'Red team ⭐':'Blue team ⭐'), heroHtml:hero+`<div class="resmeta">🔴 ${G.score[0]} · 🔵 ${G.score[1]}</div>`, icon:'🫧', unit:'변신 카드', collName:'Moru 변신 도감', per:10});
+    q.value=keep; return; }
+  await KIT.result(G,{title:'Spotted!', heroHtml:hero+(G.fast?`<div class="resmeta">⚡ 빠르게 찾음 ${G.fast}번</div>`:''), icon:'🫧', unit:'변신 카드', collName:'Moru 변신 도감', per:10});
+}
+KIT.init({prefix:'ws', onStart:startRound, onExit:()=>{ G=null; }});
+if(KIT.params.get('class')==='1'){ CLASS=true; $('classBtn').textContent='🏫 교실 모드: 켬'; }
+addEventListener('keydown',e=>{ if(e.key==='n' && $('nextBtn').style.display==='block') $('nextBtn').click(); });
+window.__ws=()=>G;
+</script>
+</body>
+</html>

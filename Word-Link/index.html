@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Word Link</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<link rel="stylesheet" href="../_shared/kit.css">
+<style>
+  :root { --s1:#7fe6c8; --s2:#2fbf97; --ss:#1d8a6b; --st:#08372a; --ink:#123a33; --b1:#ff8f7a; --b2:#e9574a; --bs:#a8332a; --a1:#4fb6a0; --a2:#26897a; --as:#15584e; --bg:#bfe9d6; }
+  #stage { background: linear-gradient(#fff4c9 0%, #d8f1df 45%, #a9dcbf 100%); }
+  .yard { position:absolute; left:0; right:0; bottom:0; height:calc(var(--u)*22); background:linear-gradient(#8fd19f,#6bb983); }
+  .sunbeam { position:absolute; right:calc(var(--u)*10); top:calc(var(--u)*-6); width:calc(var(--u)*30); height:calc(var(--u)*30); border-radius:50%; background:radial-gradient(#fff6b0,#ffe27a00 70%); }
+  .flyc { position:absolute; font-size:calc(var(--u)*7); animation: drift 4s ease-in-out infinite; z-index:5; }
+  @keyframes drift { 50% { transform:translateY(calc(var(--u)*-2)) rotate(6deg); } }
+  .modeBtn { position:absolute; left:calc(var(--u)*3); bottom:calc(var(--u)*4); z-index:21; }
+  .modeBtn.on { background:linear-gradient(#ffd96a,#f5a623); color:#5a3300; box-shadow:0 calc(var(--u)*.7) 0 #c07a0c; }
+
+  .tutor { left:calc(var(--u)*1); bottom:calc(var(--u)*2); height:calc(var(--u)*30); }
+  .bubble { top:calc(var(--u)*13); }
+  #hintBox { position:absolute; left:calc(var(--u)*34); width:calc(var(--u)*108); top:calc(var(--u)*11.5); height:calc(var(--u)*9); display:flex; align-items:center; justify-content:center; gap:calc(var(--u)*2);
+    background:rgba(255,255,255,.92); border-radius:calc(var(--u)*4.5); font-size:calc(var(--u)*4); z-index:20; box-shadow:0 calc(var(--u)*.6) 0 rgba(0,0,0,.08); }
+  #hintBox .hi { font-size:calc(var(--u)*5.6); } #hintBox .dots { color:#e9574a; letter-spacing:calc(var(--u)*.4); font-size:calc(var(--u)*3.6); }
+  #hintBox .dots i { font-style:normal; color:#c9d3d0; } #hintBox .dots i.got { color:#e9574a; }
+  #hintBox.blue .dots i.got { color:#2d6fe0; }
+  #grid { position:absolute; left:calc(var(--u)*34); width:calc(var(--u)*108); top:calc(var(--u)*22); height:calc(var(--u)*75); display:grid; justify-content:center; align-content:center; gap:calc(var(--u)*1.6); z-index:15; }
+  .wc { position:relative; background:#fff; border-radius:calc(var(--u)*2.2); display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;
+    box-shadow:0 calc(var(--u)*.7) 0 #b9d8cc, 0 calc(var(--u)*1) calc(var(--u)*1.6) rgba(0,0,0,.18); transition: transform .3s, opacity .3s, filter .3s; animation: pop .35s backwards; }
+  @keyframes pop { from { transform:scale(.3); opacity:0; } }
+  .wc .emo { font-size:calc(var(--cs)*.52); } .wc .w { font-size:calc(var(--cs)*.16); margin-top:calc(var(--u)*.3); white-space:nowrap; }
+  .wc.txt .w { font-size:calc(var(--cs)*.2); margin:0; }
+  .wc.found { opacity:0; pointer-events:none; }
+  .wc.dim { opacity:.35; filter:grayscale(.8); }
+  .wc.aside { transform:translate(calc(var(--u)*2), calc(var(--u)*2)) rotate(8deg) scale(.85); opacity:.25; pointer-events:none; }
+  .wc.glow { animation: kglow 1s infinite; }
+  .wc .btn2 { position:absolute; right:calc(var(--u)*.6); top:calc(var(--u)*.6); width:calc(var(--u)*3.6); height:calc(var(--u)*3.6); border-radius:50%; }
+  .wc.pick { outline:calc(var(--u)*.8) solid #ffd24d; }
+  .fly { position:absolute; z-index:40; pointer-events:none; transition: left .7s cubic-bezier(.5,-.3,.6,1), top .7s cubic-bezier(.5,-.3,.6,1), transform .7s, opacity .7s; }
+  #bag { position:absolute; right:calc(var(--u)*2); top:calc(var(--u)*22); width:calc(var(--u)*30); bottom:calc(var(--u)*4); z-index:14; display:flex; flex-direction:column; gap:calc(var(--u)*1); align-items:center; }
+  #bag h4 { margin:0; color:#15584e; font-size:calc(var(--u)*2.6); }
+  .grp { background:rgba(255,255,255,.85); border-radius:calc(var(--u)*2); padding:calc(var(--u)*.6) calc(var(--u)*1.2); font-size:calc(var(--u)*2.4); width:100%; display:flex; gap:calc(var(--u)*.6); align-items:center; }
+  .grp .b { width:calc(var(--u)*2.6); height:calc(var(--u)*2.6); border-radius:50%; background:#e9574a; flex:none; box-shadow:inset 0 0 0 calc(var(--u)*.5) rgba(255,255,255,.5); }
+  .grp .b.blue { background:#2d6fe0; } .grp .b.none { background:#f5c842; }
+  .grp .es { font-size:calc(var(--u)*2.8); }
+  #teamPill { display:none; } #teamPill.red { display:flex; background:#ffd9d3; } #teamPill.blue { display:flex; background:#d6e4ff; }
+  /* check overlay */
+  #check, #swap { position:absolute; left:calc(var(--u)*34); width:calc(var(--u)*108); top:calc(var(--u)*22); height:calc(var(--u)*75); background:rgba(18,58,51,.55); border-radius:calc(var(--u)*3); z-index:30; display:none; flex-direction:column; align-items:center; justify-content:center; gap:calc(var(--u)*2.4); }
+  #check.on, #swap.on { display:flex; }
+  #check .q { background:#fff; border-radius:calc(var(--u)*3); padding:calc(var(--u)*1) calc(var(--u)*3); font-size:calc(var(--u)*4); display:flex; align-items:center; gap:calc(var(--u)*1.5); }
+  #check .opts { display:flex; gap:calc(var(--u)*5); }
+  .ck { width:calc(var(--u)*26); height:calc(var(--u)*26); background:#fff; border-radius:calc(var(--u)*3); font-size:calc(var(--u)*15); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 calc(var(--u)*.8) 0 #b9d8cc; }
+  .ck.glow { animation: kglow 1s infinite; }
+  #swap .hl { display:flex; flex-wrap:wrap; gap:calc(var(--u)*1.4); justify-content:center; max-width:calc(var(--u)*100); }
+  .hc { background:#fff; border-radius:calc(var(--u)*2.4); padding:calc(var(--u)*1) calc(var(--u)*2); font-size:calc(var(--u)*3); cursor:pointer; display:flex; align-items:center; gap:calc(var(--u)*1); box-shadow:0 calc(var(--u)*.6) 0 #b9d8cc; }
+  .hc .hi { font-size:calc(var(--u)*4.4); } .hc.sel { outline:calc(var(--u)*.7) solid #ffd24d; }
+  #swap .cnt { display:flex; align-items:center; gap:calc(var(--u)*2); color:#fff; font-size:calc(var(--u)*4); }
+  #swap .cnt b { background:#fff; color:#123a33; border-radius:calc(var(--u)*2); padding:0 calc(var(--u)*2.4); }
+  #nextBtn { position:absolute; right:calc(var(--u)*3); bottom:calc(var(--u)*4); display:none; z-index:30; }
+  .scoreTeams { font-size:calc(var(--u)*3); margin-top:calc(var(--u)*.6); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="sunbeam"></div><div class="yard"></div>
+
+  <section class="screen on" id="title">
+    <div class="topbar"><div class="row"><button class="btn alt" id="keyBtn">🔑</button></div><div class="row"><button class="btn alt" id="langBtn">한국어</button><button class="btn alt sndBtn">🔊</button></div></div>
+    <div class="logo">Word Link<small>워드 링크 · 힌트에 맞는 카드를 모두 찾아 묶어요</small></div>
+    <img src="assets/dudu.png" style="position:absolute;left:calc(var(--u)*10);bottom:calc(var(--u)*4);height:calc(var(--u)*40)" alt="Dudu">
+    <div class="flyc" style="right:calc(var(--u)*30);top:calc(var(--u)*42)">🐱</div><div class="flyc" style="right:calc(var(--u)*20);top:calc(var(--u)*55);animation-delay:1s">🍎</div>
+    <div class="flyc" style="right:calc(var(--u)*38);top:calc(var(--u)*62);animation-delay:2s">⚽</div><div class="flyc" style="right:calc(var(--u)*12);top:calc(var(--u)*40);animation-delay:.5s">🧦</div>
+    <div class="coll"><div class="k">🔘</div>Button Box<br><b id="collCount">0</b></div>
+    <div class="agebox">연령(보호자 설정) <button class="chip" data-age="5">5세</button><button class="chip" data-age="6">6세</button><button class="chip" data-age="7">7세</button><button class="chip" data-age="8">초1</button></div>
+    <button class="btn alt modeBtn" id="modeBtn">🏫 교실 모드: 끔</button>
+    <button class="btn start" id="startBtn">START</button>
+  </section>
+
+  <section class="screen" id="game">
+    <div class="topbar">
+      <div class="row"><div class="pill">⭐ <span id="starSum">0</span></div><div class="progress" id="progress"></div></div>
+      <div class="row"><div class="pill" id="teamPill"></div><div class="pill" id="lvPill">LEVEL 1</div><button class="btn alt" id="reQ">💬</button></div>
+      <div class="row"><button class="btn alt sndBtn">🔊</button><button class="btn" id="exitBtn">✕</button></div>
+    </div>
+    <div id="hintBox"></div>
+    <div id="grid"></div>
+    <div id="bag"><h4>👜 Dudu's bag</h4><div id="groups" style="width:100%;display:flex;flex-direction:column;gap:calc(var(--u)*1)"></div></div>
+    <div id="check"><div class="q" id="checkQ"></div><div class="opts" id="checkOpts"></div></div>
+    <div id="swap"><div class="q" style="background:#fff;border-radius:calc(var(--u)*3);padding:calc(var(--u)*1) calc(var(--u)*3);font-size:calc(var(--u)*3.4)">👉 Pick a word card for Dudu!</div><div class="hl" id="swapList"></div>
+      <div class="cnt"><button class="btn alt" id="cMinus">−</button><b id="cNum">1</b><button class="btn alt" id="cPlus">+</button><button class="btn green" id="cOk">OK ✔</button></div></div>
+    <img class="tutor" id="tutor" src="assets/dudu.png" alt="Dudu">
+    <div class="bubble" id="bubble"></div>
+    <button class="btn gold big" id="nextBtn">Next ▶</button>
+  </section>
+
+  <section class="screen" id="result">
+    <div class="card-res"><h2 id="resTitle">All sorted!</h2><div class="res-hero" id="resHero"></div><div class="bigstars" id="resStars"></div><div class="resmeta" id="resMeta"></div><div id="resLv"></div>
+      <div class="resmeta scoreTeams" id="resTeams"></div>
+      <div class="reswords" id="resWords"></div><div class="resmeta" id="resReward"></div>
+      <div class="resbtns"><button class="btn alt" id="homeBtn">🏠 Home</button><button class="btn" id="againBtn">↻ Again</button><button class="btn green" id="nextRoundBtn">Next ▶</button></div></div>
+  </section>
+</div>
+<script src="../_shared/kit.js"></script>
+<script>
+'use strict';
+const {$, sleep, rnd, shuffle} = KIT;
+KIT.L = {
+  hello:{en:"Hi, I'm Dudu! Let's sort things out!", ko:'안녕, 나는 두두야! 같이 정리해 보자!'},
+  demo1:{en:'Listen to my word.', ko:'내 말을 잘 들어 봐.'},
+  demo2:{en:'Find all the cards that go together!', ko:'같은 무리 카드를 모두 찾아 봐!'},
+  check:{en:'Which one is it?', ko:'어느 거지?'},
+  noCard:{en:"Oops, that one doesn't go anywhere!", ko:'앗, 그 카드는 어디에도 안 들어가!'},
+  hintGlow:{en:'Look at the shiny one!', ko:'반짝이는 걸 봐!'},
+  yourTurn:{en:'Your turn! Pick a word card for me.', ko:'네 차례야! 나한테 힌트 카드를 골라 줘.'},
+  ask:{en:'Say one of them!', ko:'하나 말해 봐!'},
+  idle:{en:'Which cards go together?', ko:'어떤 카드가 같은 무리일까?'},
+  great:{en:['Into my bag!','Great sorting!','You found them all!','Super!'], ko:['가방에 쏙!','정리 최고!','다 찾았어!','멋져!']},
+  clear:{en:'All sorted! Thank you!', ko:'다 정리했어! 고마워!'},
+  levelUp:{en:'Level up! More cards this time!', ko:'레벨 업! 이번엔 카드가 더 많아!'},
+  teamRed:{en:'Red button team!', ko:'빨간 단추 팀!'}, teamBlue:{en:'Blue button team!', ko:'파란 단추 팀!'},
+};
+KIT.face=f=>{ if(f==='joy') KIT.anim($('tutor'),'bounce'); if(f==='oops') KIT.anim($('tutor'),'oops'); };
+const ageLabel=a=>a===8?'초1':a+'세';
+
+/* ---------- content (prototype stand-in for lesson pack + tag data, TRD 5) ---------- */
+const WORDS=[
+  {w:'cat',e:'🐱',t:['animal']},{w:'dog',e:'🐶',t:['animal']},{w:'mouse',e:'🐭',t:['animal']},{w:'monkey',e:'🐵',t:['animal','zoo']},
+  {w:'lion',e:'🦁',t:['animal','zoo']},{w:'elephant',e:'🐘',t:['animal','zoo','big']},{w:'giraffe',e:'🦒',t:['animal','zoo','big']},
+  {w:'cow',e:'🐄',t:['animal','farm','big']},{w:'pig',e:'🐷',t:['animal','farm']},{w:'duck',e:'🦆',t:['animal','farm']},{w:'chick',e:'🐤',t:['animal','farm','yellow']},
+  {w:'fish',e:'🐟',t:['animal','sea']},{w:'whale',e:'🐳',t:['animal','sea','big']},{w:'crab',e:'🦀',t:['animal','sea','beach','red']},
+  {w:'apple',e:'🍎',t:['food','red']},{w:'strawberry',e:'🍓',t:['food','red']},{w:'banana',e:'🍌',t:['food','yellow']},{w:'lemon',e:'🍋',t:['food','yellow']},
+  {w:'grapes',e:'🍇',t:['food'],pl:1},{w:'milk',e:'🥛',t:['food','kitchen']},{w:'cake',e:'🍰',t:['food','party']},{w:'carrot',e:'🥕',t:['food']},
+  {w:'ice cream',e:'🍦',t:['food','beach']},{w:'mushroom',e:'🍄',t:['food']},
+  {w:'ball',e:'⚽',t:['toy']},{w:'kite',e:'🪁',t:['toy']},{w:'doll',e:'🪆',t:['toy']},{w:'robot',e:'🤖',t:['toy']},{w:'teddy bear',e:'🧸',t:['toy']},{w:'drum',e:'🥁',t:['toy','party']},
+  {w:'hat',e:'👒',t:['wear']},{w:'sock',e:'🧦',t:['wear']},{w:'shoe',e:'👟',t:['wear']},{w:'mitt',e:'🧤',t:['wear']},{w:'dress',e:'👗',t:['wear']},
+  {w:'mask',e:'🎭',t:['wear','party']},{w:'boots',e:'👢',t:['wear','rain'],pl:1},
+  {w:'car',e:'🚗',t:['go','red']},{w:'bus',e:'🚌',t:['go','big']},{w:'bike',e:'🚲',t:['go']},{w:'boat',e:'⛵',t:['go','sea','beach']},{w:'train',e:'🚂',t:['go']},
+  {w:'heart',e:'❤️',t:['red']},{w:'balloon',e:'🎈',t:['red','party']},{w:'sun',e:'🌞',t:['yellow','beach','sky']},{w:'star',e:'⭐',t:['yellow','sky']},{w:'moon',e:'🌙',t:['yellow','sky']},
+  {w:'umbrella',e:'☂️',t:['rain']},{w:'cloud',e:'☁️',t:['rain','sky']},{w:'shell',e:'🐚',t:['beach','sea']},{w:'mug',e:'☕',t:['kitchen']},{w:'spoon',e:'🥄',t:['kitchen']},
+  {w:'gift',e:'🎁',t:['party']},{w:'map',e:'🗺️',t:[]},{w:'mail',e:'✉️',t:[]},{w:'mirror',e:'🪞',t:[]},{w:'mop',e:'🧹',t:[]},{w:'key',e:'🔑',t:[]},{w:'clock',e:'⏰',t:[]},
+];
+const HINTS={
+  animal:{en:'Animals',ko:'동물',icon:'🐾',as:'an animal',fam:'cat'}, food:{en:'Food',ko:'음식',icon:'🍽️',as:'food',fam:'cat'},
+  toy:{en:'Toys',ko:'장난감',icon:'🧸',as:'a toy',fam:'cat'}, wear:{en:'Things you wear',ko:'입는 것',icon:'👕',as:'something you wear',fam:'cat'},
+  go:{en:'Things that go',ko:'타는 것',icon:'🛞',as:'something that goes',fam:'cat'},
+  red:{en:'Red things',ko:'빨간 것',icon:'🔴',as:'red',fam:'color'}, yellow:{en:'Yellow things',ko:'노란 것',icon:'🟡',as:'yellow',fam:'color'},
+  big:{en:'Big things',ko:'큰 것',icon:'📏',as:'big',fam:'size'},
+  zoo:{en:'At the zoo',ko:'동물원',icon:'🎪',as:'at the zoo',fam:'place'}, farm:{en:'On the farm',ko:'농장',icon:'🚜',as:'on the farm',fam:'place'},
+  sea:{en:'In the sea',ko:'바다 속',icon:'🌊',as:'in the sea',fam:'place'}, sky:{en:'In the sky',ko:'하늘',icon:'🌌',as:'in the sky',fam:'place'},
+  beach:{en:'Beach',ko:'해변',icon:'🏖️',as:'for the beach',fam:'assoc'}, kitchen:{en:'Kitchen',ko:'부엌',icon:'🍳',as:'in the kitchen',fam:'assoc'},
+  rain:{en:'Rain',ko:'비 오는 날',icon:'🌧️',as:'for the rain',fam:'assoc'}, party:{en:'Party',ko:'파티',icon:'🎉',as:'for a party',fam:'assoc'},
+};
+const FAMS={5:['animal','food','toy','wear'], 6:['animal','food','toy','wear','go','red','yellow','big'], 7:['animal','food','toy','wear','go','red','yellow','zoo','farm','sea','sky'], 8:['beach','kitchen','rain','party','zoo','farm','sea','sky','go']};
+const NUMW=['zero','one','two','three','four','five'];
+const LV={ 1:{size:[3,3,4,4],cnt:[1,2],no:0,icon:'full',swap:0}, 2:{size:[3,3,4,4],cnt:[2,2],no:0,icon:'full',swap:0}, 3:{size:[3,4,4,4],cnt:[2,2],no:1,icon:'full',swap:0},
+           4:{size:[3,4,4,5],cnt:[2,3],no:1,icon:'dots',swap:1}, 5:{size:[3,4,4,5],cnt:[3,3],no:1,icon:'dots',swap:2}, 6:{size:[3,4,4,5],cnt:[3,4],no:1,icon:'none',swap:2} };
+const NHINT={5:4,6:5,7:6,8:5};
+const ageIdx=a=>({5:0,6:1,7:2,8:3})[a];
+const has=(wd,h)=>wd.t.includes(h);
+const art=w=>/^[aeiou]/.test(w)?'an':'a';
+
+function makeBoard(age, lv){
+  const P=LV[lv], n=P.size[ageIdx(age)], S=n*n; const noCard = age>=6 && P.no ? 1 : 0;
+  for(let tries=0; tries<400; tries++){
+    const hints=[]; const used=new Set(); let room=S-noCard-1;
+    for(const h of shuffle(FAMS[age])){
+      if(hints.length>=NHINT[age]) break;
+      const c=P.cnt[0]+Math.floor(Math.random()*(P.cnt[1]-P.cnt[0]+1));
+      if(c>room) continue;
+      const pool=WORDS.filter(wd=>has(wd,h) && !used.has(wd.w) && !hints.some(x=>has(wd,x.h)));
+      if(pool.length<c) continue;
+      const cards=shuffle(pool).slice(0,c);
+      // the new hint must not match cards already chosen for earlier hints
+      if(hints.some(x=>x.cards.some(wd=>has(wd,h)))) continue;
+      cards.forEach(wd=>used.add(wd.w)); hints.push({h, c, cards}); room-=c;
+    }
+    if(hints.length < Math.min(2, NHINT[age])) continue;
+    const others=shuffle(WORDS.filter(wd=>!used.has(wd.w) && !hints.some(x=>has(wd,x.h))));
+    const need=S-hints.reduce((a,x)=>a+x.c,0);
+    if(others.length<need) continue;
+    const extra=others.slice(0,need);
+    const cells=shuffle([...hints.flatMap(x=>x.cards.map(wd=>({...wd, hint:x.h}))), ...extra.map((wd,i)=>({...wd, hint:null, no: i<noCard}))]);
+    // verify: each hint matches exactly its count on the board (TRD 4-1)
+    if(!hints.every(x=>cells.filter(c=>has(c,x.h)).length===x.c)) continue;
+    return {n, cells, hints};
+  }
+  throw new Error('board');
+}
+
+/* ---------- flow ---------- */
+let G=null, classroom=new URLSearchParams(location.search).get('classroom')==='1';
+if(classroom){ setTimeout(()=>{ $('modeBtn').textContent='🏫 교실 모드: 켬'; $('modeBtn').classList.add('on'); }); }
+$('modeBtn').onclick=()=>{ classroom=!classroom; $('modeBtn').textContent=`🏫 교실 모드: ${classroom?'켬':'끔'}`; $('modeBtn').classList.toggle('on',classroom); };
+function touched(){ if(!G) return; KIT.clearIdle(); KIT.armIdle(idle); }
+async function idle(){ if(!G||!G.accepting) return; await KIT.tutor('idle'); const c=G.cells.find(c=>c.hint===curHint()?.h && !c.found); if(c) KIT.showHand(c.el); }
+const curHint=()=>G && G.hints[G.hi];
+
+async function startRound(){
+  const age=KIT.SAVE.age, lv=KIT.levelFor(age); const b=makeBoard(age,lv); const swaps=(age>=7 && !classroom)? LV[lv].swap : 0;
+  G={age, lv, ...b, hi:0, swapsLeft:swaps, total:b.hints.length+swaps, idx:0, stars:[], words:[], classroom, team:'red', score:{red:0,blue:0}, accepting:false};
+  const me=G; $('lvPill').textContent=`LEVEL ${lv} · ${ageLabel(age)}`; $('groups').innerHTML=''; $('nextBtn').style.display='none';
+  $('teamPill').className='pill'; KIT.show('game'); renderGrid(); KIT.renderProgress(G);
+  if(KIT.demoNeeded()) await runDemo(); if(G!==me) return; renderGrid(); nextHint();
+}
+function renderGrid(){
+  const g=$('grid'); g.innerHTML=''; const n=G.n; const cs=Math.min(108/n, 75/n)-1.8; g.style.setProperty('--cs', `calc(var(--u)*${cs})`);
+  g.style.gridTemplateColumns=`repeat(${n}, calc(var(--u)*${cs}))`; g.style.gridAutoRows=`calc(var(--u)*${cs})`;
+  G.cells.forEach((c,i)=>{ const d=document.createElement('div'); d.className='wc'+(G.age===8?' txt':''); d.style.animationDelay=(i*0.03)+'s';
+    d.innerHTML = G.age===8 ? `<div class="w">${c.w}</div>` : `<div class="emo">${c.e}</div>${G.age===7?`<div class="w">${c.w}</div>`:''}`;
+    d.onclick=()=>onCard(c); c.el=d; c.found=false; g.appendChild(d); });
+}
+function hintHtml(x, gotN){ const P=LV[G.lv]; const H=HINTS[x.h]; const dots=`<span class="dots">${Array.from({length:x.c},(_,i)=>`<i class="${i<gotN?'got':''}">●</i>`).join('')}</span>`;
+  const icon=`<span class="hi">${H.icon}</span>`; const word=G.age>=6?`<b>${H.en}, ${x.c}!</b>`:'';
+  if(P.icon==='full') return icon+word+dots; if(P.icon==='dots') return word+dots; return (G.age>=6? `<b>${H.en}, ?</b>`:'')+'🔊'; }
+function showHint(){ const x=curHint(); $('hintBox').innerHTML=hintHtml(x, x.got||0); $('hintBox').classList.toggle('blue', G.classroom && G.team==='blue'); }
+async function sayHint(){ const x=curHint(), H=HINTS[x.h]; await KIT.sayLine(`${H.en}, ${NUMW[x.c]}!`, `${H.ko} ${['','한','두','세','네','다섯'][x.c]} 개!`); }
+async function nextHint(){
+  const me=G; KIT.renderProgress(G);
+  if(G.hi>=G.hints.length){ if(G.swapsLeft>0) return roleSwap(); return finish(); }
+  const x=curHint(); x.got=0; x.wrong=0; x.checkFail=false; x.spoke=false;
+  G.cells.forEach(c=>{ if(!c.found && !c.aside){ c.el.classList.remove('dim','glow'); } });
+  if(G.classroom){ $('teamPill').className='pill '+G.team; $('teamPill').textContent=G.team==='red'?'🔴 빨간 단추 팀':'🔵 파란 단추 팀'; await KIT.tutor(G.team==='red'?'teamRed':'teamBlue'); if(G!==me) return; }
+  showHint(); await sayHint(); if(G!==me) return; G.accepting=true; touched();
+}
+let busy=false;
+async function onCard(c){
+  if(!G||!G.accepting||busy||c.found||c.aside) return; busy=true; G.accepting=false; KIT.clearIdle(); const me=G; c.el.classList.add('pick');
+  try{
+    const ok=await checkStep(c); if(G!==me) return; c.el.classList.remove('pick');
+    if(!ok){ G.accepting=true; return; }
+    const x=curHint();
+    if(c.no){ c.aside=true; c.el.classList.add('aside'); await KIT.tutor('noCard'); if(G!==me) return; G.accepting=true; touched(); return; }
+    if(c.hint===x.h) return await gotCard(c);
+    // not in this group (TRD 4-3)
+    x.wrong++; KIT.sfx.bad(); KIT.anim(c.el,'shake'); KIT.face('oops'); c.el.classList.add('dim');
+    const H=HINTS[x.h]; const be=c.pl?'are':'is'; const subj=c.pl?c.w[0].toUpperCase()+c.w.slice(1):`${art(c.w)[0].toUpperCase()+art(c.w).slice(1)} ${c.w}`;
+    await KIT.sayLine(`${subj} ${be} not ${H.as}.`, `이건 '${H.ko}' 무리가 아니야.`); if(G!==me) return;
+    if(x.wrong===2){ await KIT.tutor('hintGlow'); const r=G.cells.find(k=>k.hint===x.h && !k.found); r&&r.el.classList.add('glow'); }
+    if(x.wrong>=3){ await revealRest(); return; }
+    G.accepting=true; touched();
+  } finally { busy=false; }
+}
+/* 열기 전 확인 (TRD 4-2) */
+async function checkStep(c){
+  const me=G;
+  if(G.age<=6){ // listen & repeat: card opens regardless of judgment
+    await KIT.say(c.w); if(G!==me) return false;
+    if(!G.classroom){ const ok=await KIT.speak({phrase:c.w, keys:c.w.split(' '), isAlive:()=>G===me}); if(ok && c.hint===curHint()?.h) curHint().spoke=true; }
+    return true;
+  }
+  // 7세: hear word, 초1: read word → pick the matching picture of 2
+  const other=rnd(WORDS.filter(wd=>wd.w!==c.w && wd.e!==c.e)); const opts=shuffle([c,other]); let wrong=0;
+  $('checkQ').innerHTML = G.age===8? `<b style="font-size:calc(var(--u)*5)">${c.w}</b> <button class="btn alt" id="ckSay">🔊</button>` : `<span>🔊</span> Which one is it? <button class="btn alt" id="ckSay">🔊</button>`;
+  $('ckSay').onclick=()=>KIT.say(c.w);
+  const box=$('checkOpts'); box.innerHTML=''; $('check').classList.add('on');
+  return await new Promise(async res=>{
+    G.checkAns=c.w;
+    opts.forEach(o=>{ const d=document.createElement('div'); d.className='ck emo'; d.textContent=o.e; d.dataset.w=o.w; box.appendChild(d);
+      d.onclick=async()=>{ if(G!==me||G.checkLock) return; G.checkLock=true;
+        if(o.w===c.w){ KIT.sfx.pop(); $('check').classList.remove('on'); G.checkLock=false; G.checkAns=null; res(true); return; }
+        wrong++; KIT.sfx.bad(); KIT.anim(d,'shake'); if(curHint()) curHint().checkFail=true;
+        if(wrong===1){ await KIT.say(c.w); } else { [...box.children].find(k=>k.dataset.w===c.w)?.classList.add('glow'); }
+        G.checkLock=false; }; });
+    if(G.age===7) await KIT.say(c.w); else await KIT.tutor('check');
+  });
+}
+async function flyToBag(c, team){
+  const s=$('stage').getBoundingClientRect(), r=c.el.getBoundingClientRect(), t=$('tutor').getBoundingClientRect();
+  const f=c.el.cloneNode(true); f.classList.add('fly'); f.style.left=(r.left-s.left)+'px'; f.style.top=(r.top-s.top)+'px'; f.style.width=r.width+'px'; f.style.height=r.height+'px'; f.style.animation='none';
+  $('game').appendChild(f); c.el.classList.add('found'); c.found=true; await sleep(30);
+  f.style.left=(t.left-s.left+t.width*0.55)+'px'; f.style.top=(t.top-s.top+t.height*0.6)+'px'; f.style.transform='scale(.2)'; f.style.opacity='.2'; await sleep(720); f.remove();
+}
+async function gotCard(c){
+  const me=G, x=curHint(); KIT.sfx.coin(); x.got++; showHint(); await flyToBag(c); if(G!==me) return; KIT.face('joy');
+  if(x.got<x.c){ G.accepting=true; touched(); return; }
+  // group complete
+  const star1=1, star2=(x.wrong===0 && !x.checkFail)?1:0; const g=KIT.line('great'); KIT.bubble(g.t); await KIT.say(g.t,g.lang); if(G!==me) return;
+  let spoke=x.spoke;
+  if(G.age>=7 && !G.classroom){ await KIT.tutor('ask',{keep:true}); if(G!==me) return; const w=x.cards[0].w; spoke=await KIT.speak({phrase:w, keys:w.split(' '), isAlive:()=>G===me}); if(G!==me) return; }
+  addGroup(x); record(star1+star2+(spoke?1:0), spoke, x); if(G.classroom) G.score[G.team]+=1;
+  $('nextBtn').style.display='block';
+}
+async function revealRest(){
+  const me=G, x=curHint(); G.accepting=false; const H=HINTS[x.h];
+  await KIT.sayLine(`These are ${H.en.toLowerCase()}!`, `이게 '${H.ko}'이야!`); if(G!==me) return;
+  for(const c of G.cells.filter(k=>k.hint===x.h && !k.found)){ c.el.classList.remove('glow','dim'); await flyToBag(c); if(G!==me) return; x.got++; showHint(); }
+  addGroup(x); record(1,false,x); $('nextBtn').style.display='block';
+}
+function addGroup(x){ const H=HINTS[x.h]; const d=document.createElement('div'); d.className='grp'; d.innerHTML=`<span class="b ${G.age===5?'none':G.classroom?G.team:''}"></span><b>${H.en}</b><span class="es">${x.cards.map(c=>c.e).join('')}</span>`; $('groups').appendChild(d); }
+function record(s,spoke,x){ G.stars[G.idx]=s; const H=HINTS[x.h]; G.words.push({text:`${H.icon} ${H.en}: ${x.cards.map(c=>c.w).join(', ')}`, phrase:`${H.en}. ${x.cards.map(c=>c.w).join(', ')}.`, stars:s, spoke}); KIT.renderProgress(G); }
+$('nextBtn').onclick=()=>{ if(!G) return; $('nextBtn').style.display='none'; G.idx++; if(G.hi<G.hints.length) G.hi++; if(G.classroom) G.team=G.team==='red'?'blue':'red'; nextHint(); };
+$('reQ').onclick=()=>{ if(G&&curHint()) sayHint(); };
+
+/* ---------- 역할 바꾸기 (7세 L4~, TRD 4-2) ---------- */
+let swapSel=null, swapCnt=1;
+async function roleSwap(){
+  const me=G; G.swapsLeft--; G.accepting=false; G.swapTry=0; $('hintBox').innerHTML='<b>🔄 Your turn!</b>';
+  // all cards back on the table (Dudu empties the bag) so the child can describe any group
+  G.cells.forEach(c=>{ c.found=false; c.aside=false; c.el.className='wc'+(G.age===8?' txt':''); c.el.style.animation='none'; });
+  await KIT.tutor('yourTurn',{keep:true}); if(G!==me) return;
+  const opts=Object.keys(HINTS).filter(h=>FAMS[G.age].includes(h) && G.cells.some(c=>has(c,h))); G.swapOpts=shuffle(opts).slice(0,6);
+  const list=$('swapList'); list.innerHTML=''; swapSel=null; swapCnt=1; $('cNum').textContent=1;
+  G.swapOpts.forEach(h=>{ const H=HINTS[h]; const d=document.createElement('div'); d.className='hc'; d.dataset.h=h; d.innerHTML=`<span class="hi">${H.icon}</span>${H.en}`;
+    d.onclick=()=>{ swapSel=h; [...list.children].forEach(k=>k.classList.toggle('sel',k===d)); KIT.say(H.en); }; list.appendChild(d); });
+  $('swap').classList.add('on'); G.swapping=true;
+}
+$('cMinus').onclick=()=>{ swapCnt=Math.max(1,swapCnt-1); $('cNum').textContent=swapCnt; };
+$('cPlus').onclick=()=>{ swapCnt=Math.min(6,swapCnt+1); $('cNum').textContent=swapCnt; };
+$('cOk').onclick=async()=>{
+  if(!G||!G.swapping||!swapSel) { if(G&&G.swapping) KIT.anim($('swapList'),'shake'); return; }
+  const me=G; G.swapping=false; $('swap').classList.remove('on'); const H=HINTS[swapSel]; const found=G.cells.filter(c=>has(c,swapSel));
+  await KIT.sayLine(`${H.en}, ${NUMW[swapCnt]||swapCnt}!`); if(G!==me) return;
+  for(const c of found){ c.el.classList.add('glow'); KIT.sfx.tick(); await sleep(450); if(G!==me) return; }
+  if(found.length!==swapCnt){ G.swapTry++; await KIT.sayLine(`Hmm, I found ${NUMW[found.length]||found.length}, not ${NUMW[swapCnt]||swapCnt}!`, `음, ${swapCnt}개가 아니라 ${found.length}개 찾았어!`);
+    found.forEach(c=>c.el.classList.remove('glow')); if(G!==me) return; $('swap').classList.add('on'); G.swapping=true; return; }
+  KIT.sfx.ok(); KIT.face('joy'); const g=KIT.line('great'); KIT.bubble(g.t); await KIT.say(g.t,g.lang); if(G!==me) return;
+  found.forEach(c=>c.el.classList.remove('glow'));
+  const s=1+(G.swapTry===0?1:0); G.stars[G.idx]=s; G.words.push({text:`🔄 ${H.icon} ${H.en}: ${found.map(c=>c.w).join(', ')}`, phrase:`${H.en}. ${found.map(c=>c.w).join(', ')}.`, stars:s, spoke:false}); KIT.renderProgress(G);
+  $('nextBtn').style.display='block';
+};
+
+/* ---------- demo ---------- */
+async function runDemo(){
+  KIT.demoStart(); const me=G; const x=G.hints[0]; G.hi=0; x.got=0;
+  const steps=[ async()=>KIT.tutor('demo1',{keep:true}), async()=>{ showHint(); await sayHint(); },
+    async()=>KIT.tutor('demo2',{keep:true}),
+    async()=>{ for(const c of G.cells.filter(k=>k.hint===x.h)){ if(KIT.skipDemo||G!==me) return; KIT.showHand(c.el,true); await sleep(900); await KIT.say(c.w); KIT.sfx.coin(); x.got++; showHint(); await flyToBag(c); } },
+    async()=>{ KIT.hideHand(); await KIT.tutor('demoEnd',{keep:true}); } ];
+  for(const s of steps){ if(KIT.skipDemo||G!==me) break; await s(); }
+  KIT.demoEnd(); if(G===me){ x.got=0; }
+}
+async function finish(){
+  KIT.clearIdle(); const q=$('qaLevel'); const keep=q.value; if(G.classroom) q.value=String(G.lv); // 교실 판은 레벨 판정에 넣지 않음
+  $('resTeams').textContent = G.classroom? `🔴 빨간 단추 팀 ${G.score.red} : ${G.score.blue} 파란 단추 팀 🔵` : '';
+  const p=KIT.result(G,{title:'All sorted!', heroHtml:'<img src="assets/dudu.png">', icon:'🔘', unit:'단추', collName:'Button Box', per:10});
+  q.value=keep; await p;
+}
+/* QA hook: one correct action per call */
+window.__wl=()=>G;
+window.__wlStep=()=>{
+  if(!G) return 'none';
+  if($('check').classList.contains('on') && G.checkAns){ const d=[...$('checkOpts').children].find(k=>k.dataset.w===G.checkAns); d&&d.click(); return 'check'; }
+  if(G.swapping){ const h=G.swapOpts[0]; const n=G.cells.filter(c=>has(c,h)).length; [...$('swapList').children].find(k=>k.dataset.h===h).click(); swapCnt=n; $('cNum').textContent=n; $('cOk').click(); return 'swap'; }
+  if($('nextBtn').style.display==='block'){ $('nextBtn').click(); return 'next'; }
+  if(G.accepting && !busy){ const x=curHint(); const c=x && G.cells.find(k=>k.hint===x.h && !k.found); if(c){ c.el.click(); return 'card'; } }
+  return 'wait';
+};
+KIT.init({prefix:'wl', onStart:startRound, onExit:()=>{ $('check').classList.remove('on'); $('swap').classList.remove('on'); G=null; busy=false; }});
+</script>
+</body>
+</html>

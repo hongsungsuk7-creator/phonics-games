@@ -5,6 +5,7 @@
       "title": "Spin & Peek",
       "titleKo": "스핀 앤 픽",
       "type": [
+        "어휘·생각",
         "1인",
         "말하기",
         "레슨팩"
@@ -72,6 +73,7 @@
       "title": "Curtain Call",
       "titleKo": "커튼콜",
       "type": [
+        "어휘·생각",
         "1인",
         "말하기",
         "레슨팩"
@@ -139,6 +141,7 @@
       "title": "Copy Cat",
       "titleKo": "카피캣",
       "type": [
+        "어휘·생각",
         "1인",
         "말하기",
         "레슨팩"
@@ -206,6 +209,7 @@
       "title": "Little Detective",
       "titleKo": "꼬마 탐정",
       "type": [
+        "어휘·생각",
         "1인",
         "말하기",
         "레슨팩"
@@ -267,6 +271,7 @@
       "title": "Shop & Count",
       "titleKo": "숍 앤 카운트",
       "type": [
+        "어휘·생각",
         "1인",
         "말하기",
         "레슨팩",
@@ -329,6 +334,7 @@
       "title": "Maze Quest",
       "titleKo": "메이즈 퀘스트",
       "type": [
+        "어휘·생각",
         "1인",
         "말하기",
         "레슨팩"
@@ -390,6 +396,7 @@
       "title": "Photo Safari",
       "titleKo": "포토 사파리",
       "type": [
+        "어휘·생각",
         "1인",
         "말하기",
         "레슨팩"
@@ -443,6 +450,546 @@
           "status": "없음",
           "priority": "높음",
           "note": ""
+        }
+      ]
+    },
+    {
+      "id": "word-spot",
+      "title": "Word Spot",
+      "titleKo": "워드 스팟",
+      "type": [
+        "보드게임",
+        "1인",
+        "교실",
+        "말하기",
+        "레슨팩"
+      ],
+      "skill": "어휘 인지·듣기",
+      "tutor": "Moru",
+      "description": "두 카드에 딱 하나만 겹치는 그림을 찾아 말해요. 찾으면 Moru가 부풀어 올라요.",
+      "thumbnail": "Word-Spot/assets/moru_base.png",
+      "color": "#c6f1f3",
+      "playUrl": "Word-Spot/",
+      "trdUrl": "trd/word-spot.md",
+      "checklist": [
+        {
+          "item": "설명 SKIP · 첫 판 시범",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "방문당 1회, SKIP 버튼"
+        },
+        {
+          "item": "말하기 JUMP",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "자동 레벨 6단계",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "연령 4단계(5·6·7세·초1)",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "레슨팩 그림·공식 녹음",
+          "status": "일부",
+          "priority": "높음",
+          "note": "임시 그림(이모지·도형), 브라우저 음성"
+        },
+        {
+          "item": "발음 판정(phonics-api)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "브라우저 음성 인식으로 대체"
+        },
+        {
+          "item": "공통 기록(phonics.progress)",
+          "status": "없음",
+          "priority": "중간",
+          "note": ""
+        },
+        {
+          "item": "교실 모드(큰 화면)",
+          "status": "있음",
+          "priority": "중간",
+          "note": "서버 없는 큰 화면 진행(A단계). 태블릿 투표는 B단계"
+        },
+        {
+          "item": "한 기기 2인 대전(7세)",
+          "status": "없음",
+          "priority": "중간",
+          "note": "TRD WS-05, 다음 단계"
+        },
+        {
+          "item": "초1 온라인 대전",
+          "status": "없음",
+          "priority": "낮음",
+          "note": "C단계(실시간 서버) 필요"
+        },
+        {
+          "item": "실기기 확인(iPad·휴대폰·Safari)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "GitHub Pages 배포 후 확인"
+        },
+        {
+          "item": "Moru 물건 변신 연출",
+          "status": "일부",
+          "priority": "중간",
+          "note": "프로토타입은 부풀기·납작 연출만. 변신 모델은 레슨당 3~5개 제작 필요"
+        },
+        {
+          "item": "팀 게임 Eye Catch와 관계 결정",
+          "status": "없음",
+          "priority": "높음",
+          "note": "Eye Catch 확장으로 합칠지 별도 게임으로 둘지"
+        }
+      ]
+    },
+    {
+      "id": "story-cards",
+      "title": "Story Cards",
+      "titleKo": "스토리 카드",
+      "type": [
+        "보드게임",
+        "1인",
+        "교실",
+        "말하기",
+        "레슨팩"
+      ],
+      "skill": "묘사·듣기·말하기",
+      "tutor": "Popo",
+      "description": "Popo가 주머니에서 꺼낸 카드 설명을 듣고 그림을 골라요. 6세부터는 내가 설명하면 Popo가 맞혀요.",
+      "thumbnail": "Story-Cards/assets/popo.png",
+      "color": "#d2e2ff",
+      "playUrl": "Story-Cards/",
+      "trdUrl": "trd/story-cards.md",
+      "checklist": [
+        {
+          "item": "설명 SKIP · 첫 판 시범",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "방문당 1회, SKIP 버튼"
+        },
+        {
+          "item": "말하기 JUMP",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "자동 레벨 6단계",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "연령 4단계(5·6·7세·초1)",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "레슨팩 그림·공식 녹음",
+          "status": "일부",
+          "priority": "높음",
+          "note": "임시 그림(이모지·도형), 브라우저 음성"
+        },
+        {
+          "item": "발음 판정(phonics-api)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "브라우저 음성 인식으로 대체"
+        },
+        {
+          "item": "공통 기록(phonics.progress)",
+          "status": "없음",
+          "priority": "중간",
+          "note": ""
+        },
+        {
+          "item": "교실 모드(큰 화면)",
+          "status": "있음",
+          "priority": "중간",
+          "note": "서버 없는 큰 화면 진행(A단계). 태블릿 투표는 B단계"
+        },
+        {
+          "item": "초1 온라인 대전",
+          "status": "없음",
+          "priority": "낮음",
+          "note": "C단계(실시간 서버) 필요"
+        },
+        {
+          "item": "실기기 확인(iPad·휴대폰·Safari)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "GitHub Pages 배포 후 확인"
+        },
+        {
+          "item": "묘사 카드 그림(색·크기·기분 변형)",
+          "status": "일부",
+          "priority": "높음",
+          "note": "레슨당 60~100장 제작 필요. 프로토타입은 도형·이모지"
+        }
+      ]
+    },
+    {
+      "id": "word-link",
+      "title": "Word Link",
+      "titleKo": "워드 링크",
+      "type": [
+        "보드게임",
+        "1인",
+        "교실",
+        "말하기",
+        "레슨팩"
+      ],
+      "skill": "분류·상위어",
+      "tutor": "Dudu",
+      "description": "Dudu의 힌트(\"Animals, 2!\")에 맞는 카드를 모두 찾아 묶어요.",
+      "thumbnail": "Word-Link/assets/dudu.png",
+      "color": "#c9f0e4",
+      "playUrl": "Word-Link/",
+      "trdUrl": "trd/word-link.md",
+      "checklist": [
+        {
+          "item": "설명 SKIP · 첫 판 시범",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "방문당 1회, SKIP 버튼"
+        },
+        {
+          "item": "말하기 JUMP",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "자동 레벨 6단계",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "연령 4단계(5·6·7세·초1)",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "레슨팩 그림·공식 녹음",
+          "status": "일부",
+          "priority": "높음",
+          "note": "임시 그림(이모지·도형), 브라우저 음성"
+        },
+        {
+          "item": "발음 판정(phonics-api)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "브라우저 음성 인식으로 대체"
+        },
+        {
+          "item": "공통 기록(phonics.progress)",
+          "status": "없음",
+          "priority": "중간",
+          "note": ""
+        },
+        {
+          "item": "교실 모드(큰 화면)",
+          "status": "있음",
+          "priority": "중간",
+          "note": "서버 없는 큰 화면 진행(A단계). 태블릿 투표는 B단계"
+        },
+        {
+          "item": "초1 온라인 대전",
+          "status": "없음",
+          "priority": "낮음",
+          "note": "C단계(실시간 서버) 필요"
+        },
+        {
+          "item": "실기기 확인(iPad·휴대폰·Safari)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "GitHub Pages 배포 후 확인"
+        },
+        {
+          "item": "카드 태그(범주·색·장소) 데이터",
+          "status": "일부",
+          "priority": "높음",
+          "note": "프로토타입 임시 태그. 레슨팩 추가 데이터 필요"
+        }
+      ]
+    },
+    {
+      "id": "letter-tiles",
+      "title": "Letter Tiles",
+      "titleKo": "알파벳 타일",
+      "type": [
+        "보드게임",
+        "1인",
+        "교실",
+        "말하기",
+        "레슨팩"
+      ],
+      "skill": "알파벳·첫소리·철자",
+      "tutor": "Stretch",
+      "description": "글자 타일을 이어 단어를 만들면 Stretch가 단어 다리가 돼요.",
+      "thumbnail": "Letter-Tiles/assets/sb_stretch.png",
+      "color": "#ffe2c4",
+      "playUrl": "Letter-Tiles/",
+      "trdUrl": "trd/letter-tiles.md",
+      "checklist": [
+        {
+          "item": "설명 SKIP · 첫 판 시범",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "방문당 1회, SKIP 버튼"
+        },
+        {
+          "item": "말하기 JUMP",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "자동 레벨 6단계",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "연령 4단계(5·6·7세·초1)",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "레슨팩 그림·공식 녹음",
+          "status": "일부",
+          "priority": "높음",
+          "note": "임시 그림(이모지·도형), 브라우저 음성"
+        },
+        {
+          "item": "발음 판정(phonics-api)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "브라우저 음성 인식으로 대체"
+        },
+        {
+          "item": "공통 기록(phonics.progress)",
+          "status": "없음",
+          "priority": "중간",
+          "note": ""
+        },
+        {
+          "item": "교실 모드(큰 화면)",
+          "status": "있음",
+          "priority": "중간",
+          "note": "서버 없는 큰 화면 진행(A단계). 태블릿 투표는 B단계"
+        },
+        {
+          "item": "초1 온라인 대전",
+          "status": "없음",
+          "priority": "낮음",
+          "note": "C단계(실시간 서버) 필요"
+        },
+        {
+          "item": "실기기 확인(iPad·휴대폰·Safari)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "GitHub Pages 배포 후 확인"
+        },
+        {
+          "item": "트랙 소속 결정",
+          "status": "없음",
+          "priority": "높음",
+          "note": "5~7세 단계가 파닉스 트랙과 겹침"
+        },
+        {
+          "item": "연령별 허용 단어 목록",
+          "status": "일부",
+          "priority": "중간",
+          "note": "프로토타입 임시 목록"
+        }
+      ]
+    },
+    {
+      "id": "word-spectrum",
+      "title": "Word Spectrum",
+      "titleKo": "워드 스펙트럼",
+      "type": [
+        "보드게임",
+        "1인",
+        "교실",
+        "말하기",
+        "레슨팩"
+      ],
+      "skill": "형용사·반대말·비교",
+      "tutor": "Big House",
+      "description": "big–small, hot–cold 막대 위 알맞은 자리에 그림을 놓아요.",
+      "thumbnail": "Word-Spectrum/assets/big.png",
+      "color": "#fff0b8",
+      "playUrl": "Word-Spectrum/",
+      "trdUrl": "trd/word-spectrum.md",
+      "checklist": [
+        {
+          "item": "설명 SKIP · 첫 판 시범",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "방문당 1회, SKIP 버튼"
+        },
+        {
+          "item": "말하기 JUMP",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "자동 레벨 6단계",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "연령 4단계(5·6·7세·초1)",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "레슨팩 그림·공식 녹음",
+          "status": "일부",
+          "priority": "높음",
+          "note": "임시 그림(이모지·도형), 브라우저 음성"
+        },
+        {
+          "item": "발음 판정(phonics-api)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "브라우저 음성 인식으로 대체"
+        },
+        {
+          "item": "공통 기록(phonics.progress)",
+          "status": "없음",
+          "priority": "중간",
+          "note": ""
+        },
+        {
+          "item": "교실 모드(큰 화면)",
+          "status": "있음",
+          "priority": "중간",
+          "note": "서버 없는 큰 화면 진행(A단계). 태블릿 투표는 B단계"
+        },
+        {
+          "item": "초1 온라인 대전",
+          "status": "없음",
+          "priority": "낮음",
+          "note": "C단계(실시간 서버) 필요"
+        },
+        {
+          "item": "실기기 확인(iPad·휴대폰·Safari)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "GitHub Pages 배포 후 확인"
+        },
+        {
+          "item": "정도 값 데이터",
+          "status": "일부",
+          "priority": "중간",
+          "note": "프로토타입은 고정 비교 그림 세트"
+        }
+      ]
+    },
+    {
+      "id": "draw-pass",
+      "title": "Draw & Pass",
+      "titleKo": "그림 릴레이",
+      "type": [
+        "보드게임",
+        "1인",
+        "교실",
+        "말하기",
+        "레슨팩"
+      ],
+      "skill": "듣기·구·문장 이해",
+      "tutor": "Flat One",
+      "description": "영어를 듣고 Flat One의 등에 그림을 그린 뒤, 맞는 영어를 골라요. 6세부터.",
+      "thumbnail": "Draw-Pass/assets/flat.png",
+      "color": "#dcd8ff",
+      "playUrl": "Draw-Pass/",
+      "trdUrl": "trd/draw-pass.md",
+      "checklist": [
+        {
+          "item": "설명 SKIP · 첫 판 시범",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "방문당 1회, SKIP 버튼"
+        },
+        {
+          "item": "말하기 JUMP",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "자동 레벨 6단계",
+          "status": "있음",
+          "priority": "낮음",
+          "note": ""
+        },
+        {
+          "item": "연령 3단계(6·7세·초1)",
+          "status": "있음",
+          "priority": "낮음",
+          "note": "5세 대상 아님"
+        },
+        {
+          "item": "레슨팩 그림·공식 녹음",
+          "status": "일부",
+          "priority": "높음",
+          "note": "임시 그림(이모지·도형), 브라우저 음성"
+        },
+        {
+          "item": "발음 판정(phonics-api)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "브라우저 음성 인식으로 대체"
+        },
+        {
+          "item": "공통 기록(phonics.progress)",
+          "status": "없음",
+          "priority": "중간",
+          "note": ""
+        },
+        {
+          "item": "교실 모드(큰 화면)",
+          "status": "있음",
+          "priority": "중간",
+          "note": "서버 없는 큰 화면 진행(A단계). 태블릿 투표는 B단계"
+        },
+        {
+          "item": "초1 온라인 대전",
+          "status": "없음",
+          "priority": "낮음",
+          "note": "C단계(실시간 서버) 필요"
+        },
+        {
+          "item": "실기기 확인(iPad·휴대폰·Safari)",
+          "status": "없음",
+          "priority": "높음",
+          "note": "GitHub Pages 배포 후 확인"
+        },
+        {
+          "item": "아이 그림 저장 정책",
+          "status": "일부",
+          "priority": "중간",
+          "note": "판이 끝나면 삭제. 반 앨범 저장은 B단계"
         }
       ]
     }
